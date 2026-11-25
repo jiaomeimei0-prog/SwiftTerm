@@ -5,7 +5,7 @@
 
 | Repo | Tip khảo sát | Ghi chú pin |
 |------|--------------|-------------|
-| SwiftTerm `main` | `31aa0b4` | `Apps/a-Shell` → `69f29030` (PR [#10](https://github.com/jiaomeimei0-prog/SwiftTerm/pull/10) đang mở để lên `f47f284c`) |
+| SwiftTerm `main` | `d2e8f42` | `Apps/a-Shell` → `f47f284c` (đã merge #10) |
 | a-shell `master` | `f47f284c` | Nested `SwiftTerm` → `edc5aae` (fork v2 + HostHelpers) |
 
 **Chính sách:** mọi tính năng / vá bảo mật emulator chỉ sửa tại SwiftTerm; a-shell chỉ wiring host (`Docs/source-of-truth.md`).
@@ -27,7 +27,7 @@ jiaomeimei0-prog/SwiftTerm          ← SOURCES emulator (fork v2)
 | Single source-of-truth SwiftTerm | **Hoạt động** |
 | a-Shell pin fork (không còn holzschu v1) | **Hoạt động** |
 | Host sources vs upstream holzschu (SceneDelegate*, ExtraCommands, Relay, AppDelegate) | **Giống hệt** (đã đối chiếu audit) |
-| Bỏ gọi `updateDisplay` internal | **Hoạt động trên a-shell master** (`f47f284c`); monorepo gitlink chờ #10 |
+| Bỏ gọi `updateDisplay` internal | **Hoạt động** — a-shell `f47f284c` + monorepo pin khớp |
 
 I/O terminal app: Foundation `Pipe` + `ios_system` (không dùng `LocalProcess`/PTY kernel).
 
@@ -144,11 +144,10 @@ Chi tiết: `Docs/final-monorepo-audit-2026-11-26.md`, `Docs/security-audit-egre
 
 ## 7. Việc còn mở
 
-1. Merge [SwiftTerm #10](https://github.com/jiaomeimei0-prog/SwiftTerm/pull/10) — đồng bộ `Apps/a-Shell` gitlink → `f47f284c`.  
-2. Chạy lại CI App build khi có runner macOS (hoặc build trên Mac/cloud Mac).  
-3. Trên thiết bị: `sh scripts/verify_ashell_integrity.sh` + thử history/selection/Shortcuts.  
-4. Codex: build `codex/codex.xcframework` nếu cần dùng AI CLI.  
-5. Windows: **không** chạy a-Shell; chỉ có thể xem WASM browser của SwiftTerm (không đủ nghiệm thu app).
+1. Chạy lại CI App build khi có runner macOS (hoặc build trên Mac/cloud Mac).  
+2. Trên thiết bị: `sh scripts/verify_ashell_integrity.sh` + thử history/selection/Shortcuts.  
+3. Codex: build `codex/codex.xcframework` nếu cần dùng AI CLI.  
+4. Windows: **không** chạy a-Shell; chỉ có thể xem WASM browser của SwiftTerm (không đủ nghiệm thu app).
 
 ---
 
