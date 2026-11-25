@@ -3251,7 +3251,7 @@ open class TerminalView: UIScrollView, UITextInputTraits, UIKeyInput, UIScrollVi
         koreanResyllabificationTransaction.begin(deletedText: String(deletedText))
     }
 
-    func ensureCaretIsVisible ()
+    public func ensureCaretIsVisible ()
     {
         let shouldUpdate = withTerminal { terminal -> Bool in
             guard !terminal.synchronizedOutputActive else { return false }

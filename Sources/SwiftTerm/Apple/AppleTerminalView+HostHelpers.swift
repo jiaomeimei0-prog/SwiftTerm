@@ -310,6 +310,52 @@ extension TerminalView {
             }
         }
     }
+
+    /// Moves the caret to the end of the current selection, then clears selection.
+    public func moveToEndOfSelection() {
+        withTerminal { terminal in
+            let myPoint = Position(
+                col: min(max(0, selection.end.col), terminal.cols - 1),
+                row: selection.end.row)
+            if let grid = myPoint.toScreenCoordinate(from: terminal.displayBuffer) {
+                terminal.sendEvent(
+                    buttonFlags: encodeFlags(release: false),
+                    x: grid.col, y: grid.row, pixelX: 0, pixelY: 0)
+            }
+            selection.selectNone()
+        }
+        disableSelectionPanGesture()
+    }
+
+    /// Moves the caret to the start of the current selection, then clears selection.
+    public func moveToBeginningOfSelection() {
+        withTerminal { terminal in
+            let myPoint = Position(
+                col: min(max(0, selection.start.col), terminal.cols - 1),
+                row: selection.start.row)
+            if let grid = myPoint.toScreenCoordinate(from: terminal.displayBuffer) {
+                terminal.sendEvent(
+                    buttonFlags: encodeFlags(release: false),
+                    x: grid.col, y: grid.row, pixelX: 0, pixelY: 0)
+            }
+            selection.selectNone()
+        }
+        disableSelectionPanGesture()
+    }
+
+    /// Deletes selected text on/after the prompt without copying (cut without clipboard).
+    public func deleteSelection() {
+        let text: String? = withTerminal { _ in
+            guard selection.end.row >= promptline else { return nil }
+            return selection.getSelectedText()
+        }
+        guard let text else { return }
+        moveToEndOfSelection()
+        let backspace: UInt8 = backspaceSendsControlH ? 8 : 0x7f
+        for _ in 0..<text.count {
+            send([backspace])
+        }
+    }
 }
 #endif
 #endif
