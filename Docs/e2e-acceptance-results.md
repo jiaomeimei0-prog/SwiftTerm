@@ -1,15 +1,15 @@
 # E2E acceptance results (host)
 
-- Generated: 2026-11-25T21:05:20Z UTC
+- Generated: 2026-11-25T21:05:35Z UTC
 - Root: `/workspace`
-- HEAD: `27db3e00cbfd268d1852729a42e2f6504271ea25` (`27db3e0 Bump Apps/a-Shell to integrity-script master merge tip (#7)`)
+- HEAD: `8e135176bdb8d5f075e87c2620f6502c5ab47222` (`8e13517 Add host E2E acceptance harness and report`)
 
 === Host E2E acceptance ===
 
 ## 1. Pin graph
-PASS  SwiftTerm HEAD=27db3e00cbfd268d1852729a42e2f6504271ea25
-PASS  Apps/a-Shell gitlink=9b4c7548914b517c4052ec632054c6a5e9f8b670
-WARN  Apps/a-Shell checkout 68857ae1ab46216c312bdc8ef5ac6712160d9bb7 != gitlink 9b4c7548914b517c4052ec632054c6a5e9f8b670
+PASS  SwiftTerm HEAD=8e135176bdb8d5f075e87c2620f6502c5ab47222
+PASS  Apps/a-Shell gitlink=68857ae1ab46216c312bdc8ef5ac6712160d9bb7
+PASS  Apps/a-Shell checkout matches gitlink
 PASS  nested SwiftTerm pin=edc5aae87c070887c1575b059e83a800a44e3bae
 PASS  nested SwiftTerm is ancestor of monorepo HEAD (or equal)
 PASS  .gitmodules points at jiaomeimei0-prog/SwiftTerm
@@ -90,9 +90,9 @@ WARN  pythonInstall.tar.gz fetched without local SHA-256 (upstream design)
 
 ## 7. Device script syntax
 PASS  verify_ashell_integrity.sh sh -n clean
-=== a-Shell integrity 2026-11-25T21:05:20Z ===
+=== a-Shell integrity 2026-11-25T21:05:36Z ===
 pwd=/workspace
-HOME=/tmp/tmp.WpZwKZOSZ8
+HOME=/tmp/tmp.DNouIwqodq
 GROUP=
 
 ## env
@@ -113,10 +113,10 @@ PASS  help -l contains help
 PASS  help -l contains codex (full app)
 
 ## .relay.json
-PASS  found /tmp/tmp.WpZwKZOSZ8/Documents/.relay.json
-PASS  /tmp/tmp.WpZwKZOSZ8/Documents/.relay.json has enabled/bind/port keys
-PASS  /tmp/tmp.WpZwKZOSZ8/Documents/.relay.json enabled is not true (safe default / stopped)
-PASS  /tmp/tmp.WpZwKZOSZ8/Documents/.relay.json bind is loopback 127.0.0.1
+PASS  found /tmp/tmp.DNouIwqodq/Documents/.relay.json
+PASS  /tmp/tmp.DNouIwqodq/Documents/.relay.json has enabled/bind/port keys
+PASS  /tmp/tmp.DNouIwqodq/Documents/.relay.json enabled is not true (safe default / stopped)
+PASS  /tmp/tmp.DNouIwqodq/Documents/.relay.json bind is loopback 127.0.0.1
 WARN  relay command not available in this target
 
 ## clipboard pbcopy/pbpaste
