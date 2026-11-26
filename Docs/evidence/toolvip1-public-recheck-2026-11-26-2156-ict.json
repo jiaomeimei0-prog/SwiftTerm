@@ -1,0 +1,21 @@
+{
+  "ts_utc": "2026-11-26T14:57:13.683056Z",
+  "ts_label": "Asia/Bangkok",
+  "probes": {
+    "https://toolvip1.top/": {
+      "url": "https://toolvip1.top/",
+      "error": "URLError: <urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING] EOF occurred in violation of protocol (_ssl.c:1000)>",
+      "curl_stderr": "curl: (35) OpenSSL SSL_connect: SSL_ERROR_SYSCALL in connection to toolvip1.top:443 \n",
+      "curl_meta": "\nHTTP=000 SIZE=0\n"
+    },
+    "https://www.toolvip1.top/": {
+      "url": "https://www.toolvip1.top/",
+      "error": "URLError: <urlopen error [Errno -2] Name or service not known>",
+      "curl_stderr": "curl: (6) Could not resolve host: www.toolvip1.top\n",
+      "curl_meta": "\nHTTP=000 SIZE=0\n"
+    }
+  },
+  "workers_note": "list-self-hosted-workers empty at recheck; Use my computer install alone is not enough",
+  "workers": [],
+  "verdict": "FAIL_PUBLIC_AND_NO_WORKER"
+}

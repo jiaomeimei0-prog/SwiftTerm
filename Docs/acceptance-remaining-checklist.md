@@ -1,4 +1,4 @@
-# Checklist nghiem thu con lai — cap nhat 2026-11-26 21:53 Asia/Bangkok
+# Checklist nghiem thu con lai — cap nhat 2026-11-26 21:57 Asia/Bangkok
 
 ## Da dat (co lenh/evidence)
 
@@ -36,3 +36,4 @@ PASS domain khi body `https://toolvip1.top/` co `SwiftTerm` — khong 1033 / Hel
 - **Khong** goi hoan thanh tuyet doi (158 + domain ben + Pages) cho den khi checklist dong va ban doi chieu.
 - Agent **khong the** go lenh tren PC khi workers rong — cai Use my computer / CLI thoi chua bat worker.
 - Public probe 2026-11-26T14:53Z: apex SSL_ERROR_SYSCALL; www NXDOMAIN. Evidence: `Docs/evidence/toolvip1-public-probe-2026-11-26-agent-vm.json`.
+- Timer recheck 2026-11-26 21:57 ICT: `workers: []` van rong; apex van SSL_ERROR_SYSCALL. Evidence: `Docs/evidence/toolvip1-public-recheck-2026-11-26-2156-ict.json`.
