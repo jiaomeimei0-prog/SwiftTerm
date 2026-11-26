@@ -10,6 +10,7 @@
 #   $env:USERPROFILE\Documents\SwiftTerm\Docs\evidence\windows-persistent-e2e-log.txt
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "windows-tunnel-common.ps1")
 
 $Root = Join-Path $env:USERPROFILE "Documents\SwiftTerm"
 $Site = Join-Path $Root "Web\cloudflare\site"
@@ -22,14 +23,6 @@ if (-not (Test-Path -LiteralPath $Index)) {
     throw "Missing $Index - clone https://github.com/jiaomeimei0-prog/SwiftTerm.git into Documents\SwiftTerm first."
 }
 New-Item -ItemType Directory -Force -Path $EvidenceDir | Out-Null
-
-function Refresh-Path {
-    $machine = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
-    $user = [System.Environment]::GetEnvironmentVariable("Path", "User")
-    if ($null -eq $machine) { $machine = "" }
-    if ($null -eq $user) { $user = "" }
-    $env:Path = $machine + ";" + $user
-}
 
 function Ensure-Cloudflared {
     Refresh-Path

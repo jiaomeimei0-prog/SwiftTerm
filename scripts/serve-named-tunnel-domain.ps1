@@ -109,15 +109,7 @@ if (-not (Test-Path -LiteralPath $credPath)) {
 }
 
 $configPath = Join-Path $configDir "swiftterm-web-config.yml"
-$yaml = @(
-    "tunnel: $tunnelId"
-    "credentials-file: $credPath"
-    "ingress:"
-    "  - hostname: $Hostname"
-    "    service: http://127.0.0.1:$Port"
-    "  - service: http_status:404"
-) -join "`r`n"
-[System.IO.File]::WriteAllText($configPath, $yaml + "`r`n")
+Write-SwiftTermIngressConfig -Path $configPath -TunnelId $tunnelId -CredentialsFile $credPath -Hostname $Hostname -Port $Port
 "wrote $configPath tunnelId=$tunnelId port=$Port" | Add-Content -LiteralPath $Log
 Write-Host "Wrote $configPath (origin http://127.0.0.1:$Port)"
 
