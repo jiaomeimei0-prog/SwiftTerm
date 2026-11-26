@@ -1,0 +1,74 @@
+# Apple-platform compile probe for this fork.
+#
+# The upstream `Swift` workflow (xcode.yml) runs its Apple jobs on `xcode-27`. In this fork those
+# jobs have stayed queued without a runner, so no Apple code (AppKit, UIKit, HostHelpers) is built
+# in CI here. This workflow repeats the manufacturer's own build and test commands from xcode.yml
+# on the standard GitHub-hosted `macos-26` image (Xcode 26.x). The repository is public, so the
+# minutes are free. It is also a control experiment: if these jobs start while the `xcode-27`
+# jobs stay queued, the problem is specific to that label.
+
+name: Apple compile probe
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'Package.swift'
+      - 'Sources/**'
+      - 'Tests/**'
+      - 'TerminalApp/**'
+      - '.github/workflows/apple-compile.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: apple-compile-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  macos-build:
+    name: macOS build (MacTerminal + swift build)
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Show toolchain versions
+        run: |
+          xcodebuild -version
+          swift --version
+      - name: Xcode Mac Build
+        run: xcodebuild -project TerminalApp/MacTerminal.xcodeproj -scheme MacTerminal
+      - name: Swift Package Build
+        run: swift build -v
+
+  ios-build:
+    name: iOS build (iOSTerminal, covers HostHelpers)
+    runs-on: macos-26
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Show toolchain versions
+        run: |
+          xcodebuild -version
+          swift --version
+      - name: Xcode iOS Build
+        run: >-
+          xcodebuild -project TerminalApp/iOSTerminal.xcodeproj -scheme iOSTerminal
+          -destination 'generic/platform=iOS'
+          CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO
+
+  macos-tests:
+    name: macOS tests (swift test --no-parallel)
+    runs-on: macos-26
+    timeout-minutes: 90
+    env:
+      SWIFTTERM_EXPENSIVE_ASSERTS: "1"
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Show toolchain versions
+        run: |
+          xcodebuild -version
+          swift --version
+      - name: Run tests
+        run: swift test --no-parallel
