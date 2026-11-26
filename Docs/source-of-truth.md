@@ -1,5 +1,8 @@
 # Source of truth
 
+**Architecture status:** complete for SoT + a-Shell iOS wiring — see
+`Docs/sot-ashell-complete-2026-11-26.md`.
+
 This fork (`jiaomeimei0-prog/SwiftTerm`) is the **only** place to edit terminal
 emulator features and security patches.
 
