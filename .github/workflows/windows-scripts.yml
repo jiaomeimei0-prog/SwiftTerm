@@ -1,0 +1,41 @@
+name: Windows scripts
+
+# The tunnel/bring-up scripts under scripts/ are written for Windows PowerShell 5.1 and
+# were never executed in CI. This job parses them with the 5.1 parser, checks their
+# encoding rules and runs the unit tests of the shared helper. It does not start
+# cloudflared or touch any domain.
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'scripts/**/*.ps1'
+      - 'scripts/**/*.cmd'
+      - '.github/workflows/windows-scripts.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'scripts/**/*.ps1'
+      - 'scripts/**/*.cmd'
+      - '.github/workflows/windows-scripts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  powershell-5-1:
+    name: PowerShell 5.1 (parse, encoding, helper tests)
+    runs-on: windows-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Show PowerShell version
+        shell: powershell
+        run: $PSVersionTable | Format-Table -AutoSize | Out-String | Write-Host
+
+      - name: Run scripts tests
+        shell: powershell
+        run: .\scripts\tests\windows-tunnel-common.tests.ps1
