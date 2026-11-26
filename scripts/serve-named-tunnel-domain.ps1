@@ -131,28 +131,36 @@ if ($route.Text -match '(?i)\bfatal\b' -and $route.Text -notmatch '(?i)already e
 }
 "routed dns $Hostname -> $TunnelName" | Add-Content -LiteralPath $Log
 
-$tunnelId = $null
-$list2 = Invoke-Cloudflared @("tunnel", "list")
-foreach ($line in $list2.Lines) {
-    if ($line -match $TunnelName) {
-        if ($line -match '([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})') {
-            $tunnelId = $Matches[1]
-            break
+# Resolve UUID for EXACT tunnel name only. Never fall back to another tunnel's JSON
+# (that bug previously bound toolvip1.top to toolvip1-ssh which serves "Hello World!").
+function Get-TunnelIdByName {
+    param([string]$Name)
+    $listed = Invoke-Cloudflared @("tunnel", "list")
+    foreach ($line in $listed.Lines) {
+        # cloudflared list columns: ID NAME CREATED CONNECTIONS
+        if ($line -match ('^([0-9a-fA-F-]{36})\s+' + [regex]::Escape($Name) + '\s+')) {
+            return $Matches[1]
         }
     }
+    return $null
+}
+
+$tunnelId = Get-TunnelIdByName -Name $TunnelName
+if (-not $tunnelId) {
+    Write-Host "Tunnel '$TunnelName' not in list after create/check - creating..."
+    $created = Invoke-Cloudflared @("tunnel", "create", $TunnelName)
+    $created.Text | Add-Content -LiteralPath $Log
+    $tunnelId = Get-TunnelIdByName -Name $TunnelName
 }
 if (-not $tunnelId) {
-    $cred = Get-ChildItem -Path $configDir -Filter "*.json" -ErrorAction SilentlyContinue |
-        Where-Object { $_.Name -match '^[0-9a-fA-F-]{36}\.json$' } |
-        Select-Object -First 1
-    if (-not $cred) {
-        throw "No tunnel credentials JSON under $configDir - run: cloudflared tunnel create $TunnelName"
-    }
-    $tunnelId = [System.IO.Path]::GetFileNameWithoutExtension($cred.Name)
+    throw "Cannot resolve tunnel UUID for name '$TunnelName'. Run: cloudflared tunnel list"
 }
+Write-Host "Tunnel '$TunnelName' => $tunnelId"
+"tunnel_id=$tunnelId name=$TunnelName" | Add-Content -LiteralPath $Log
+
 $credPath = Join-Path $configDir ($tunnelId + ".json")
 if (-not (Test-Path -LiteralPath $credPath)) {
-    throw "Missing credentials file $credPath"
+    throw "Missing credentials file $credPath for tunnel $TunnelName"
 }
 
 $configPath = Join-Path $configDir "swiftterm-web-config.yml"
