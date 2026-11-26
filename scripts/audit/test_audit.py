@@ -17,7 +17,7 @@ import audit_security as sec  # noqa: E402
 import openstep  # noqa: E402
 import render_report  # noqa: E402
 import run_audit  # noqa: E402
-from audit_lib import FindingRegistry, TreeEntry, classify  # noqa: E402
+from audit_lib import FindingRegistry, TreeEntry, classify, defect_codes, defect_targets, macos_ci_stats, minutes_between  # noqa: E402
 
 
 def blob(path: str, mode: str = "100644", size: int = 10) -> TreeEntry:
@@ -295,24 +295,60 @@ class SecurityTests(unittest.TestCase):
         self.assertEqual([h.rule for h in spawn], ["child-process"])
 
 
+class TimeTests(unittest.TestCase):
+    def test_vn_time_adds_seven_hours_and_passes_unknown_through(self) -> None:
+        self.assertEqual(render_report.vn_time("2026-11-26T16:56:39Z"), "2026-11-26T16:56:39Z (UTC) = 2026-11-26 23:56 giờ Việt Nam (UTC+7)")
+        self.assertEqual(render_report.vn_time("2026-11-26T20:00:00Z").split("= ")[1][:16], "2026-11-27 03:00")
+        self.assertEqual(render_report.vn_time("?"), "?")
+
+
+class DefectCodeTests(unittest.TestCase):
+    def test_target_suffix_counts_as_the_code(self) -> None:
+        self.assertEqual(defect_codes("D01:a-Shell-noPython;D07"), {"D01", "D07"})
+        self.assertEqual(defect_codes(""), set())
+        self.assertEqual(defect_targets("D01:a-Shell-noPython;D01:x;D07", "D01"), {"a-Shell-noPython", "x"})
+
+
 class CiFactsTests(unittest.TestCase):
     def test_minutes_between_handles_missing_and_valid_stamps(self) -> None:
-        self.assertEqual(run_audit.minutes_between("2026-11-26T15:47:28Z", "2026-11-26T16:50:53Z"), 63)
-        self.assertIsNone(run_audit.minutes_between("", "2026-11-26T16:50:53Z"))
+        self.assertEqual(minutes_between("2026-11-26T15:47:28Z", "2026-11-26T16:50:53Z"), 63)
+        self.assertIsNone(minutes_between("", "2026-11-26T16:50:53Z"))
 
-    def test_queued_macos_jobs_are_reported_without_claiming_an_unproven_cause(self) -> None:
-        results = run_audit.Results(ci_facts={
-            "collected_at": "2026-11-26T16:50:00Z",
-            "swift_jobs": [
-                {"name": "build", "status": "queued", "conclusion": None, "labels": ["xcode-27"], "created_at": "2026-11-26T15:47:28Z"},
-                {"name": "linux-headless", "status": "completed", "conclusion": "success", "labels": ["ubuntu-latest"], "created_at": "2026-11-26T15:47:28Z"},
-            ]})
+    FACTS = {
+        "collected_at": "2026-11-26T17:00:00Z",
+        "swift_recent": [
+            {"id": 2, "jobs": [
+                {"name": "build", "status": "queued", "conclusion": None, "labels": ["xcode-27"], "created_at": "2026-11-26T16:50:54Z", "started_at": "2026-11-26T16:50:54Z", "runner_name": None},
+                {"name": "strict", "status": "in_progress", "conclusion": None, "labels": ["xcode-27"], "created_at": "2026-11-26T16:50:54Z", "started_at": "2026-11-26T16:56:18Z", "runner_name": "GitHub Actions 7"},
+                {"name": "linux-headless", "status": "completed", "conclusion": "success", "labels": ["ubuntu-latest"], "created_at": "2026-11-26T16:50:54Z", "started_at": "2026-11-26T16:50:57Z", "runner_name": "GitHub Actions 8"}]},
+            {"id": 1, "jobs": [
+                {"name": "build", "status": "queued", "conclusion": None, "labels": ["xcode-27"], "created_at": "2026-11-26T15:47:28Z", "started_at": "2026-11-26T15:47:28Z", "runner_name": None}]},
+        ]}
+
+    def test_macos_queue_statistics_use_runner_assignment_not_started_at(self) -> None:
+        stats = macos_ci_stats(self.FACTS)
+        self.assertEqual((stats["runs"], stats["jobs"], stats["started"], stats["queued"], stats["completed"]), (2, 3, 1, 2, 0))
+        self.assertEqual(stats["start_delay_min"], (5, 5))
+        self.assertEqual(stats["oldest_queued_min"], 72)
+        self.assertEqual(stats["ubuntu_max_delay_min"], 0)
+        self.assertIsNone(macos_ci_stats({"swift_recent": [{"jobs": [{"labels": ["ubuntu-latest"]}]}]}))
+
+    def test_ci_finding_reports_observed_queueing_and_denies_the_missing_label_theory(self) -> None:
+        results = run_audit.Results(ci_facts=self.FACTS)
         findings = run_audit.findings_to_dicts(run_audit.build_findings(results, {}))
-        ci = [f for f in findings if "xcode-27" in f["title"]]
+        ci = [f for f in findings if "CI macOS" in f["title"]]
         self.assertEqual(len(ci), 1)
-        self.assertIn("≥ 62 phút", ci[0]["evidence"])
-        self.assertIn("không xác định được", ci[0]["evidence"])
-        self.assertNotIn("không có runner mang nhãn", ci[0]["title"] + ci[0]["evidence"])
+        self.assertEqual(ci[0]["severity"], "HIGH")
+        self.assertIn("1/3 job", ci[0]["title"])
+        self.assertIn("≥ 72 phút", ci[0]["evidence"])
+        self.assertIn("không phải thiếu nhãn", ci[0]["evidence"])
+        self.assertIn("chưa xác định", ci[0]["evidence"])
+
+    def test_finished_macos_job_removes_the_finding(self) -> None:
+        facts = {"collected_at": "2026-11-26T17:00:00Z", "swift_recent": [{"id": 1, "jobs": [
+            {"name": "build", "status": "completed", "conclusion": "success", "labels": ["xcode-27"], "created_at": "2026-11-26T16:50:54Z", "started_at": "2026-11-26T16:52:00Z", "runner_name": "r"}]}]}
+        findings = run_audit.findings_to_dicts(run_audit.build_findings(run_audit.Results(ci_facts=facts), {}))
+        self.assertFalse([f for f in findings if "CI macOS" in f["title"]])
 
     def test_apple_probe_states_map_conclusions(self) -> None:
         results = run_audit.Results(ci_facts={"apple_compile_jobs": [

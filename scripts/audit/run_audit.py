@@ -30,7 +30,7 @@ import audit_invocations as I  # noqa: E402
 import audit_languages as L  # noqa: E402
 import audit_scripts as S  # noqa: E402
 import audit_security as X  # noqa: E402
-from audit_lib import FindingRegistry, GitRepo, decode, findings_to_dicts, write_csv, write_json  # noqa: E402
+from audit_lib import FindingRegistry, GitRepo, decode, defect_codes, findings_to_dicts, macos_ci_stats, minutes_between, write_csv, write_json  # noqa: E402
 
 TABLE_ORDER = ["full", "mini", "extra", "llvm", "tex", "luatex", "sshStock"]
 BASELINE = {"full", "mini"}
@@ -418,15 +418,6 @@ def doc_claims(st: GitRepo, ash: GitRepo, args: argparse.Namespace, results: Res
                         results.stale_pins.append({"location": f"{entry.path}:{number}", "sha": token, "subject": ash.git("log", "-1", "--format=%s", full).strip()[:70], "relation": relation})
 
 
-def minutes_between(start: str, end: str) -> int | None:
-    """Whole minutes from `start` to `end` (both GitHub `...Z` timestamps), or None if either is missing."""
-    try:
-        fmt = "%Y-%m-%dT%H:%M:%SZ"
-        return int((dt.datetime.strptime(end, fmt) - dt.datetime.strptime(start, fmt)).total_seconds() // 60)
-    except ValueError:
-        return None
-
-
 def load_github_facts(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
 
@@ -444,6 +435,13 @@ def refresh_github_facts(args: argparse.Namespace, path: Path, refs: dict[str, s
             code, jobs = run(["gh", "api", f"repos/jiaomeimei0-prog/SwiftTerm/actions/runs/{run_info['id']}/jobs", "--jq", "[.jobs[]|{id,name,labels,status,conclusion,runner_name,created_at,started_at}]"])
             if code == 0:
                 facts["swift_jobs"] = json.loads(jobs)
+    code, out = run(["gh", "api", "repos/jiaomeimei0-prog/SwiftTerm/actions/workflows/xcode.yml/runs?per_page=8", "--jq", "[.workflow_runs[]|{id,head_sha,status,conclusion,created_at}]"])
+    if code == 0 and out.strip().startswith("["):
+        recent = json.loads(out)
+        for item in recent:
+            code, jobs = run(["gh", "api", f"repos/jiaomeimei0-prog/SwiftTerm/actions/runs/{item['id']}/jobs?per_page=30", "--jq", "[.jobs[]|{name,labels,status,conclusion,runner_name,created_at,started_at}]"])
+            item["jobs"] = json.loads(jobs) if code == 0 and jobs.strip().startswith("[") else []
+        facts["swift_recent"] = recent
     if args.apple_sha:
         code, out = run(["gh", "api", f"repos/jiaomeimei0-prog/SwiftTerm/actions/workflows/apple-compile.yml/runs?head_sha={args.apple_sha}", "--jq",
                          "[.workflow_runs[]|{id,html_url,head_sha,status,conclusion,event,created_at}]|sort_by(.created_at)|reverse|.[0]"])
@@ -479,20 +477,20 @@ def build_findings(results: Results, snaps: dict[str, C.AshellSnapshot]) -> Find
     by_kind = collections.defaultdict(list)
     for p in results.wrong_calls:
         by_kind[p["kind"]].append(p)
-    jobs = facts.get("swift_jobs", [])
-    queued = [j for j in jobs if j.get("status") == "queued"]
-    if queued:
-        waited = minutes_between(min((j["created_at"] for j in queued if j.get("created_at")), default=""), facts.get("collected_at", ""))
-        ran = [j["name"] for j in jobs if j.get("status") == "completed"]
+    stats = macos_ci_stats(facts)
+    if stats and stats["completed"] == 0:
+        delay = stats["start_delay_min"]
         reg.add("HIGH", "CI/assurance", "swiftterm", ".github/workflows/xcode.yml",
-                f"{len(queued)} job macOS của workflow `Swift` (`runs-on: xcode-27`) ở trạng thái queued, chưa runner nào nhận",
-                f"{len(queued)} job queued ({', '.join(j['name'] for j in queued)})" + (f", đã chờ ≥ {waited} phút khi thu thập" if waited is not None else "") +
-                f"; job {', '.join(ran) or '(không có)'} cùng run đã chạy xong ngay ⇒ runner Ubuntu hoạt động còn nhãn `xcode-27` không nhận job. "
-                "`xcode-27` được GitHub công bố là nhãn runner của họ (actions/runner-images#15397) nên nguyên nhân không xác định được từ bên ngoài: agent không đọc được danh sách runner (HTTP 403). "
-                "Giả thuyết cần chủ tài khoản kiểm tra: giới hạn gói/billing, dung lượng, hoặc nhãn không áp dụng cho repo fork. "
-                "Hệ quả đã quan sát: code Apple (Sources/SwiftTerm/{Apple,Mac,iOS}, gồm HostHelpers) không được biên dịch/test trong CI của fork.",
-                "Chủ tài khoản kiểm tra Settings → Actions → Runners và Billing. Phép thử đối chứng đã thêm: workflow `apple-compile.yml` chạy cùng lệnh trên runner `macos-26`.",
-                "gh api repos/jiaomeimei0-prog/SwiftTerm/actions/runs/<id>/jobs")
+                f"CI macOS của fork chưa cho kết quả nào: {stats['started']}/{stats['jobs']} job `{'/'.join(stats['labels'])}` được runner nhận, {stats['completed']} xong, {stats['queued']} còn queued",
+                f"Trong {stats['runs']} run gần nhất của workflow `Swift`: {stats['jobs']} job macOS, {stats['started']} đã được runner GitHub nhận" +
+                (f" (chờ {delay[0]}–{delay[1]} phút)" if delay else "") + f", {stats['queued']} còn queued" +
+                (f", job cũ nhất đã chờ ≥ {stats['oldest_queued_min']} phút khi thu thập" if stats["oldest_queued_min"] is not None else "") +
+                (f"; job Ubuntu cùng các run chờ tối đa {stats['ubuntu_max_delay_min']} phút. " if stats["ubuntu_max_delay_min"] is not None else ". ") +
+                "Nhãn `xcode-27` được GitHub công bố là nhãn runner của họ (actions/runner-images#15397) và đã có job được nhận, nên không phải thiếu nhãn; nguyên nhân hàng đợi kẹt chưa xác định "
+                "(giới hạn số job macOS chạy đồng thời, billing, hoặc job kẹt phía GitHub). Agent không đọc được thông tin runner/billing (HTTP 403). "
+                "Hệ quả đã quan sát: chưa có job macOS nào xong, nên code Apple (Sources/SwiftTerm/{Apple,Mac,iOS}, gồm HostHelpers) chưa được biên dịch/test trong CI của fork.",
+                "Chủ tài khoản kiểm tra Settings → Actions (Runners, usage/concurrency) và Billing; huỷ các run macOS cũ đang kẹt để hàng đợi không dồn. Phép thử đối chứng đã thêm: `apple-compile.yml` chạy cùng lệnh trên `macos-26`.",
+                "gh api repos/jiaomeimei0-prog/SwiftTerm/actions/workflows/xcode.yml/runs ; .../runs/<id>/jobs")
     for job in facts.get("apple_compile_jobs", []):
         if job.get("conclusion") == "failure":
             failed = [s["name"] for s in job.get("steps", []) if s.get("conclusion") == "failure"]
@@ -514,7 +512,7 @@ def build_findings(results: Results, snaps: dict[str, C.AshellSnapshot]) -> Find
     if unmerged:
         pr = ", ".join(f"PR #{p['number']} ({p['state']}, nhánh {p['head']})" for p in pulls) or "không tìm thấy PR"
         reg.add("MEDIUM", "Toàn vẹn pin", "swiftterm", ".gitmodules / Apps/a-Shell", "Pin `Apps/a-Shell` trỏ vào commit của PR chưa merge, không thuộc `master` của a-shell",
-                f"pin={g['pin'][:10]}; GitHub compare master...pin: {pvm['status']} ahead {pvm['ahead_by']} behind {pvm['behind_by']} (merge-base {pvm['merge_base'][:10]}) — {pr}. Nếu nhánh bị xoá hoặc squash-merge rồi GC, `git submodule update --init` trên bản clone mới sẽ hỏng." if pvm else
+                f"pin={g['pin'][:10]}; GitHub compare master...pin: status={pvm['status']}, ahead_by={pvm['ahead_by']}, behind_by={pvm['behind_by']} (merge-base {pvm['merge_base'][:10]}) — {pr}. Nếu nhánh bị xoá hoặc squash-merge rồi GC, `git submodule update --init` trên bản clone mới sẽ hỏng." if pvm else
                 f"pin={g['pin'][:10]} không là tổ tiên của fork master (kiểm tra cục bộ).",
                 "Merge PR a-shell tương ứng rồi bump pin về commit nằm trên master (hoặc dùng merge-commit/rebase, không squash).", "gh api repos/jiaomeimei0-prog/a-shell/compare/master...<pin>")
     for target in results.target_matrix:
@@ -530,11 +528,11 @@ def build_findings(results: Results, snaps: dict[str, C.AshellSnapshot]) -> Find
         ("D10", "MEDIUM", "Python.framework lấy từ tarball tải bằng `curl -fOL` không kiểm checksum (downloadFrameworks.sh:8)",
          "Ghim SHA-256 của `pythonInstall.tar.gz` và kiểm trước khi `tar xzf` (xcfs đã làm vậy cho 65 binaryTarget)."),
     ):
-        hit = [c for c in results.commands if code in c["defects"].split(";")]
+        hit = [c for c in results.commands if code in defect_codes(c["defects"])]
         if hit:
             reg.add(severity, "Lệnh / chuỗi cung ứng", "ashell", "xcfs/Package.swift; downloadFrameworks.sh", f"{title}: {len(hit)} lệnh ({', '.join(c['command'] for c in hit)})",
                     f"Framework: {', '.join(sorted({c['framework'] for c in hit}))}. Giống hệt upstream (lỗi gốc nhà sản xuất): {all(c['defect_origin'] == 'upstream-original' for c in hit)}.", rec, f"audit_commands.framework_provenance ({code})")
-    basename_hits = [c for c in results.commands if "D04" in c["defects"].split(";")]
+    basename_hits = [c for c in results.commands if "D04" in defect_codes(c["defects"])]
     if basename_hits:
         reg.add("LOW", "Lệnh", "ashell", "Resources/commandDictionary.plist vs Resources_mini/commandDictionary.plist", f"Cùng một lệnh khai báo khác nhau giữa catalogue full và mini: {', '.join(c['command'] for c in basename_hits)}",
                 "; ".join(f"{c['command']}: {c['defect_detail']}" for c in basename_hits) + " (argtype `file` ở full nhưng `none` ở mini — lỗi gốc nhà sản xuất)", "Thống nhất argtype giữa hai catalogue.", "audit_commands tables diff")
@@ -567,7 +565,8 @@ def build_findings(results: Results, snaps: dict[str, C.AshellSnapshot]) -> Find
                 "AppDelegate.swift:45-47 nạp `localCertificate.pfx` với passphrase \"password\" cho server HTTPS loopback 127.0.0.1 (WASM). Khoá riêng của chứng chỉ localhost là công khai.",
                 "Sinh chứng chỉ per-install khi chạy lần đầu; không commit khoá. Rủi ro thực tế giới hạn ở loopback nhưng khoá công khai nghĩa là bất kỳ tiến trình cục bộ nào cũng mạo danh được nếu WebView tin chứng chỉ.", "audit_security.secret_scan")
         reg.add("MEDIUM", "An ninh", "ashell", "a-Shell/SceneDelegate.swift:6338-6342", "`webView(_:didReceive:)` chấp nhận mọi server-trust (không kiểm tra host/phương thức xác thực) — phát hiện tĩnh, chưa kiểm chứng tính tiếp cận",
-                "Handler trả `.useCredential` dựng từ chính `serverTrust` của server cho mọi challenge → vô hiệu hoá kiểm tra chứng chỉ cho WebView dùng delegate này (cần cho chứng chỉ localhost tự ký).",
+                "Handler dựng `URLCredential(trust: challenge.protectionSpace.serverTrust!)` rồi gọi `completionHandler(.useCredential, cred)` cho mọi challenge → vô hiệu hoá kiểm tra chứng chỉ cho WebView dùng delegate này (cần cho chứng chỉ localhost tự ký). "
+                "Suy ra từ mã (chưa chạy): `serverTrust` là nil với challenge không phải server-trust (ví dụ HTTP Basic), nên dấu `!` có thể làm app crash thay vì chỉ từ chối.",
                 "Chỉ chấp nhận khi `protectionSpace.host` là 127.0.0.1/localhost và đúng cổng WASM; còn lại `performDefaultHandling`.", "audit_security.sink_inventory rule=tls-trust-bypass; đọc mã")
     jwt = [s for s in results.secrets if s["kind"] == "jwt"]
     if jwt:
@@ -646,9 +645,9 @@ def summarise(results: Results) -> dict:
         "defects_upstream_original": sum(1 for c in cmds if c["defect_origin"] == "upstream-original"),
         "defects_fork_introduced": sum(1 for c in cmds if c["defect_origin"] == "fork-introduced"),
         "defect_groups": {
-            "config": sorted(c["command"] for c in cmds if set(c["defects"].split(";")) & {"D01", "D04", "D08"}),
-            "provenance": sorted(c["command"] for c in cmds if set(c["defects"].split(";")) & {"D07", "D10"}),
-            "unverified_symbol": sorted(c["command"] for c in cmds if "D05" in c["defects"].split(";")),
+            "config": sorted(c["command"] for c in cmds if defect_codes(c["defects"]) & {"D01", "D04", "D08"}),
+            "provenance": sorted(c["command"] for c in cmds if defect_codes(c["defects"]) & {"D07", "D10"}),
+            "unverified_symbol": sorted(c["command"] for c in cmds if "D05" in defect_codes(c["defects"])),
         },
         "sinks_by_status": dict(collections.Counter(h["status"] or "-" for h in results.sinks if h["severity"] in ("HIGH", "MEDIUM"))),
         "unit_tests": results.unit_tests,

@@ -8,6 +8,19 @@ import collections
 import re
 from pathlib import Path
 
+from datetime import datetime, timedelta
+
+from audit_lib import defect_codes, defect_targets, macos_ci_stats
+
+
+def vn_time(stamp: str) -> str:
+    """`2026-11-26T16:56:39Z` -> `2026-11-26T16:56:39Z (UTC) = 23:56 giờ Việt Nam (UTC+7)`; unknown input is returned unchanged."""
+    try:
+        moment = datetime.strptime(stamp, "%Y-%m-%dT%H:%M:%SZ")
+    except ValueError:
+        return stamp
+    return f"{stamp} (UTC) = {(moment + timedelta(hours=7)).strftime('%Y-%m-%d %H:%M')} giờ Việt Nam (UTC+7)"
+
 DEFECT_TITLES = {
     "D01": "Target nhúng thiếu framework của lệnh nằm trong catalogue của chính target đó",
     "D04": "Cùng một lệnh khai báo khác nhau giữa catalogue `full` và `mini` (argtype)",
@@ -115,7 +128,7 @@ def section_sources(r) -> str:
     out = ["## 1. Hai nguồn lõi và đồ thị phụ thuộc", "", table(["Nguồn", "Repo", "Ref", "Commit", "Ngày", "Tiêu đề"], rows), ""]
     fu, pvm = f.get("fork_vs_upstream"), f.get("pin_vs_master")
     if fu:
-        out.append(f"- **Fork so với nhà sản xuất** (GitHub compare, thu thập {f.get('collected_at', '?')}): `{fu['status']}`, ahead **{fu['ahead_by']}** / behind **{fu['behind_by']}**, merge-base `{fu['merge_base'][:10]}`. "
+        out.append(f"- **Fork so với nhà sản xuất** (GitHub compare, thu thập {vn_time(f.get('collected_at', '?'))}): `{fu['status']}`, ahead **{fu['ahead_by']}** / behind **{fu['behind_by']}**, merge-base `{fu['merge_base'][:10]}`. "
                    "Đếm bằng `git rev-list` cục bộ không đáng tin vì bản clone a-shell trên VM là shallow.")
     if pvm:
         pulls = ", ".join(f"[PR #{p['number']}]({p['html_url']}) ({p['state']})" for p in f.get("pin_pulls", []))
@@ -199,7 +212,7 @@ def section_scripts(r) -> str:
     out += [table(["Repo", "Loại", "Số", "Danh sách"], [[k[0], k[1], len(v), short(sorted(v), 18)] for k, v in sorted(ep.items())]), "", "### 3.3 Workflow CI", ""]
     rows = [[w["repo"], f"`{re.sub(r'^.*/', '', w['workflow'])}`", w["triggers"], w["runners"], w["permissions"], f"{w['pinned_actions']}/{w['pinned_actions'] + w['unpinned_actions']}", w["secrets"] or "-"] for w in r.workflows]
     out += [table(["Repo", "Workflow", "Trigger", "Runner", "permissions", "Action ghim SHA", "Secrets dùng"], rows), "",
-            f"Kết quả thật của fork trên commit CI đã chọn (nguồn: GitHub API, `data/github_facts.json`, thu thập {r.ci_facts.get('collected_at', '?')}):", ""]
+            f"Kết quả thật của fork trên commit CI đã chọn (nguồn: GitHub API, `data/github_facts.json`, thu thập {vn_time(r.ci_facts.get('collected_at', '?'))}):", ""]
     if r.ci_facts.get("runs_for_sha"):
         out.append(table(["Workflow", "Trạng thái", "Kết luận", "Run"], [[x["name"], x["status"], x["conclusion"] or "-", x["html_url"]] for x in r.ci_facts["runs_for_sha"]]))
     jobs = r.ci_facts.get("swift_jobs", [])
@@ -256,17 +269,19 @@ def section_commands(r) -> str:
     for heading, codes in DEFECT_GROUPS:
         rows = []
         for code in codes:
-            hit = [c for c in cmds if code in c["defects"].split(";")]
+            hit = [c for c in cmds if code in defect_codes(c["defects"])]
             origins = collections.Counter(c["defect_origin"] for c in hit)
             rows.append([code, DEFECT_TITLES[code], len(hit), ", ".join(f"{k}: {v}" for k, v in origins.items()) or "—", short([c["command"] for c in hit], 14) or "—"])
-        union = {c["command"] for c in cmds if set(c["defects"].split(";")) & set(codes)}
+        union = {c["command"] for c in cmds if defect_codes(c["defects"]) & set(codes)}
         out += [f"**{heading}** — {len(union)} lệnh", "", table(["Mã", "Mô tả", "Số lệnh", "Nguồn gốc", "Lệnh"], rows), ""]
     groups = r.summary["defect_groups"]
+    d01_targets = {t for c in cmds for t in defect_targets(c["defects"], "D01")}
     out += [f"Tổng hợp: {len(groups['config'])} lệnh có lỗi cấu hình, {len(groups['provenance'])} lệnh có khoảng trống nguồn gốc, {len(groups['unverified_symbol'])} lệnh TeX chưa xác minh symbol; "
             f"**{sum(1 for c in cmds if c['defect_origin'] == 'upstream-original')}** lệnh có mã lỗi đều là lỗi gốc của nhà sản xuất (xuất hiện y hệt ở upstream), **{sum(1 for c in cmds if c['defect_origin'] == 'fork-introduced')}** do fork; "
             f"{sum(1 for c in cmds if not c['defects'])} lệnh không có mã nào mà bộ phát hiện kiểm được.", "",
+            *([f"D01 chỉ xảy ra ở target {', '.join(f'`{t}`' for t in sorted(d01_targets))}: target dùng catalogue `mini` nhưng chỉ nhúng một phần framework; giống hệt upstream và có thể là chủ ý cho biến thể CI (cần chủ dự án xác nhận), nên không tính là lỗi của fork.", ""] if d01_targets else []),
             f"Giới hạn: kiểm tĩnh KHÔNG chứng minh lệnh chạy được. Với {kinds.get('xcfs-binaryTarget', 0)} lệnh nguồn `xcfs-binaryTarget` và {sum(1 for c in cmds if c['framework'] == 'SELF')} lệnh `SELF`, symbol nằm trong nhị phân prebuilt mà VM không tải được (release asset bị chặn); "
-            "việc đối chiếu `[framework, symbol]` với symbol export thật nằm trong workflow `apple-compile.yml` (mục 6.5).", "",
+            "việc đối chiếu `[framework, symbol]` với symbol export thật chưa được làm (mục 6.5, việc 2).", "",
             "### 4.5 Host built-in (đăng ký bằng `replaceCommand`)", ""]
     host_only = sorted(c["command"] for c in cmds if c["kind"] == "host-builtin only")
     dup = sorted({b["name"] for b in r.builtins if b["duplicate_registration"]})
@@ -329,7 +344,7 @@ def apple_probe_lines(r) -> list[str]:
         steps = job.get("steps", [])
         passed = sum(1 for s in steps if s.get("conclusion") == "success")
         failed = [s["name"] for s in steps if s.get("conclusion") == "failure"]
-        rows.append([f"`{job['name']}`", job.get("runner_name") or "-", job["status"], job.get("conclusion") or "-", f"{passed}/{len(steps)} bước đạt" + (f"; lỗi: {', '.join(failed)}" if failed else "")])
+        rows.append([f"`{job['name']}`", job.get("runner_name") or "-", job["status"], job.get("conclusion") or "-", ("chưa chạy" if not steps else f"{passed}/{len(steps)} bước đạt") + (f"; lỗi: {', '.join(failed)}" if failed else "")])
     return [f"- Workflow `Apple compile probe` (run {run_info['id']}, commit `{run_info['head_sha'][:10]}`, trạng thái `{run_info['status']}`/`{run_info.get('conclusion') or '-'}`; Xcode 26.x của image `macos-26`, không phải Xcode 27.1 mà upstream dùng):", "",
             table(["Job", "Runner", "Trạng thái", "Kết luận", "Bước"], rows), ""]
 
@@ -362,9 +377,12 @@ def section_tests(r) -> str:
     if xct is not None and swt:
         evidence = (r.ci_facts.get("linux_headless_log") or {}).get("evidence_lines", [])
         out.append(f"- Job `linux-headless` (id {job_id}, `ubuntu-latest`): **{xct} XCTest** đạt, 0 lỗi + **{swt[0]} test Swift Testing / {swt[1]} suite** đạt. Log: " + " · ".join(f"`{line[:80]}`" for line in evidence[-2:]) + ".")
-    queued = [j for j in r.ci_facts.get("swift_jobs", []) if j.get("status") == "queued"]
-    if queued:
-        out.append(f"- {len(queued)} job còn lại của workflow `Swift` (macOS, `runs-on: xcode-27`) ở trạng thái `queued`, chưa runner nào nhận; nguyên nhân chưa xác định (mục 10) ⇒ **workflow gốc của CI fork chưa cho kết quả biên dịch/test Apple nào**.")
+    stats = macos_ci_stats(r.ci_facts)
+    if stats:
+        delay = stats["start_delay_min"]
+        out.append(f"- Job macOS (`{'/'.join(stats['labels'])}`) của {stats['runs']} run gần nhất của workflow `Swift`: {stats['started']}/{stats['jobs']} đã được runner nhận" + (f" (chờ {delay[0]}–{delay[1]} phút)" if delay else "") +
+                   f", {stats['completed']} xong, {stats['queued']} còn `queued`" + (f" (cũ nhất ≥ {stats['oldest_queued_min']} phút)" if stats["oldest_queued_min"] is not None else "") +
+                   "; nguyên nhân hàng đợi kẹt chưa xác định (mục 10) ⇒ " + ("**workflow gốc của CI fork chưa cho kết quả biên dịch/test Apple nào**." if stats["completed"] == 0 else "đã có kết quả macOS."))
     out += apple_probe_lines(r)
     out += ["- Số test khai báo tĩnh trong `Tests/` (regex; `@Test` có tham số tính 1) — không so trực tiếp với số đã chạy:", "",
             table(["Test target", "File", "XCTest (khai báo)", "@Test (khai báo)"], [[k, v[0], n(v[1]), n(v[2])] for k, v in sorted(per_target.items(), key=lambda kv: -(kv[1][1] + kv[1][2]))]), "",
@@ -382,7 +400,8 @@ def section_tests(r) -> str:
         [f"Định nghĩa catalogue ({r.catalogue_sizes[0]['fork']}/{r.catalogue_sizes[1]['fork']} lệnh)", "a-Shell", "plist hợp lệ; fork≡upstream≡pin; `ssh-stock-registration.sh` PASS ×3 nguồn", "L1", "ĐẠT (tĩnh)"],
         ["Chạy thật các lệnh", "Người dùng cuối", "Chưa có", "L4", "PENDING_USER_DEVICE"],
         ["Gắn Worker A–J (`worker-binding.sh`)", "a-Shell", "upstream PASS; " + ("; ".join(f"{x['ref']} FAIL" for x in failing) or "fork/pin PASS"), "L1", "KHÔNG ĐẠT (fork)" if failing else "ĐẠT"],
-        ["Build Web/WASM", "Người dùng web", wasm_cell, "L2", "ĐẠT (build)" if wasm and wasm["conclusion"] == "success" else "CHƯA ĐẠT"],
+        ["Build Web/WASM", "Người dùng web", wasm_cell, "L2" if wasm and wasm["conclusion"] == "success" else "—",
+         "KHÔNG CÓ DỮ LIỆU" if not wasm else "ĐẠT (build)" if wasm["conclusion"] == "success" else "ĐANG CHẠY (chưa có kết quả)" if wasm["status"] in ("queued", "in_progress") else "KHÔNG ĐẠT"],
         ["Deploy Cloudflare Pages", "Công chúng", "Workflow cố ý thất bại khi thiếu secrets", "—", "CHƯA (thiếu `CLOUDFLARE_*`)"],
         ["Tunnel Windows (PowerShell)", "Máy người dùng", "Không có `pwsh` trên VM; chỉ kiểm tĩnh", "L0", "Chưa chạy thật"],
         ["Tên miền `toolvip1.top`", "Công chúng", "Probe từ VM không hợp lệ (egress allowlist)", "—", "CHƯA XÁC MINH từ bên ngoài"]]), "",
@@ -404,7 +423,7 @@ def section_security(r) -> str:
     out += [table(["Repo", "Loại", "Mức heuristic", "Vị trí", "Giá trị (đã che)", "Ghi chú / phát hiện liên quan"], rows), "",
             "Mức \"heuristic\" là mức của detector; đánh giá cuối cùng nằm ở danh sách phát hiện (mục 9). Không phát hiện token GitHub/AWS/Slack/Stripe/Google hay `CLOUDFLARE_API_TOKEN` dạng literal ở HEAD của hai repo.", "",
             "### 7.3 Phát hiện đọc mã (không chạy được trên VM)", "",
-            "- **Chấp nhận mọi chứng chỉ trong WebView** — `a-Shell/SceneDelegate.swift:6338-6342`: `webView(_:didReceive:)` luôn `completionHandler(.useCredential, URLCredential(trust: serverTrust!))` (không kiểm host/`authenticationMethod`).",
+            "- **Chấp nhận mọi chứng chỉ trong WebView** — `a-Shell/SceneDelegate.swift:6338-6342`: `webView(_:didReceive:)` dựng `URLCredential(trust: challenge.protectionSpace.serverTrust!)` rồi gọi `completionHandler(.useCredential, cred)` cho mọi challenge (không kiểm host/`authenticationMethod`).",
             "- **Server HTTPS WASM** — `a-Shell/AppDelegate.swift:44-75`: `LocalHTTPServer` bind `127.0.0.1`, chỉ `GET`, chặn path traversal (`resolvingSymlinksInPath` + `hasPrefix(base)`), nhưng nạp `localCertificate.pfx` bằng passphrase `\"password\"` và khoá riêng nằm trong repo công khai.",
             "- **Relay (lệnh từ xa)** — `a-Shell/Relay.swift`: opt-in, mặc định `127.0.0.1`, TLS bật, token 32–256 ký tự so sánh hằng thời gian, mTLS tuỳ chọn. Rủi ro khi `bind=0.0.0.0` mà không bật mTLS.",
             "- **WebTerminal (PTY qua WebSocket)** — `TerminalApp/WebTerminal/.../HTTPServer.swift:98` bind `127.0.0.1`; WebSocket yêu cầu `Host` loopback và `Origin` khớp. Hệ quả: không thể phơi server này qua Cloudflare tunnel (đúng thiết kế an toàn).",
@@ -433,7 +452,7 @@ def section_limits(r) -> str:
         "egress là allowlist (github.com, api.github.com) ⇒ không tải được framework prebuilt, không probe được `toolvip1.top`, và các kết luận \"FAIL\" tên miền chạy từ VM trong báo cáo cũ **không có giá trị**.", "",
         "**Việc tiếp theo, theo thứ tự giá trị:**", "",
         "1. Merge PR a-shell #8 rồi bump pin về commit nằm trên `master`; đồng bộ `upstream/master` vào fork để `worker-binding.sh` PASS.",
-        "2. Đọc kết quả `Apple compile probe` (mục 6.3). Nếu job `macos-26` chạy còn `xcode-27` vẫn `queued`, vấn đề nằm ở nhãn `xcode-27` của fork: kiểm Settings → Actions → Runners và Billing, hoặc chuyển job macOS của `xcode.yml` sang runner chạy được.",
+        "2. Đọc kết quả `Apple compile probe` và hàng đợi macOS (mục 6.3): huỷ các run macOS cũ đang kẹt, kiểm Settings → Actions (giới hạn chạy đồng thời) và Billing. Khi job `xcode-27` chạy xong, dùng nó (Xcode 27.1, giống upstream) làm nguồn chuẩn; `macos-26` chỉ là đối chứng.",
         "3. Chạy `verify_command_catalogue_158.sh` trên iPhone/iPad và điền ma trận.",
         "4. Cấu hình `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID`, tắt Access cho hostname demo công khai, probe `toolvip1.top` từ ngoài VM.",
         "5. Với upstream a-Shell: thu hẹp `didReceive challenge`, sinh chứng chỉ localhost theo máy, thống nhất escape JS (đề xuất, ngoài phạm vi repo này).", "",
@@ -490,7 +509,7 @@ def render(r, out: Path) -> None:
     failing = [x for x in r.test_runs if x["ref"] == "fork" and x["result"] == "FAIL"]
     ut = r.unit_tests
     head = [f"# Báo cáo kiểm kê tổng thể và rà soát an ninh — SwiftTerm (lõi) + a-Shell (master)", "",
-            f"> Sinh tự động lúc {r.generated_at} (UTC) bởi `scripts/audit/run_audit.py`. Mọi con số được **tính từ git objects và lệnh chạy thật**, không gõ tay. "
+            f"> Sinh tự động lúc {vn_time(r.generated_at)} bởi `scripts/audit/run_audit.py`. Mọi con số được **tính từ git objects và lệnh chạy thật**, không gõ tay. "
             f"Bộ phát hiện có {ut.get('ran', '?')} test đối chứng dương/âm (`scripts/audit/test_audit.py`): {ut.get('result', '?')}. Dữ liệu thô: `Docs/audit/data/`.", "",
             "## 0. Kết luận nhanh", "",
             f"1. **Lệnh:** {s['distinct_command_names']} tên lệnh (catalogue full {s['catalogue_sizes_fork']['full']}, mini {s['catalogue_sizes_fork']['mini']}, cộng extra/llvm/tex/luatex/sshStock và {sum(1 for c in r.commands if c['kind'] == 'host-builtin only')} host built-in). "
@@ -500,7 +519,7 @@ def render(r, out: Path) -> None:
             + (f"Đã khắc phục: gốc repo PowerShell gắn cứng {base_by_kind.get('ps1-hardcoded-root', 0)} → {by_kind.get('ps1-hardcoded-root', 0)}, tên miền sai {base_by_kind.get('wrong-domain-reference', 0)} → {by_kind.get('wrong-domain-reference', 0)}, "
                f"workflow thiếu `permissions` {base_by_kind.get('workflow-permissions', 0)} → {by_kind.get('workflow-permissions', 0)}." if r.baseline else ""),
             f"3. **Kiểm thử:** lõi emulator đạt trên Linux CI ({xct} XCTest + {swt[0] if swt else '?'} Swift Testing). " +
-            ("**Fork a-Shell trượt bài test `worker-binding.sh` của nhà sản xuất** (upstream đạt). " if failing else "") + "Biên dịch Apple (`Apple compile probe`): " + (", ".join(f"{APPLE_JOBS[k]} {v}" for k, v in apple_states(r).items()) or "chưa có kết quả") + "; workflow `Swift` gốc: job macOS `queued`. Chưa có chạy thật 158 lệnh.",
+            ("**Fork a-Shell trượt bài test `worker-binding.sh` của nhà sản xuất** (upstream đạt). " if failing else "") + "Biên dịch Apple (`Apple compile probe`): " + (", ".join(f"{APPLE_JOBS[k]} {v}" for k, v in apple_states(r).items()) or "chưa có kết quả") + "; workflow `Swift` gốc: " + (f"{stats_now['started']}/{stats_now['jobs']} job macOS được runner nhận, {stats_now['completed']} xong, {stats_now['queued']} queued" if (stats_now := macos_ci_stats(r.ci_facts)) else "không có dữ liệu") + ". Chưa có chạy thật 158 lệnh.",
             f"4. **An ninh:** {sev.get('CRITICAL', 0)} nghiêm trọng, {sev.get('HIGH', 0)} cao, {sev.get('MEDIUM', 0)} trung bình, {sev.get('LOW', 0)} thấp, {sev.get('INFO', 0)} thông tin. "
             "Không lộ token đang hiệu lực; có khoá riêng localhost công khai, handler chấp nhận mọi chứng chỉ và ba chỗ nội suy JS thiếu escape (đều là mã gốc của nhà sản xuất).",
             "5. **Chưa thể khẳng định \"hoàn tất\"**: tên miền `toolvip1.top` chưa xác minh từ bên ngoài; 158 lệnh chưa chạy trên thiết bị; thiếu secrets Cloudflare. Chi tiết mục 6.4 và 10.", ""]

@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 from dataclasses import asdict, dataclass
+from datetime import datetime
 from pathlib import Path
 from typing import Iterable, Iterator
 
@@ -19,6 +20,50 @@ class GitError(RuntimeError):
 # The audit's own code and generated reports quote other repositories' scripts, workflow names and
 # mistyped domains on purpose (fixtures, evidence). Wrong-call detectors must not judge them.
 SELF_AUDIT_PREFIXES = ("scripts/audit/", "Docs/audit/")
+
+
+def minutes_between(start: str, end: str) -> int | None:
+    """Whole minutes from `start` to `end` (both GitHub `...Z` timestamps), or None if either is missing."""
+    try:
+        fmt = "%Y-%m-%dT%H:%M:%SZ"
+        return int((datetime.strptime(end, fmt) - datetime.strptime(start, fmt)).total_seconds() // 60)
+    except ValueError:
+        return None
+
+
+def _is_macos(job: dict) -> bool:
+    return any(label.startswith(("xcode-", "macos")) for label in job.get("labels", []))
+
+
+def macos_ci_stats(facts: dict) -> dict | None:
+    """Queue statistics of the macOS jobs over the recent runs of the `Swift` workflow (GitHub facts)."""
+    runs = facts.get("swift_recent") or []
+    all_jobs = [job for run in runs for job in run.get("jobs", [])]
+    macos = [job for job in all_jobs if _is_macos(job)]
+    if not macos:
+        return None
+    queued = [job for job in macos if job.get("status") == "queued"]
+    started = [job for job in macos if job.get("runner_name")]
+    delays = [m for m in (minutes_between(job.get("created_at", ""), job.get("started_at", "")) for job in started) if m is not None]
+    ubuntu_delays = [m for m in (minutes_between(job.get("created_at", ""), job.get("started_at", "")) for job in all_jobs if job.get("runner_name") and not _is_macos(job)) if m is not None]
+    return {
+        "runs": len(runs), "jobs": len(macos), "queued": len(queued), "started": len(started),
+        "completed": sum(1 for job in macos if job.get("status") == "completed"),
+        "oldest_queued_min": minutes_between(min((job["created_at"] for job in queued if job.get("created_at")), default=""), facts.get("collected_at", "")),
+        "start_delay_min": (min(delays), max(delays)) if delays else None,
+        "ubuntu_max_delay_min": max(ubuntu_delays) if ubuntu_delays else None,
+        "labels": sorted({label for job in macos for label in job.get("labels", [])}),
+    }
+
+
+def defect_codes(defects: str) -> set[str]:
+    """Defect codes of one command row (`D01:<target>` counts as D01)."""
+    return {item.split(":", 1)[0] for item in (defects or "").split(";") if item}
+
+
+def defect_targets(defects: str, code: str) -> set[str]:
+    """Targets named by `<code>:<target>` entries of one command row."""
+    return {item.split(":", 1)[1] for item in (defects or "").split(";") if item.startswith(code + ":")}
 
 
 @dataclass(frozen=True)
