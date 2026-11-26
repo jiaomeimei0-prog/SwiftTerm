@@ -30,7 +30,7 @@ import audit_invocations as I  # noqa: E402
 import audit_languages as L  # noqa: E402
 import audit_scripts as S  # noqa: E402
 import audit_security as X  # noqa: E402
-from audit_lib import FindingRegistry, GitRepo, apple_evidence, decode, defect_codes, findings_to_dicts, macos_ci_stats, minutes_between, summarise_ps_log, summarise_swift_log, swift_states, tree_equivalence, write_csv, write_json  # noqa: E402
+from audit_lib import FindingRegistry, GitRepo, apple_evidence, decode, defect_codes, findings_to_dicts, macos_ci_stats, minutes_between, summarise_build_log, summarise_ps_log, summarise_swift_log, swift_states, tree_equivalence, write_csv, write_json  # noqa: E402
 
 TABLE_ORDER = ["full", "mini", "extra", "llvm", "tex", "luatex", "sshStock"]
 BASELINE = {"full", "mini"}
@@ -469,6 +469,8 @@ def refresh_github_facts(args: argparse.Namespace, path: Path, refs: dict[str, s
             facts[key] = summarise_ps_log(Path(log).read_text(encoding="utf-8", errors="replace"))
     if args.swift_log and Path(args.swift_log).exists():
         facts["swift_log"] = summarise_swift_log(Path(args.swift_log).read_text(encoding="utf-8", errors="replace"))
+    if args.build_log and Path(args.build_log).exists():
+        facts["build_log"] = summarise_build_log(Path(args.build_log).read_text(encoding="utf-8", errors="replace"))
     if args.linux_log and Path(args.linux_log).exists():
         text = Path(args.linux_log).read_text(encoding="utf-8", errors="replace").splitlines()
         facts["linux_headless_log"] = {"path_note": "log of the linux-headless job (downloaded via MCP get_job_logs)", "evidence_lines": [ln.split("Z ", 1)[-1].strip() for ln in text if re.search(r"Executed \d+ tests, with \d+ failures|Test run with \d+ tests", ln)][-3:]}
@@ -696,6 +698,7 @@ def main() -> int:
     parser.add_argument("--ci-sha", default="")
     parser.add_argument("--swift-sha", default="", help="commit whose `Swift` workflow run supplies the macOS results (default: --ci-sha); its Sources/Tests/Package.swift trees are compared with --st-ref")
     parser.add_argument("--linux-log", default="")
+    parser.add_argument("--build-log", default="", help="job log of the macOS `build` job (xcodebuild MacTerminal/iOSTerminal, swift build, swift test)")
     parser.add_argument("--swift-log", default="", help="job log of `swiftpm-strict-concurrency` (toolchain, result and compiler warnings)")
     parser.add_argument("--windows-log", default="", help="job log of `Windows scripts` on the audited scripts (downloaded via MCP get_job_logs)")
     parser.add_argument("--windows-mutation-log", default="", help="job log of the same tests run against the pre-fix scripts (expected to fail)")

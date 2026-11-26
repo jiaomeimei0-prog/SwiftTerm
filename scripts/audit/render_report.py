@@ -351,6 +351,11 @@ def swift_run_lines(r) -> list[str]:
     if log:
         lines += [f"- Log job `swiftpm-strict-concurrency` (`swift build --target SwiftTerm -Xswiftc -strict-concurrency=complete`): image `{log['image']}`, macOS {log['macos']}, {log['xcode']}; kết quả `{log['result']}`; "
                   f"{len(log['warnings'])} cảnh báo biên dịch" + (": " + "; ".join(f"`{w['location']}`" for w in log["warnings"]) if log["warnings"] else "") + ".", ""]
+    build = r.ci_facts.get("build_log")
+    if build:
+        projects = ", ".join(f"`{name}.xcodeproj`" for name in build["hosthelpers_projects"]) or "không thấy dòng biên dịch"
+        lines += [f"- Log job `build` (`xcodebuild` + `swift build -v` + `swift test`): `** BUILD SUCCEEDED **` ×{build['xcodebuild_succeeded']} (MacTerminal, iOSTerminal), `** BUILD FAILED **` ×{build['xcodebuild_failed']}, `swift build` \"Build complete!\" ×{build['swift_build_complete']}; "
+                  f"`AppleTerminalView+HostHelpers.swift` có dòng `SwiftCompile` trong: {projects}; kết quả test: " + (" · ".join(f"`{line}`" for line in build["test_lines"]) or "chưa có (bước test chưa chạy xong khi thu thập)") + ".", ""]
     return lines
 
 
@@ -430,7 +435,7 @@ def section_tests(r) -> str:
         ["View/renderer iOS (UIKit)", "a-Shell iOS", f"workflow Swift: bước `Xcode iOS Build` {states['ios_build']}", "L3" if proven["ios_compiled"] else "—",
          "BIÊN DỊCH ĐẠT; chưa chạy" if proven["ios_compiled"] else "CHƯA CÓ BẰNG CHỨNG BIÊN DỊCH"],
         ["Test trên macOS (`swift test`)", "SwiftTerm", f"workflow Swift: bước `Run tests` {states['swift_test']}", "L2" if proven["mac_tested"] else "—", "ĐẠT (macOS)" if proven["mac_tested"] else "CHƯA CÓ BẰNG CHỨNG"],
-        [f"HostHelpers ({r.hostapi_script['declared']} API)", "a-Shell", ("bước `Xcode iOS Build` đạt (biên dịch cả phần `os(iOS)`); " if proven["ios_compiled"] else "grep tĩnh; chưa biên dịch iOS; ") + f"{len([a for a in r.hostapi if a['status'] == 'USED_BY_ASHELL_UNTESTED_IN_SWIFTTERM'])} API a-Shell dùng nhưng SwiftTerm không test", "L3" if proven["ios_compiled"] else "L0", "BIÊN DỊCH ĐẠT; hành vi chưa kiểm" if proven["ios_compiled"] else "CHƯA XÁC MINH BIÊN DỊCH"],
+        [f"HostHelpers ({r.hostapi_script['declared']} API)", "a-Shell", ("bước `Xcode iOS Build` đạt" + (", log có dòng `SwiftCompile … AppleTerminalView+HostHelpers.swift` trong `iOSTerminal.xcodeproj`" if "iOSTerminal" in (r.ci_facts.get("build_log") or {}).get("hosthelpers_projects", []) else "") + " (biên dịch cả phần `os(iOS)`); " if proven["ios_compiled"] else "grep tĩnh; chưa biên dịch iOS; ") + f"{len([a for a in r.hostapi if a['status'] == 'USED_BY_ASHELL_UNTESTED_IN_SWIFTTERM'])} API a-Shell dùng nhưng SwiftTerm không test", "L3" if proven["ios_compiled"] else "L0", "BIÊN DỊCH ĐẠT; hành vi chưa kiểm" if proven["ios_compiled"] else "CHƯA XÁC MINH BIÊN DỊCH"],
         [f"Định nghĩa catalogue ({r.catalogue_sizes[0]['fork']}/{r.catalogue_sizes[1]['fork']} lệnh)", "a-Shell", "plist hợp lệ; fork≡upstream≡pin; `ssh-stock-registration.sh` PASS ×3 nguồn", "L1", "ĐẠT (tĩnh)"],
         ["Chạy thật các lệnh", "Người dùng cuối", "Chưa có", "L4", "PENDING_USER_DEVICE"],
         ["Gắn Worker A–J (`worker-binding.sh`)", "a-Shell", "upstream PASS; " + ("; ".join(f"{x['ref']} FAIL" for x in failing) or "fork/pin PASS"), "L1", "KHÔNG ĐẠT (fork)" if failing else "ĐẠT"],
@@ -494,7 +499,7 @@ def section_limits(r) -> str:
         "## Phụ lục — tái lập", "", "```bash",
         "python3 -m unittest discover -s scripts/audit -v      # test đối chứng của bộ phát hiện",
         "python3 scripts/audit/run_audit.py --ashell /path/to/a-shell --out Docs/audit --run-tests --online --ci-sha <sha> --swift-sha <sha-có-kết-quả-macOS> \\",
-        "    --linux-log <log> --swift-log <log> --windows-log <log> --windows-mutation-log <log> \\",
+        "    --linux-log <log> --swift-log <log> --build-log <log> --windows-log <log> --windows-mutation-log <log> \\",
         "    --baseline-dir Docs/audit/data/baseline --baseline-ref <sha-trước-khi-sửa>",
         "```", "", "Dữ liệu thô: `Docs/audit/data/*.csv|json`; baseline trước khi sửa: `Docs/audit/data/baseline/`. Mọi bảng trong báo cáo này được sinh từ các file đó."])
 

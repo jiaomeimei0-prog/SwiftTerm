@@ -114,6 +114,31 @@ def summarise_swift_log(text: str) -> dict:
     return facts
 
 
+HOSTHELPERS_COMPILE_RE = re.compile(r"^SwiftCompile normal \w+ \S*AppleTerminalView\+HostHelpers\.swift \(in target 'SwiftTerm'")
+TEST_RESULT_RE = re.compile(r"Executed \d+ tests?, with \d+ failures|Test run with \d+ tests?")
+
+
+def summarise_build_log(text: str) -> dict:
+    """Facts from the log of the macOS `build` job: xcodebuild results, where HostHelpers was compiled, test totals."""
+    lines = [ANSI_RE.sub("", re.sub(r"^\d{4}-\d\d-\d\dT[\d:.]+Z ", "", raw)).rstrip() for raw in text.splitlines()]
+    facts: dict = {"xcodebuild_succeeded": 0, "xcodebuild_failed": 0, "swift_build_complete": 0, "hosthelpers_projects": [], "test_lines": []}
+    for index, line in enumerate(lines):
+        if line.startswith("** BUILD SUCCEEDED **"):
+            facts["xcodebuild_succeeded"] += 1
+        elif line.startswith("** BUILD FAILED **"):
+            facts["xcodebuild_failed"] += 1
+        elif line.startswith("Build complete!"):
+            facts["swift_build_complete"] += 1
+        elif HOSTHELPERS_COMPILE_RE.match(line) and index + 1 < len(lines):
+            project = re.search(r"/([\w+-]+)\.xcodeproj\s*$", lines[index + 1])
+            if project and project.group(1) not in facts["hosthelpers_projects"]:
+                facts["hosthelpers_projects"].append(project.group(1))
+        elif TEST_RESULT_RE.search(line):
+            facts["test_lines"].append(line.strip()[:140])
+    facts["test_lines"] = facts["test_lines"][-4:]
+    return facts
+
+
 SWIFT_TREE_PATHS = ("Package.swift", "Sources", "Tests", "TerminalApp")
 
 

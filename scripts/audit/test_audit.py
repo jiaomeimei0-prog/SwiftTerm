@@ -20,7 +20,7 @@ import openstep  # noqa: E402
 import render_report  # noqa: E402
 import run_audit  # noqa: E402
 from audit_lib import (FindingRegistry, GitRepo, TreeEntry, apple_evidence, classify, defect_codes, defect_targets, job_state, macos_ci_stats,  # noqa: E402
-                       minutes_between, summarise_ps_log, summarise_swift_log, swift_states, tree_equivalence)
+                       minutes_between, summarise_build_log, summarise_ps_log, summarise_swift_log, swift_states, tree_equivalence)
 
 
 def blob(path: str, mode: str = "100644", size: int = 10) -> TreeEntry:
@@ -454,6 +454,23 @@ class LogSummaryTests(unittest.TestCase):
         facts = summarise_swift_log(log)
         self.assertEqual((facts["image"], facts["macos"], facts["xcode"], facts["result"]), ("xcode-27-arm64", "27.0.1 (build 26A434)", "Xcode 27.1", "Build complete! (66.22 sec)"))
         self.assertEqual(facts["warnings"], [{"location": "Sources/SwiftTerm/Mac/MacTerminalView.swift:1388:16", "message": "immutable value 'terminal' was never used"}])
+
+
+    def test_build_log_records_results_hosthelpers_projects_and_tests(self) -> None:
+        compile_line = "SwiftCompile normal arm64 /Users/runner/work/SwiftTerm/SwiftTerm/Sources/SwiftTerm/Apple/AppleTerminalView+HostHelpers.swift (in target 'SwiftTerm' from project 'SwiftTerm')"
+        log = "\n".join([
+            "2026-11-26T17:10:46Z " + compile_line, "2026-11-26T17:10:46Z     cd /Users/runner/work/SwiftTerm/SwiftTerm/TerminalApp/MacTerminal.xcodeproj",
+            "2026-11-26T17:11:08Z ** BUILD SUCCEEDED **",
+            "2026-11-26T17:13:50Z " + compile_line, "2026-11-26T17:13:50Z     cd /Users/runner/work/SwiftTerm/SwiftTerm/TerminalApp/iOSTerminal.xcodeproj",
+            "2026-11-26T17:14:14Z ** BUILD SUCCEEDED **", "2026-11-26T17:20:00Z Build complete! (4.2s)",
+            "2026-11-26T17:30:00Z Executed 876 tests, with 0 failures (0 unexpected) in 95.1 (95.2) seconds",
+            "2026-11-26T17:31:00Z \u2714 Test run with 2291 tests in 140 suites passed after 60.0 seconds."])
+        facts = summarise_build_log(log)
+        self.assertEqual((facts["xcodebuild_succeeded"], facts["xcodebuild_failed"], facts["swift_build_complete"]), (2, 0, 1))
+        self.assertEqual(facts["hosthelpers_projects"], ["MacTerminal", "iOSTerminal"])
+        self.assertEqual(len(facts["test_lines"]), 2)
+        failed = summarise_build_log("2026-11-26T17:11:08Z ** BUILD FAILED **")
+        self.assertEqual((failed["xcodebuild_succeeded"], failed["xcodebuild_failed"], failed["hosthelpers_projects"]), (0, 1, []))
 
 
 class TreeEquivalenceTests(unittest.TestCase):
