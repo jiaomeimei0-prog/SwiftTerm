@@ -82,8 +82,8 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
-            echo 'Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID to deploy.'
-            exit 0
+            echo '::error::Set GitHub Actions secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID (repo Settings → Secrets). Deploy was previously skipped while the job still reported success.'
+            exit 1
           fi
           ./node_modules/.bin/wrangler --version
           ./node_modules/.bin/wrangler pages deploy site \
@@ -95,8 +95,8 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
-            echo "Skip domain attach — Cloudflare secrets not configured."
-            exit 0
+            echo '::error::Cloudflare secrets missing — cannot attach toolvip1.top'
+            exit 1
           fi
           # Keep apex wiring for toolvip1.top
           ./node_modules/.bin/wrangler pages domain add "$CUSTOM_DOMAIN" --project-name="$PAGES_PROJECT" \
@@ -104,3 +104,4 @@ jobs:
           ./node_modules/.bin/wrangler pages domain add "www.${CUSTOM_DOMAIN}" --project-name="$PAGES_PROJECT" \
             || echo "www domain already attached or DNS not ready."
           echo "After DNS settles: https://${CUSTOM_DOMAIN}/"
+          echo "Also open the pages.dev URL printed by wrangler deploy above."
