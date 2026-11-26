@@ -51,17 +51,37 @@ URL dạng: `https://swiftterm-web.<account>.pages.dev/`
 
 ### Custom domain: `toolvip1.top`
 
-Domain đã trỏ NS Cloudflare (`raegan` / `jarred`). Sau deploy Pages project `swiftterm-web`:
+Domain đã trỏ NS Cloudflare (`raegan` / `jarred`). **Bắt buộc** có GitHub Actions secrets
+`CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` trên repo — nếu thiếu, job deploy sẽ **fail**
+(không còn “success giả” bỏ qua deploy).
+
+Sau khi secrets có: chạy workflow **Cloudflare Pages (Web WASM)** → `workflow_dispatch`,
+hoặc push thay đổi `Web/**`.
 
 ```sh
 npx wrangler pages domain add toolvip1.top --project-name=swiftterm-web
 npx wrangler pages domain add www.toolvip1.top --project-name=swiftterm-web
 ```
 
-Hoặc Dashboard → Workers & Pages → `swiftterm-web` → **Custom domains** → Add `toolvip1.top` / `www.toolvip1.top` (proxied).  
-Workflow CI cũng gọi `pages domain add` khi đã có secrets.
+Dashboard → Workers & Pages → `swiftterm-web` → **Custom domains** → Add `toolvip1.top` /
+`www.toolvip1.top` (proxied orange cloud).
 
-Production: **https://toolvip1.top/**
+**DNS lỗi thường gặp:** apex chỉ còn AAAA `100::` (blackhole) → điện thoại/PC không vào được.
+Xóa bản ghi `100::`, để Pages tạo lại CNAME/AAAA đúng, hoặc thêm Custom domain trong Pages
+cho Cloudflare tự ghi DNS.
+
+Production: **https://toolvip1.top/** (sau khi DNS xanh) · tạm thời dùng `*.pages.dev` từ log deploy.
+
+### Quick Tunnel từ máy Windows (vào bằng điện thoại ngay)
+
+Không cần sửa DNS `toolvip1.top`. Trên PC (đã clone repo + chạy được local):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\Documents\SwiftTerm\scripts\serve-via-cloudflare-tunnel.ps1"
+```
+
+Script mở `http.server` + `cloudflared tunnel` và in URL `https://….trycloudflare.com` —
+mở URL đó trên điện thoại (4G cũng được).
 
 ---
 
