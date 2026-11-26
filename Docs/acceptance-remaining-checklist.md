@@ -43,3 +43,9 @@ Body có `SwiftTerm WASM` — không 1033 / Hello World / Sign in.
 
 - **Không** gọi hoàn thành tuyệt đối (158 + domain bền + Pages) cho đến khi checklist trên đóng và bạn đối chiếu.
 - Domain từng hiện SwiftTerm khi tunnel chạy; Error 1033 = tunnel đã dừng — không phải lỗi code repo.
+
+## Browser recheck (agent) — 2026-11-26 21:39 Asia/Bangkok
+
+**FAIL** public `https://toolvip1.top/`: Chrome `ERR_CONNECTION_CLOSED` (not SwiftTerm). Evidence: `Docs/evidence/toolvip1-top-browser-fail-2026-11-26.md`.
+
+PC must re-run `scripts/windows-bringup-toolvip1.ps1` and keep both windows open.
