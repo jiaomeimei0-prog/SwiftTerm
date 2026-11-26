@@ -13,7 +13,7 @@ param(
     [Parameter(Mandatory = $true)]
     [string]$Hostname,
     [string]$TunnelName = "swiftterm-web",
-    [int]$Port = 8765
+    [int]$Port = 0
 )
 
 $ErrorActionPreference = "Stop"
@@ -35,7 +35,7 @@ function Refresh-Path {
     $env:Path = $machine + ";" + $user
 }
 
-# cloudflared writes WRN/INF to stderr; with $ErrorActionPreference=Stop + 2>&1 that becomes a terminating error on PS 5.1.
+# cloudflared writes WRN/INF to stderr; with ErrorAction Stop + 2>&1 that becomes terminating on PS 5.1.
 function Invoke-Cloudflared {
     param([Parameter(ValueFromRemainingArguments = $true)][string[]]$CfArgs)
     $prev = $ErrorActionPreference
@@ -48,6 +48,40 @@ function Invoke-Cloudflared {
     }
     $text = ($out | ForEach-Object { "$_" }) -join "`n"
     return @{ ExitCode = $code; Text = $text; Lines = @($out | ForEach-Object { "$_" }) }
+}
+
+function Test-CanBindPort {
+    param([int]$TestPort)
+    $listener = $null
+    try {
+        $listener = New-Object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Loopback, $TestPort)
+        $listener.Start()
+        $listener.Stop()
+        return $true
+    } catch {
+        return $false
+    } finally {
+        if ($listener) {
+            try { $listener.Stop() } catch { }
+        }
+    }
+}
+
+function Select-ListenPort {
+    param([int]$Preferred)
+    $candidates = @()
+    if ($Preferred -gt 0) { $candidates += $Preferred }
+    $candidates += 8787, 8888, 18080, 19000, 28080, 3000, 8080, 8765
+    $seen = @{}
+    foreach ($p in $candidates) {
+        if ($seen.ContainsKey($p)) { continue }
+        $seen[$p] = $true
+        if (Test-CanBindPort -TestPort $p) {
+            return $p
+        }
+        Write-Host "Port $p not bindable (in use or WinError 10013 excluded) - trying next..."
+    }
+    throw "No bindable local port found. Run as Admin or free a port. Check: netsh interface ipv4 show excludedportrange protocol=tcp"
 }
 
 Refresh-Path
@@ -69,6 +103,10 @@ if (-not (Test-Path -LiteralPath (Join-Path $configDir "cert.pem"))) {
     throw "Missing $configDir\cert.pem - run: cloudflared tunnel login"
 }
 
+$Port = Select-ListenPort -Preferred $Port
+Write-Host "Using local origin port: $Port"
+"selected_port=$Port" | Add-Content -LiteralPath $Log
+
 # Create tunnel if missing
 $list = Invoke-Cloudflared @("tunnel", "list")
 $list.Text | Add-Content -LiteralPath $Log
@@ -76,11 +114,8 @@ if ($list.Text -notmatch [regex]::Escape($TunnelName)) {
     Write-Host "Creating tunnel $TunnelName ..."
     $created = Invoke-Cloudflared @("tunnel", "create", $TunnelName)
     $created.Text | Add-Content -LiteralPath $Log
-    if ($created.ExitCode -ne 0 -and $created.ExitCode -ne $null) {
-        # exit code may be null on some hosts; only fail on clear error text
-        if ($created.Text -match '(?i)\berror\b|\bfatal\b|\bfailed\b') {
-            throw "cloudflared tunnel create failed:`n$($created.Text)"
-        }
+    if ($created.Text -match '(?i)\bfatal\b' -and $created.Text -notmatch '(?i)already') {
+        throw "cloudflared tunnel create failed:`n$($created.Text)"
     }
     "created tunnel $TunnelName" | Add-Content -LiteralPath $Log
 } else {
@@ -91,13 +126,11 @@ if ($list.Text -notmatch [regex]::Escape($TunnelName)) {
 Write-Host "Routing DNS $Hostname -> $TunnelName ..."
 $route = Invoke-Cloudflared @("tunnel", "route", "dns", $TunnelName, $Hostname)
 $route.Text | Add-Content -LiteralPath $Log
-# route dns is often idempotent; ignore "already exists" style messages
 if ($route.Text -match '(?i)\bfatal\b' -and $route.Text -notmatch '(?i)already exists') {
     throw "cloudflared tunnel route dns failed:`n$($route.Text)"
 }
 "routed dns $Hostname -> $TunnelName" | Add-Content -LiteralPath $Log
 
-# Prefer credentials JSON whose name matches tunnel list UUID for TunnelName
 $tunnelId = $null
 $list2 = Invoke-Cloudflared @("tunnel", "list")
 foreach ($line in $list2.Lines) {
@@ -132,8 +165,8 @@ $yaml = @(
     "  - service: http_status:404"
 ) -join "`r`n"
 [System.IO.File]::WriteAllText($configPath, $yaml + "`r`n")
-"wrote $configPath tunnelId=$tunnelId" | Add-Content -LiteralPath $Log
-Write-Host "Wrote $configPath"
+"wrote $configPath tunnelId=$tunnelId port=$Port" | Add-Content -LiteralPath $Log
+Write-Host "Wrote $configPath (origin http://127.0.0.1:$Port)"
 
 $pyPath = $py.Source
 $serverCmd = "Set-Location -LiteralPath '$Site'; `$Host.UI.RawUI.WindowTitle = 'SwiftTerm-HTTP-$Port-KEEP-OPEN'; Write-Host 'Serving http://127.0.0.1:$Port - keep this window open.'; & '$pyPath' -m http.server $Port --bind 127.0.0.1"
@@ -141,7 +174,7 @@ Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit","-ExecutionPoli
 
 Write-Host "Waiting for local origin http://127.0.0.1:$Port/ ..."
 $ready = $false
-for ($i = 0; $i -lt 20; $i++) {
+for ($i = 0; $i -lt 30; $i++) {
     Start-Sleep -Milliseconds 500
     try {
         $r = Invoke-WebRequest -Uri "http://127.0.0.1:$Port/" -UseBasicParsing -TimeoutSec 2
@@ -149,24 +182,21 @@ for ($i = 0; $i -lt 20; $i++) {
     } catch { }
 }
 if (-not $ready) {
-    throw "Local origin http://127.0.0.1:$Port/ is not healthy. Check the SwiftTerm-HTTP window (Python missing? site path wrong?)."
+    throw "Local origin http://127.0.0.1:$Port/ is not healthy after start. See SwiftTerm-HTTP window (WinError 10013 = port blocked; script should have picked another port)."
 }
-Write-Host "Local origin OK (HTTP 200)."
-"local_origin http=200" | Add-Content -LiteralPath $Log
+Write-Host "Local origin OK (HTTP 200 on port $Port)."
+"local_origin http=200 port=$Port" | Add-Content -LiteralPath $Log
 
-$tunnelCmd = "`$m=[System.Environment]::GetEnvironmentVariable('Path','Machine'); `$u=[System.Environment]::GetEnvironmentVariable('Path','User'); if (`$null -eq `$m){`$m=''}; if (`$null -eq `$u){`$u=''}; `$env:Path=`$m+';'+`$u; `$Host.UI.RawUI.WindowTitle = 'SwiftTerm-NamedTunnel-KEEP-OPEN'; Write-Host 'Named tunnel https://$Hostname - keep this window open.'; & cloudflared tunnel --config '$configPath' run '$TunnelName'"
+$tunnelCmd = "`$m=[System.Environment]::GetEnvironmentVariable('Path','Machine'); `$u=[System.Environment]::GetEnvironmentVariable('Path','User'); if (`$null -eq `$m){`$m=''}; if (`$null -eq `$u){`$u=''}; `$env:Path=`$m+';'+`$u; `$Host.UI.RawUI.WindowTitle = 'SwiftTerm-NamedTunnel-KEEP-OPEN'; Write-Host 'Named tunnel https://$Hostname -> 127.0.0.1:$Port - keep open.'; & cloudflared tunnel --config '$configPath' run '$TunnelName'"
 Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit","-ExecutionPolicy","Bypass","-Command",$tunnelCmd | Out-Null
 
 Write-Host ""
 Write-Host "Started HTTP + named tunnel windows (stay open)."
 Write-Host "Open: https://$Hostname/"
 Write-Host ""
-Write-Host "IMPORTANT - two phone symptoms:"
-Write-Host "  1) Login / Sign in page  => Cloudflare Access still ON. Zero Trust > Access > Applications > DELETE app for $Hostname"
-Write-Host "  2) Unable to connect to origin => NamedTunnel window not connected OR local HTTP died. Keep BOTH windows open."
-Write-Host ""
-Write-Host "On this PC verify origin:"
-Write-Host "  Invoke-WebRequest http://127.0.0.1:$Port/ -UseBasicParsing | Select StatusCode"
+Write-Host "IMPORTANT:"
+Write-Host "  Login page on phone     => Zero Trust > Access > DELETE app for $Hostname"
+Write-Host "  Unable to connect origin => HTTP window must stay running (no WinError 10013)"
+Write-Host "Verify: Invoke-WebRequest http://127.0.0.1:$Port/ -UseBasicParsing | Select StatusCode"
 Write-Host "Log: $Log"
-Write-Host "cloudflared outdated WRN is OK."
 Read-Host "Press Enter to leave this launcher idle" | Out-Null
