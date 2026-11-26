@@ -5,85 +5,73 @@
 #   CLOUDFLARE_API_TOKEN   — Pages:Edit + Account:Read (custom domains need Zones:Edit)
 #   CLOUDFLARE_ACCOUNT_ID  — from Cloudflare dashboard URL / Account ID
 #
-# Optional repository variables:
-#   CLOUDFLARE_PAGES_PROJECT  — Pages project name (default: swiftterm-web)
-#   CLOUDFLARE_CUSTOM_DOMAIN   — apex/custom host (default: toolvip1.top)
-#
 # Security notes (Sonar githubactions):
-# - Prefer npm ci + lockfile over bare npx / unpinned installs (S6505 / S8543)
+# - Prefer npm ci + lockfile + local binary over bare npx / unpinned installs (S6505 / S8543)
 # - Pass --ignore-scripts on npm install/ci (S6505)
 # - Force HTTPS on curl downloads (S6506)
+# - Do not reference secrets context in step if: expressions (use env checks in-script)
 
-name: Cloudflare Pages (Web)
+name: Cloudflare Pages (Web WASM)
 
 on:
   workflow_dispatch:
   push:
     branches: [main]
     paths:
-      - "Web/**"
-      - "Sources/**"
-      - "Package.swift"
-      - ".github/workflows/cloudflare-pages-web.yml"
-      - "scripts/prepare-cloudflare-web.sh"
-
-concurrency:
-  group: cloudflare-pages-web-${{ github.ref }}
-  cancel-in-progress: true
+      - 'Web/**'
+      - 'scripts/build-wasm.sh'
+      - 'scripts/prepare-cloudflare-web.sh'
+      - 'scripts/wasm-toolchain.env'
+      - '.github/workflows/cloudflare-pages-web.yml'
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
     env:
-      PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT || 'swiftterm-web' }}
-      CUSTOM_DOMAIN: ${{ vars.CLOUDFLARE_CUSTOM_DOMAIN || 'toolvip1.top' }}
+      PAGES_PROJECT: swiftterm-web
+      CUSTOM_DOMAIN: toolvip1.top
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '22'
           cache: npm
           cache-dependency-path: |
             Web/package-lock.json
             Web/cloudflare/package-lock.json
 
-      - name: Install wasm-pack
+      - name: Install pinned Swift compiler and WASM SDK
+        shell: bash
         run: |
           set -euo pipefail
-          curl --proto '=https' --tlsv1.2 --retry 3 --retry-delay 2 --fail --silent --show-error \
-            -L "https://github.com/rustwasm/wasm-pack/releases/download/v0.13.1/wasm-pack-v0.13.1-x86_64-unknown-linux-musl.tar.gz" \
-            -o /tmp/wasm-pack.tgz
-          echo "3d588d8e7edb368d82a0855b2926c69b9c1b826dd5811c59c6798bbe934ed391  /tmp/wasm-pack.tgz" | sha256sum -c -
-          tar -xzf /tmp/wasm-pack.tgz -C /tmp
-          sudo mv /tmp/wasm-pack-v0.13.1-x86_64-unknown-linux-musl/wasm-pack /usr/local/bin/wasm-pack
-          wasm-pack --version
+          source scripts/wasm-toolchain.env
+          sudo apt-get update
+          sudo apt-get install -y libcurl4-openssl-dev libedit2 libxml2-dev libncurses-dev libsqlite3-dev libz3-dev libpython3.12
+          curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
+            "https://download.swift.org/swift-6.4.0-release/ubuntu2404/$SWIFTTERM_TOOLCHAIN_ID/$SWIFTTERM_TOOLCHAIN_ID-ubuntu24.04.tar.gz" \
+            -o "$RUNNER_TEMP/swift.tar.gz"
+          mkdir -p "$RUNNER_TEMP/swift"
+          tar -xzf "$RUNNER_TEMP/swift.tar.gz" --strip-components=1 -C "$RUNNER_TEMP/swift"
+          echo "$RUNNER_TEMP/swift/usr/bin" >> "$GITHUB_PATH"
+          echo "SWIFTTERM_SWIFT=$RUNNER_TEMP/swift/usr/bin/swift" >> "$GITHUB_ENV"
+          curl --proto '=https' --tlsv1.2 --fail --location --retry 3 \
+            "https://download.swift.org/swift-6.4.0-release/wasm-sdk/$SWIFTTERM_TOOLCHAIN_ID/${SWIFTTERM_TOOLCHAIN_ID}_wasm.artifactbundle.tar.gz" \
+            -o "$RUNNER_TEMP/wasm-sdk.tar.gz"
+          "$RUNNER_TEMP/swift/usr/bin/swift" sdk install "$RUNNER_TEMP/wasm-sdk.tar.gz"
 
-      - name: Install Swift (swiftlang.org)
-        run: |
-          set -euo pipefail
-          curl --proto '=https' --tlsv1.2 --retry 3 --retry-delay 2 --fail --silent --show-error \
-            -L "https://download.swift.org/swiftly/linux/swiftly-$(uname -m).tar.gz" \
-            -o /tmp/swiftly.tar.gz
-          tar -xzf /tmp/swiftly.tar.gz -C /tmp
-          /tmp/swiftly init --quiet-shell-followup --skip-install
-          . "$HOME/.local/share/swiftly/env.sh"
-          hash -r
-          swiftly install --assume-yes latest
-          echo "$HOME/.local/share/swiftly/bin" >> "$GITHUB_PATH"
-          swift --version
-
-      - name: Install Web JS deps + build WASM
+      - name: Build embedded browser reactor
         run: |
           set -euo pipefail
           npm ci --prefix Web --ignore-scripts
-          bash Web/build-wasm.sh
+          scripts/build-wasm.sh embedded --browser --release
 
-      - name: Stage Cloudflare site (embedded-fonts)
-        run: bash scripts/prepare-cloudflare-web.sh --fonts embedded
+      - name: Prepare Cloudflare site
+        run: bash scripts/prepare-cloudflare-web.sh
 
       - name: Install pinned wrangler (local binary)
         working-directory: Web/cloudflare
@@ -91,33 +79,28 @@ jobs:
 
       - name: Deploy to Cloudflare Pages
         working-directory: Web/cloudflare
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
           if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
-            echo "::error::Missing CLOUDFLARE_API_TOKEN and/or CLOUDFLARE_ACCOUNT_ID repository secrets."
-            echo "Add them under Settings → Secrets and variables → Actions, then re-run."
-            exit 1
+            echo 'Set CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID to deploy.'
+            exit 0
           fi
           ./node_modules/.bin/wrangler --version
-          ./node_modules/.bin/wrangler pages project create "$PAGES_PROJECT" --production-branch=main 2>/dev/null || true
-          ./node_modules/.bin/wrangler pages deploy ./site \
+          ./node_modules/.bin/wrangler pages deploy site \
             --project-name="$PAGES_PROJECT" \
-            --branch=main \
             --commit-dirty=true
 
       - name: Attach custom domain toolvip1.top
-        if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ACCOUNT_ID != '' }}
         working-directory: Web/cloudflare
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           set -euo pipefail
-          # Keep apex wiring for toolvip1.top (override via CLOUDFLARE_CUSTOM_DOMAIN).
-          ./node_modules/.bin/wrangler pages project list
-          ./node_modules/.bin/wrangler pages domain add "$CUSTOM_DOMAIN" --project-name="$PAGES_PROJECT" 2>/dev/null \
+          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
+            echo "Skip domain attach — Cloudflare secrets not configured."
+            exit 0
+          fi
+          # Keep apex wiring for toolvip1.top
+          ./node_modules/.bin/wrangler pages domain add "$CUSTOM_DOMAIN" --project-name="$PAGES_PROJECT" \
             || echo "Domain already attached or DNS not ready — check Cloudflare Pages → Custom domains."
-          echo "After DNS (Cloudflare NS): CNAME/apex for ${CUSTOM_DOMAIN} → ${PAGES_PROJECT}.pages.dev"
+          ./node_modules/.bin/wrangler pages domain add "www.${CUSTOM_DOMAIN}" --project-name="$PAGES_PROJECT" \
+            || echo "www domain already attached or DNS not ready."
+          echo "After DNS settles: https://${CUSTOM_DOMAIN}/"
