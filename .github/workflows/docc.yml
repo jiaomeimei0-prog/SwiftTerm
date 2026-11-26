@@ -18,11 +18,40 @@ concurrency:
 jobs:
   build:
     runs-on: macos-latest
+    outputs:
+      pages_enabled: ${{ steps.pages.outputs.enabled }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Check GitHub Pages
+        id: pages
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          code="$(curl -sS -o /tmp/pages-response.json -w '%{http_code}' \
+            -H "Authorization: Bearer ${GH_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/${{ github.repository }}/pages" || true)"
+          if [ "${code}" = "200" ]; then
+            echo "enabled=true" >> "${GITHUB_OUTPUT}"
+            echo "GitHub Pages is configured; DocC will be uploaded and deployed."
+          else
+            echo "enabled=false" >> "${GITHUB_OUTPUT}"
+            echo "GitHub Pages is not configured (HTTP ${code})."
+            echo "DocC will still be generated; Pages configure/upload/deploy will be skipped."
+            if [ -f /tmp/pages-response.json ]; then
+              head -c 500 /tmp/pages-response.json || true
+              echo
+            fi
+          fi
+
       - name: Configure Pages
+        if: steps.pages.outputs.enabled == 'true'
         uses: actions/configure-pages@v5
+
       - name: Generate DocC
         env:
           SWIFTTERM_DOCC: "1"
@@ -33,6 +62,7 @@ jobs:
             --output-path ./docs \
             --transform-for-static-hosting \
             --hosting-base-path "${{ github.event.repository.name }}"
+
       - name: Add redirect index.html
         run: |
           docc_root="./docs"
@@ -57,13 +87,16 @@ jobs:
             </body>
           </html>
           EOF
+
       - name: Upload Pages artifact
+        if: steps.pages.outputs.enabled == 'true'
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./docs
 
   deploy:
     needs: build
+    if: needs.build.outputs.pages_enabled == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
