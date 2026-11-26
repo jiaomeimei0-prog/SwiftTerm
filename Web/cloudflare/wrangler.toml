@@ -1,9 +1,8 @@
 # Cloudflare Pages — SwiftTerm WASM Canvas demo (embedded)
-# Production host: https://toolvip1.top
+# Requested host: https://tooltop1.vip  (must be registered + on Cloudflare DNS)
+# Existing zone:  https://toolvip1.top  (disable Cloudflare Access for public demo)
 # Deploy:
-#   npx wrangler pages deploy site --project-name=swiftterm-web
-#   npx wrangler pages domain add toolvip1.top --project-name=swiftterm-web
-#   npx wrangler pages domain add www.toolvip1.top --project-name=swiftterm-web
+#   bash scripts/cloudflare-connect-domain.sh tooltop1.vip toolvip1.top
 #
 # Required env (GitHub Actions secrets — do not paste into chat):
 #   CLOUDFLARE_API_TOKEN   — Account → Cloudflare Pages → Edit

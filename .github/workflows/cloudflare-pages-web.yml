@@ -1,5 +1,6 @@
 # Deploy the SwiftTerm WASM terminal (Web/) to Cloudflare Pages.
-# Hosting target: toolvip1.top (add CNAME → <project>.pages.dev after first deploy).
+# Hosting targets: tooltop1.vip (requested) + toolvip1.top (existing CF zone).
+# tooltop1.vip must be registered + DNS on Cloudflare before attach succeeds.
 #
 # Required GitHub repository secrets (Settings → Secrets and variables → Actions):
 #   CLOUDFLARE_API_TOKEN   — Pages:Edit + Account:Read (custom domains need Zones:Edit)
@@ -31,7 +32,8 @@ jobs:
       contents: read
     env:
       PAGES_PROJECT: swiftterm-web
-      CUSTOM_DOMAIN: toolvip1.top
+      CUSTOM_DOMAIN: tooltop1.vip
+      LEGACY_DOMAIN: toolvip1.top
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
@@ -90,18 +92,24 @@ jobs:
             --project-name="$PAGES_PROJECT" \
             --commit-dirty=true
 
-      - name: Attach custom domain toolvip1.top
+      - name: Attach custom domains (tooltop1.vip + toolvip1.top)
         working-directory: Web/cloudflare
         run: |
           set -euo pipefail
           if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
-            echo '::error::Cloudflare secrets missing — cannot attach toolvip1.top'
+            echo '::error::Cloudflare secrets missing — cannot attach custom domains'
             exit 1
           fi
-          # Keep apex wiring for toolvip1.top
-          ./node_modules/.bin/wrangler pages domain add "$CUSTOM_DOMAIN" --project-name="$PAGES_PROJECT" \
-            || echo "Domain already attached or DNS not ready — check Cloudflare Pages → Custom domains."
-          ./node_modules/.bin/wrangler pages domain add "www.${CUSTOM_DOMAIN}" --project-name="$PAGES_PROJECT" \
-            || echo "www domain already attached or DNS not ready."
-          echo "After DNS settles: https://${CUSTOM_DOMAIN}/"
+          attach() {
+            local host="$1"
+            echo "--- pages domain add: $host ---"
+            ./node_modules/.bin/wrangler pages domain add "$host" --project-name="$PAGES_PROJECT" \
+              || echo "WARN: $host not attached (unregistered, wrong zone, or already present)."
+          }
+          attach "$CUSTOM_DOMAIN"
+          attach "www.${CUSTOM_DOMAIN}"
+          attach "$LEGACY_DOMAIN"
+          attach "www.${LEGACY_DOMAIN}"
+          echo "After DNS settles: https://${CUSTOM_DOMAIN}/ and https://${LEGACY_DOMAIN}/"
+          echo "If HTTPS returns Cloudflare Access login, disable Access for that hostname."
           echo "Also open the pages.dev URL printed by wrangler deploy above."

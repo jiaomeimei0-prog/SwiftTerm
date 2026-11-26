@@ -49,28 +49,31 @@ Site output: `Web/cloudflare/site/` · config: `Web/cloudflare/wrangler.toml`.
 
 URL dạng: `https://swiftterm-web.<account>.pages.dev/`
 
-### Custom domain: `toolvip1.top`
+### Custom domain: `tooltop1.vip` (yêu cầu) + `toolvip1.top` (zone sẵn)
 
-Domain đã trỏ NS Cloudflare (`raegan` / `jarred`). **Bắt buộc** có GitHub Actions secrets
-`CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` trên repo — nếu thiếu, job deploy sẽ **fail**
-(không còn “success giả” bỏ qua deploy).
+**Trạng thái lệnh thật (2026-11-26):** xem `Docs/domain-tooltop1-vip-blocker.md`.
 
-Sau khi secrets có: chạy workflow **Cloudflare Pages (Web WASM)** → `workflow_dispatch`,
-hoặc push thay đổi `Web/**`.
+| Domain | Hiện trạng |
+|--------|------------|
+| `tooltop1.vip` | **NXDOMAIN / RDAP 404** — chưa đăng ký; phải mua + trỏ NS Cloudflare trước |
+| `toolvip1.top` | NS Cloudflare OK nhưng **Cloudflare Access** chặn (302 Sign-in) |
+
+**Bắt buộc** GitHub Actions secrets `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` —
+nếu thiếu, job deploy **fail** (không còn success giả).
+
+Sau khi secrets có + domain DNS sẵn:
 
 ```sh
-npx wrangler pages domain add toolvip1.top --project-name=swiftterm-web
-npx wrangler pages domain add www.toolvip1.top --project-name=swiftterm-web
+bash scripts/cloudflare-connect-domain.sh tooltop1.vip toolvip1.top www.toolvip1.top
 ```
 
-Dashboard → Workers & Pages → `swiftterm-web` → **Custom domains** → Add `toolvip1.top` /
-`www.toolvip1.top` (proxied orange cloud).
+Hoặc workflow **Cloudflare Pages (Web WASM)** → `workflow_dispatch`.
 
-**DNS lỗi thường gặp:** apex chỉ còn AAAA `100::` (blackhole) → điện thoại/PC không vào được.
-Xóa bản ghi `100::`, để Pages tạo lại CNAME/AAAA đúng, hoặc thêm Custom domain trong Pages
-cho Cloudflare tự ghi DNS.
+**Access:** Zero Trust → Applications → tắt bảo vệ hostname demo (public WASM).
 
-Production: **https://toolvip1.top/** (sau khi DNS xanh) · tạm thời dùng `*.pages.dev` từ log deploy.
+**DNS lỗi thường gặp:** apex chỉ còn AAAA `100::` (blackhole) → xóa `100::`, để Pages ghi lại.
+
+Tạm thời (đã chứng minh): Quick Tunnel `*.trycloudflare.com` — không thay custom domain.
 
 ### Quick Tunnel từ máy Windows (vào bằng điện thoại ngay)
 

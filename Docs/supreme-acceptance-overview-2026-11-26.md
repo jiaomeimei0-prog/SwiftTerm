@@ -82,6 +82,15 @@ sh scripts/verify_command_catalogue_158.sh
 | `Docs/evidence/cloudflare-quick-tunnel-evidence.md` | curl + tunnel CF |
 | `Docs/e2e-acceptance-results.md` | Host gate SwiftTerm lõi |
 
+## Domain custom (tooltop1.vip) — CHƯA ĐẠT
+
+Lệnh thật: `Docs/evidence/domain-tooltop1-vip-probe.md` · blocker: `Docs/domain-tooltop1-vip-blocker.md`
+
+- `tooltop1.vip` = NXDOMAIN / RDAP 404 (chưa đăng ký)
+- `toolvip1.top` = Cloudflare Access 302 (không phải WASM)
+- GitHub `CLOUDFLARE_*` secrets trống → Pages deploy fail
+- Wiring đã sẵn: workflow + `scripts/cloudflare-connect-domain.sh` + named-tunnel PS1
+
 ## Cam kết chống báo cáo giả
 
 - Không ghi `PASS_DEVICE` cho 158 khi chưa có output từ máy/thiết bị của bạn.
