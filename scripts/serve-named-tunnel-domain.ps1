@@ -1,4 +1,4 @@
-﻿# Named Cloudflare Tunnel -> custom domain (Windows, windows stay open).
+﻿-# Named Cloudflare Tunnel -> custom domain (Windows, windows stay open).
 # ASCII-only for Windows PowerShell 5.1 encoding safety.
 #
 # Prerequisites:
@@ -139,16 +139,34 @@ $pyPath = $py.Source
 $serverCmd = "Set-Location -LiteralPath '$Site'; `$Host.UI.RawUI.WindowTitle = 'SwiftTerm-HTTP-$Port-KEEP-OPEN'; Write-Host 'Serving http://127.0.0.1:$Port - keep this window open.'; & '$pyPath' -m http.server $Port --bind 127.0.0.1"
 Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit","-ExecutionPolicy","Bypass","-Command",$serverCmd | Out-Null
 
+Write-Host "Waiting for local origin http://127.0.0.1:$Port/ ..."
+$ready = $false
+for ($i = 0; $i -lt 20; $i++) {
+    Start-Sleep -Milliseconds 500
+    try {
+        $r = Invoke-WebRequest -Uri "http://127.0.0.1:$Port/" -UseBasicParsing -TimeoutSec 2
+        if ($r.StatusCode -eq 200) { $ready = $true; break }
+    } catch { }
+}
+if (-not $ready) {
+    throw "Local origin http://127.0.0.1:$Port/ is not healthy. Check the SwiftTerm-HTTP window (Python missing? site path wrong?)."
+}
+Write-Host "Local origin OK (HTTP 200)."
+"local_origin http=200" | Add-Content -LiteralPath $Log
+
 $tunnelCmd = "`$m=[System.Environment]::GetEnvironmentVariable('Path','Machine'); `$u=[System.Environment]::GetEnvironmentVariable('Path','User'); if (`$null -eq `$m){`$m=''}; if (`$null -eq `$u){`$u=''}; `$env:Path=`$m+';'+`$u; `$Host.UI.RawUI.WindowTitle = 'SwiftTerm-NamedTunnel-KEEP-OPEN'; Write-Host 'Named tunnel https://$Hostname - keep this window open.'; & cloudflared tunnel --config '$configPath' run '$TunnelName'"
 Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit","-ExecutionPolicy","Bypass","-Command",$tunnelCmd | Out-Null
 
 Write-Host ""
 Write-Host "Started HTTP + named tunnel windows (stay open)."
 Write-Host "Open: https://$Hostname/"
-Write-Host "If Access login appears, disable Cloudflare Access for $Hostname in Zero Trust."
-Write-Host "If phone shows Unable to connect to origin, wait 10s then refresh; keep both windows open."
-Write-Host "Log: $Log"
 Write-Host ""
-Write-Host "cert.pem already exists - that is OK. Do NOT delete it unless you need to re-login."
-Write-Host "cloudflared outdated WRN is OK - ignored by this script."
+Write-Host "IMPORTANT - two phone symptoms:"
+Write-Host "  1) Login / Sign in page  => Cloudflare Access still ON. Zero Trust > Access > Applications > DELETE app for $Hostname"
+Write-Host "  2) Unable to connect to origin => NamedTunnel window not connected OR local HTTP died. Keep BOTH windows open."
+Write-Host ""
+Write-Host "On this PC verify origin:"
+Write-Host "  Invoke-WebRequest http://127.0.0.1:$Port/ -UseBasicParsing | Select StatusCode"
+Write-Host "Log: $Log"
+Write-Host "cloudflared outdated WRN is OK."
 Read-Host "Press Enter to leave this launcher idle" | Out-Null
