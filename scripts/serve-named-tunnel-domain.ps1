@@ -34,6 +34,22 @@ function Refresh-Path {
     if ($null -eq $user) { $user = "" }
     $env:Path = $machine + ";" + $user
 }
+
+# cloudflared writes WRN/INF to stderr; with $ErrorActionPreference=Stop + 2>&1 that becomes a terminating error on PS 5.1.
+function Invoke-Cloudflared {
+    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$CfArgs)
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try {
+        $out = & cloudflared @CfArgs 2>&1
+        $code = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $prev
+    }
+    $text = ($out | ForEach-Object { "$_" }) -join "`n"
+    return @{ ExitCode = $code; Text = $text; Lines = @($out | ForEach-Object { "$_" }) }
+}
+
 Refresh-Path
 if (-not (Get-Command cloudflared -ErrorAction SilentlyContinue)) {
     Write-Host "Installing cloudflared (winget)..."
@@ -54,10 +70,18 @@ if (-not (Test-Path -LiteralPath (Join-Path $configDir "cert.pem"))) {
 }
 
 # Create tunnel if missing
-$listOut = & cloudflared tunnel list 2>&1 | Out-String
-if ($listOut -notmatch [regex]::Escape($TunnelName)) {
+$list = Invoke-Cloudflared @("tunnel", "list")
+$list.Text | Add-Content -LiteralPath $Log
+if ($list.Text -notmatch [regex]::Escape($TunnelName)) {
     Write-Host "Creating tunnel $TunnelName ..."
-    & cloudflared tunnel create $TunnelName
+    $created = Invoke-Cloudflared @("tunnel", "create", $TunnelName)
+    $created.Text | Add-Content -LiteralPath $Log
+    if ($created.ExitCode -ne 0 -and $created.ExitCode -ne $null) {
+        # exit code may be null on some hosts; only fail on clear error text
+        if ($created.Text -match '(?i)\berror\b|\bfatal\b|\bfailed\b') {
+            throw "cloudflared tunnel create failed:`n$($created.Text)"
+        }
+    }
     "created tunnel $TunnelName" | Add-Content -LiteralPath $Log
 } else {
     Write-Host "Tunnel exists: $TunnelName"
@@ -65,13 +89,18 @@ if ($listOut -notmatch [regex]::Escape($TunnelName)) {
 }
 
 Write-Host "Routing DNS $Hostname -> $TunnelName ..."
-& cloudflared tunnel route dns $TunnelName $Hostname
+$route = Invoke-Cloudflared @("tunnel", "route", "dns", $TunnelName, $Hostname)
+$route.Text | Add-Content -LiteralPath $Log
+# route dns is often idempotent; ignore "already exists" style messages
+if ($route.Text -match '(?i)\bfatal\b' -and $route.Text -notmatch '(?i)already exists') {
+    throw "cloudflared tunnel route dns failed:`n$($route.Text)"
+}
 "routed dns $Hostname -> $TunnelName" | Add-Content -LiteralPath $Log
 
 # Prefer credentials JSON whose name matches tunnel list UUID for TunnelName
 $tunnelId = $null
-$listLines = & cloudflared tunnel list 2>&1
-foreach ($line in $listLines) {
+$list2 = Invoke-Cloudflared @("tunnel", "list")
+foreach ($line in $list2.Lines) {
     if ($line -match $TunnelName) {
         if ($line -match '([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})') {
             $tunnelId = $Matches[1]
@@ -94,7 +123,6 @@ if (-not (Test-Path -LiteralPath $credPath)) {
 }
 
 $configPath = Join-Path $configDir "swiftterm-web-config.yml"
-# Build YAML without here-string edge cases on PS 5.1
 $yaml = @(
     "tunnel: $tunnelId"
     "credentials-file: $credPath"
@@ -111,7 +139,7 @@ $pyPath = $py.Source
 $serverCmd = "Set-Location -LiteralPath '$Site'; `$Host.UI.RawUI.WindowTitle = 'SwiftTerm-HTTP-$Port-KEEP-OPEN'; Write-Host 'Serving http://127.0.0.1:$Port - keep this window open.'; & '$pyPath' -m http.server $Port --bind 127.0.0.1"
 Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit","-ExecutionPolicy","Bypass","-Command",$serverCmd | Out-Null
 
-$tunnelCmd = "Refresh-Path; function Refresh-Path { `$m=[System.Environment]::GetEnvironmentVariable('Path','Machine'); `$u=[System.Environment]::GetEnvironmentVariable('Path','User'); if (`$null -eq `$m){`$m=''}; if (`$null -eq `$u){`$u=''}; `$env:Path=`$m+';'+`$u }; Refresh-Path; `$Host.UI.RawUI.WindowTitle = 'SwiftTerm-NamedTunnel-KEEP-OPEN'; Write-Host 'Named tunnel https://$Hostname - keep this window open.'; & cloudflared tunnel --config '$configPath' run '$TunnelName'"
+$tunnelCmd = "`$m=[System.Environment]::GetEnvironmentVariable('Path','Machine'); `$u=[System.Environment]::GetEnvironmentVariable('Path','User'); if (`$null -eq `$m){`$m=''}; if (`$null -eq `$u){`$u=''}; `$env:Path=`$m+';'+`$u; `$Host.UI.RawUI.WindowTitle = 'SwiftTerm-NamedTunnel-KEEP-OPEN'; Write-Host 'Named tunnel https://$Hostname - keep this window open.'; & cloudflared tunnel --config '$configPath' run '$TunnelName'"
 Start-Process -FilePath "powershell.exe" -ArgumentList "-NoExit","-ExecutionPolicy","Bypass","-Command",$tunnelCmd | Out-Null
 
 Write-Host ""
@@ -122,4 +150,5 @@ Write-Host "If phone shows Unable to connect to origin, wait 10s then refresh; k
 Write-Host "Log: $Log"
 Write-Host ""
 Write-Host "cert.pem already exists - that is OK. Do NOT delete it unless you need to re-login."
+Write-Host "cloudflared outdated WRN is OK - ignored by this script."
 Read-Host "Press Enter to leave this launcher idle" | Out-Null
