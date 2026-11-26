@@ -30,7 +30,7 @@ import audit_invocations as I  # noqa: E402
 import audit_languages as L  # noqa: E402
 import audit_scripts as S  # noqa: E402
 import audit_security as X  # noqa: E402
-from audit_lib import FindingRegistry, GitRepo, decode, defect_codes, findings_to_dicts, macos_ci_stats, minutes_between, write_csv, write_json  # noqa: E402
+from audit_lib import FindingRegistry, GitRepo, apple_evidence, decode, defect_codes, findings_to_dicts, macos_ci_stats, minutes_between, summarise_ps_log, summarise_swift_log, swift_states, tree_equivalence, write_csv, write_json  # noqa: E402
 
 TABLE_ORDER = ["full", "mini", "extra", "llvm", "tex", "luatex", "sshStock"]
 BASELINE = {"full", "mini"}
@@ -422,36 +422,34 @@ def load_github_facts(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
 
 
-def refresh_github_facts(args: argparse.Namespace, path: Path, refs: dict[str, str], ash: GitRepo) -> dict:
+JOB_JQ = "[.jobs[]|{id,name,labels,status,conclusion,runner_name,created_at,started_at,completed_at,html_url,steps:[.steps[]|{name,status,conclusion}]}]"
+
+
+def refresh_github_facts(args: argparse.Namespace, path: Path, refs: dict[str, str], ash: GitRepo, st: GitRepo) -> dict:
     facts: dict = {"collected_at": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")}
     code, out = run(["gh", "api", "repos/jiaomeimei0-prog/a-shell/compare/holzschu:master...master", "--jq", "{status,ahead_by,behind_by,merge_base:.merge_base_commit.sha,html_url}"])
     if code == 0:
         facts["fork_vs_upstream"] = json.loads(out)
-    code, out = run(["gh", "api", "repos/jiaomeimei0-prog/SwiftTerm/actions/runs", "--jq", f".workflow_runs|map(select(.head_sha==\"{args.ci_sha or ''}\" and .name==\"Swift\"))|.[0]|{{id,html_url,head_sha,status,conclusion,created_at}}"])
-    if code == 0 and out.strip().startswith("{"):
+    swift_sha = args.swift_sha or args.ci_sha
+    code, out = run(["gh", "api", f"repos/jiaomeimei0-prog/SwiftTerm/actions/workflows/xcode.yml/runs?head_sha={swift_sha}", "--jq",
+                     "[.workflow_runs[]|{id,html_url,head_sha,status,conclusion,event,created_at}]|sort_by(.created_at)|reverse|.[0]"])
+    if swift_sha and code == 0 and out.strip().startswith("{"):
         run_info = json.loads(out)
         facts["swift_run"] = run_info
-        if run_info.get("id"):
-            code, jobs = run(["gh", "api", f"repos/jiaomeimei0-prog/SwiftTerm/actions/runs/{run_info['id']}/jobs", "--jq", "[.jobs[]|{id,name,labels,status,conclusion,runner_name,created_at,started_at}]"])
-            if code == 0:
-                facts["swift_jobs"] = json.loads(jobs)
-    code, out = run(["gh", "api", "repos/jiaomeimei0-prog/SwiftTerm/actions/workflows/xcode.yml/runs?per_page=8", "--jq", "[.workflow_runs[]|{id,head_sha,status,conclusion,created_at}]"])
+        code, jobs = run(["gh", "api", f"repos/jiaomeimei0-prog/SwiftTerm/actions/runs/{run_info['id']}/jobs?per_page=30", "--jq", JOB_JQ])
+        if code == 0 and jobs.strip().startswith("["):
+            facts["swift_jobs"] = json.loads(jobs)
+        facts["swift_tree"] = {"swift_sha": swift_sha, "st_ref": args.st_ref, "same": tree_equivalence(st, swift_sha, args.st_ref)}
+    code, out = run(["gh", "api", "repos/jiaomeimei0-prog/SwiftTerm/actions/workflows/xcode.yml/runs?per_page=8", "--jq", "[.workflow_runs[]|{id,head_sha,head_branch,status,conclusion,created_at}]"])
     if code == 0 and out.strip().startswith("["):
         recent = json.loads(out)
         for item in recent:
-            code, jobs = run(["gh", "api", f"repos/jiaomeimei0-prog/SwiftTerm/actions/runs/{item['id']}/jobs?per_page=30", "--jq", "[.jobs[]|{name,labels,status,conclusion,runner_name,created_at,started_at}]"])
+            code, jobs = run(["gh", "api", f"repos/jiaomeimei0-prog/SwiftTerm/actions/runs/{item['id']}/jobs?per_page=30", "--jq", JOB_JQ])
             item["jobs"] = json.loads(jobs) if code == 0 and jobs.strip().startswith("[") else []
         facts["swift_recent"] = recent
-    if args.apple_sha:
-        code, out = run(["gh", "api", f"repos/jiaomeimei0-prog/SwiftTerm/actions/workflows/apple-compile.yml/runs?head_sha={args.apple_sha}", "--jq",
-                         "[.workflow_runs[]|{id,html_url,head_sha,status,conclusion,event,created_at}]|sort_by(.created_at)|reverse|.[0]"])
-        if code == 0 and out.strip().startswith("{"):
-            apple = json.loads(out)
-            facts["apple_compile_run"] = apple
-            code, jobs = run(["gh", "api", f"repos/jiaomeimei0-prog/SwiftTerm/actions/runs/{apple['id']}/jobs", "--jq",
-                              "[.jobs[]|{id,name,labels,status,conclusion,runner_name,created_at,started_at,completed_at,html_url,steps:[.steps[]|{name,status,conclusion}]}]"])
-            if code == 0:
-                facts["apple_compile_jobs"] = json.loads(jobs)
+    code, out = run(["gh", "api", "repos/jiaomeimei0-prog/SwiftTerm/actions/runs?status=queued&per_page=100", "--jq", "[.workflow_runs[]|{id,name,head_branch,created_at}]"])
+    if code == 0 and out.strip().startswith("["):
+        facts["queued_runs"] = json.loads(out)
     pin = refs["pin"]
     for key, endpoint, jq in (
         ("pin_vs_master", f"repos/jiaomeimei0-prog/a-shell/compare/master...{pin}", "{status,ahead_by,behind_by,merge_base:.merge_base_commit.sha}"),
@@ -461,9 +459,16 @@ def refresh_github_facts(args: argparse.Namespace, path: Path, refs: dict[str, s
         ("upstream_only_commits", "repos/jiaomeimei0-prog/a-shell/compare/master...holzschu:master", "[.commits[]|{sha:.sha[0:10],date:.commit.committer.date[0:10],message:(.commit.message|split(\"\n\")[0])}]"),
         ("runs_for_sha", f"repos/jiaomeimei0-prog/SwiftTerm/actions/runs?head_sha={args.ci_sha}", "[.workflow_runs[]|{id,name,status,conclusion,html_url}]"),
     ):
+        if key == "runs_for_sha" and not args.ci_sha:
+            continue
         code, out = run(["gh", "api", endpoint, "--jq", jq])
         if code == 0 and out.strip():
             facts[key] = json.loads(out)
+    for key, log in (("windows_log", args.windows_log), ("windows_mutation_log", args.windows_mutation_log)):
+        if log and Path(log).exists():
+            facts[key] = summarise_ps_log(Path(log).read_text(encoding="utf-8", errors="replace"))
+    if args.swift_log and Path(args.swift_log).exists():
+        facts["swift_log"] = summarise_swift_log(Path(args.swift_log).read_text(encoding="utf-8", errors="replace"))
     if args.linux_log and Path(args.linux_log).exists():
         text = Path(args.linux_log).read_text(encoding="utf-8", errors="replace").splitlines()
         facts["linux_headless_log"] = {"path_note": "log of the linux-headless job (downloaded via MCP get_job_logs)", "evidence_lines": [ln.split("Z ", 1)[-1].strip() for ln in text if re.search(r"Executed \d+ tests, with \d+ failures|Test run with \d+ tests", ln)][-3:]}
@@ -478,26 +483,44 @@ def build_findings(results: Results, snaps: dict[str, C.AshellSnapshot]) -> Find
     for p in results.wrong_calls:
         by_kind[p["kind"]].append(p)
     stats = macos_ci_stats(facts)
-    if stats and stats["completed"] == 0:
+    states = swift_states(facts)
+    proven = apple_evidence(states)
+    swift_run = facts.get("swift_run") or {}
+    if stats and stats["queued"] and (stats["oldest_queued_min"] or 0) >= 30:
         delay = stats["start_delay_min"]
-        reg.add("HIGH", "CI/assurance", "swiftterm", ".github/workflows/xcode.yml",
-                f"CI macOS của fork chưa cho kết quả nào: {stats['started']}/{stats['jobs']} job `{'/'.join(stats['labels'])}` được runner nhận, {stats['completed']} xong, {stats['queued']} còn queued",
+        done = ", ".join(f"{k}={v}" for k, v in sorted(stats["conclusions"].items())) or "chưa có"
+        queued_swift = sum(1 for q in facts.get("queued_runs", []) if q.get("name") == "Swift")
+        reg.add("HIGH" if stats["completed"] == 0 else "MEDIUM", "CI/assurance", "swiftterm", ".github/workflows/xcode.yml",
+                f"Hàng đợi job macOS của fork chạy rất chậm: {stats['completed']}/{stats['jobs']} job `{'/'.join(stats['labels'])}` đã xong, {stats['in_progress']} đang chạy, {stats['queued']} còn queued",
                 f"Trong {stats['runs']} run gần nhất của workflow `Swift`: {stats['jobs']} job macOS, {stats['started']} đã được runner GitHub nhận" +
-                (f" (chờ {delay[0]}–{delay[1]} phút)" if delay else "") + f", {stats['queued']} còn queued" +
+                (f" (chờ {delay[0]}–{delay[1]} phút)" if delay else "") + f", {stats['completed']} xong ({done}), {stats['queued']} còn queued" +
                 (f", job cũ nhất đã chờ ≥ {stats['oldest_queued_min']} phút khi thu thập" if stats["oldest_queued_min"] is not None else "") +
+                (f"; toàn repo có {queued_swift} run `Swift` đang queued" if "queued_runs" in facts else "") +
                 (f"; job Ubuntu cùng các run chờ tối đa {stats['ubuntu_max_delay_min']} phút. " if stats["ubuntu_max_delay_min"] is not None else ". ") +
-                "Nhãn `xcode-27` được GitHub công bố là nhãn runner của họ (actions/runner-images#15397) và đã có job được nhận, nên không phải thiếu nhãn; nguyên nhân hàng đợi kẹt chưa xác định "
-                "(giới hạn số job macOS chạy đồng thời, billing, hoặc job kẹt phía GitHub). Agent không đọc được thông tin runner/billing (HTTP 403). "
-                "Hệ quả đã quan sát: chưa có job macOS nào xong, nên code Apple (Sources/SwiftTerm/{Apple,Mac,iOS}, gồm HostHelpers) chưa được biên dịch/test trong CI của fork.",
-                "Chủ tài khoản kiểm tra Settings → Actions (Runners, usage/concurrency) và Billing; huỷ các run macOS cũ đang kẹt để hàng đợi không dồn. Phép thử đối chứng đã thêm: `apple-compile.yml` chạy cùng lệnh trên `macos-26`.",
+                "Nhãn `xcode-27` là image do GitHub cung cấp (actions/runner-images#15397; log job ghi `Image: xcode-27-arm64`) và đã có job chạy xong, nên không phải thiếu nhãn. " +
+                (f"Hàng đợi đang được phục vụ chậm chứ không đứng yên (có job được nhận sau {delay[1]} phút). " if delay and delay[1] >= 30 else "") +
+                "Nguyên nhân chậm chưa xác định (giới hạn số job macOS chạy đồng thời, billing hoặc thiếu runner phía GitHub — chưa kiểm chứng; agent không đọc được thông tin runner/billing, HTTP 403). " +
+                f"Hệ quả đã quan sát trên run {swift_run.get('id', '?')}: biên dịch macOS {'ĐÃ' if proven['mac_compiled'] else 'CHƯA'} có bằng chứng, biên dịch iOS (HostHelpers) {'ĐÃ' if proven['ios_compiled'] else 'CHƯA'}, `swift test` trên macOS {'ĐÃ' if proven['mac_tested'] else 'CHƯA'} có kết quả.",
+                "Chủ tài khoản kiểm tra Settings → Actions (Runners, usage/concurrency) và Billing; huỷ các run macOS cũ đang kẹt để hàng đợi không dồn; cân nhắc thêm `concurrency: cancel-in-progress` cho `xcode.yml` (mỗi lần push vào PR đang tạo thêm 5 job macOS).",
                 "gh api repos/jiaomeimei0-prog/SwiftTerm/actions/workflows/xcode.yml/runs ; .../runs/<id>/jobs")
-    for job in facts.get("apple_compile_jobs", []):
-        if job.get("conclusion") == "failure":
+    for job in facts.get("swift_jobs", []):
+        if job.get("conclusion") in ("failure", "timed_out"):
             failed = [s["name"] for s in job.get("steps", []) if s.get("conclusion") == "failure"]
-            reg.add("HIGH", "CI/assurance", "swiftterm", f".github/workflows/apple-compile.yml ({job['name']})",
-                    f"Job `{job['name']}` của Apple compile probe thất bại ở bước: {', '.join(failed) or '(không rõ)'}",
-                    f"job {job['id']} trên `{' '.join(job.get('labels', []))}` kết thúc `failure`. Runner `macos-26` có Xcode 26.x còn upstream CI dùng Xcode 27.1, nên chưa đủ để kết luận lỗi nằm ở mã nguồn.",
-                    "Đọc log job (cursor-github get_job_logs hoặc `gh run view --log-failed`), phân biệt lỗi toolchain với lỗi mã rồi sửa hoặc chuyển job sang runner có Xcode 27.", job.get("html_url", ""))
+            reg.add("HIGH", "CI/assurance", "swiftterm", f".github/workflows/xcode.yml ({job['name']})",
+                    f"Job `{job['name']}` của workflow Swift thất bại ở bước: {', '.join(failed) or '(không rõ)'}",
+                    f"job {job['id']} trên `{' '.join(job.get('labels', []))}` kết thúc `{job['conclusion']}` (run {swift_run.get('id', '?')}).",
+                    "Đọc log job (cursor-github get_job_logs hoặc `gh run view --log-failed`), phân biệt lỗi toolchain với lỗi mã rồi sửa.", job.get("html_url", ""))
+    swift_log = facts.get("swift_log") or {}
+    if swift_log.get("warnings"):
+        reg.add("LOW", "Chất lượng mã", "swiftterm", swift_log["warnings"][0]["location"],
+                f"Biên dịch macOS ({swift_log.get('xcode', '?')}, `-strict-concurrency=complete`) phát {len(swift_log['warnings'])} cảnh báo trong " + ", ".join(f"`{name}`" for name in sorted({w["location"].split(":")[0].split("/")[-1] for w in swift_log["warnings"]})),
+                "; ".join(f"{w['location'].split('/')[-1]}: {w['message']}" for w in swift_log["warnings"]) + f". Kết quả build: `{swift_log.get('result', '?')}` (không lỗi).",
+                "Thay `let terminal` không dùng bằng `_`/xoá; thay `String(cString:)` đã deprecated bằng `String(decoding:as:)` sau khi cắt ký tự null.",
+                "log job swiftpm-strict-concurrency (cursor-github get_job_logs)")
+    windows = next((x for x in facts.get("runs_for_sha", []) if x["name"] == "Windows scripts"), None)
+    if windows and windows.get("conclusion") in ("failure", "timed_out"):
+        reg.add("HIGH", "CI/assurance", "swiftterm", ".github/workflows/windows-scripts.yml", "Bộ kiểm thử script Windows (PowerShell 5.1) thất bại trên commit CI",
+                f"run {windows['id']} kết thúc `{windows['conclusion']}`.", "Đọc log job `PowerShell 5.1 (parse, encoding, helper tests)` và sửa script hoặc test.", windows.get("html_url", ""))
     fork_up = facts.get("fork_vs_upstream")
     failing = [r for r in results.test_runs if r["ref"] == "fork" and r["result"] == "FAIL"]
     if fork_up or failing:
@@ -589,8 +612,8 @@ def build_findings(results: Results, snaps: dict[str, C.AshellSnapshot]) -> Find
     if hs:
         reg.add("LOW", "Kiểm thử", "swiftterm", "scripts/e2e_acceptance_host.sh:77", "Bằng chứng HostHelpers chỉ ở mức L0 (grep chuỗi) và nhãn '20 APIs' đã lỗi thời: "
                 f"file khai báo {hs['declared']} API (script liệt kê {hs['listed_in_e2e_script']}); {len(untested)} API được a-Shell gọi nhưng SwiftTerm không có test; {len(unused)} API không ai dùng",
-                f"Không có test trong SwiftTerm: {', '.join(untested)}; không ai dùng: {', '.join(unused)}. HostHelpers bị bao bởi `{hs['platform_guard']}` nên không bao giờ biên dịch trên Linux; workflow `Swift` gốc (macOS) của fork không chạy nên chỉ `Apple compile probe` có thể biên dịch nó.",
-                "Dùng workflow `apple-compile.yml` (biên dịch iOS) và thêm test cho các API chưa được phủ.", "audit_hostapi.analyse")
+                f"Không có test trong SwiftTerm: {', '.join(untested)}; không ai dùng: {', '.join(unused)}. HostHelpers bị bao bởi `{hs['platform_guard']}` nên không bao giờ biên dịch trên Linux; chỉ bước `Xcode iOS Build` của workflow `Swift` (macOS) biên dịch nó — trạng thái: {states['ios_build']}.",
+                "Khi bước `Xcode iOS Build` đạt thì HostHelpers mới có bằng chứng biên dịch; thêm test cho các API chưa được phủ.", "audit_hostapi.analyse")
     if any(s["repo"] == "ashell" and s["kind"] == "key-or-certificate-file" for s in results.secrets):
         reg.add("INFO", "An ninh", "ashell", "cacert.pem", "Gói CA (cacert.pem, ~200 KB) commit trong repo (di sản upstream, dữ liệu công khai của curl.se)", "Không phải bí mật; cần cập nhật định kỳ.", "Cập nhật theo lịch.", "audit_security.secret_scan")
     reg.add("INFO", "An ninh", "swiftterm", "TerminalApp/WebTerminal/Sources/WebTerminalServer/HTTPServer.swift:4-20,98", "Điểm tốt: WebTerminal (PTY qua WebSocket) chỉ bind 127.0.0.1 và yêu cầu Host + Origin loopback khớp",
@@ -671,8 +694,11 @@ def main() -> int:
     parser.add_argument("--run-tests", action="store_true")
     parser.add_argument("--online", action="store_true")
     parser.add_argument("--ci-sha", default="")
-    parser.add_argument("--apple-sha", default="", help="commit whose `Apple compile probe` workflow run should be summarised")
+    parser.add_argument("--swift-sha", default="", help="commit whose `Swift` workflow run supplies the macOS results (default: --ci-sha); its Sources/Tests/Package.swift trees are compared with --st-ref")
     parser.add_argument("--linux-log", default="")
+    parser.add_argument("--swift-log", default="", help="job log of `swiftpm-strict-concurrency` (toolchain, result and compiler warnings)")
+    parser.add_argument("--windows-log", default="", help="job log of `Windows scripts` on the audited scripts (downloaded via MCP get_job_logs)")
+    parser.add_argument("--windows-mutation-log", default="", help="job log of the same tests run against the pre-fix scripts (expected to fail)")
     parser.add_argument("--baseline-dir", default="", help="directory with summary.json + wrong_calls.csv of an earlier audit (before fixes)")
     parser.add_argument("--baseline-ref", default="", help="commit the baseline audit was run on (documentation only)")
     args = parser.parse_args()
@@ -689,7 +715,7 @@ def main() -> int:
     command_table(snaps, results)
     hostapi_section(st, snaps, args, results)
     facts_path = out / "data" / "github_facts.json"
-    results.ci_facts = refresh_github_facts(args, facts_path, refs, ash) if args.online else load_github_facts(facts_path)
+    results.ci_facts = refresh_github_facts(args, facts_path, refs, ash, st) if args.online else load_github_facts(facts_path)
     if args.run_tests:
         run_tests(st, ash, refs, args, results, out)
     elif (out / "data" / "test_runs.csv").exists():

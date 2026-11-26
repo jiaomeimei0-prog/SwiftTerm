@@ -1,9 +1,11 @@
 """Shared helpers for the repository audit tools (standard library only)."""
 from __future__ import annotations
 
+import collections
 import csv
 import json
 import os
+import re
 import subprocess
 from dataclasses import asdict, dataclass
 from datetime import datetime
@@ -46,13 +48,131 @@ def macos_ci_stats(facts: dict) -> dict | None:
     started = [job for job in macos if job.get("runner_name")]
     delays = [m for m in (minutes_between(job.get("created_at", ""), job.get("started_at", "")) for job in started) if m is not None]
     ubuntu_delays = [m for m in (minutes_between(job.get("created_at", ""), job.get("started_at", "")) for job in all_jobs if job.get("runner_name") and not _is_macos(job)) if m is not None]
+    completed = [job for job in macos if job.get("status") == "completed"]
     return {
         "runs": len(runs), "jobs": len(macos), "queued": len(queued), "started": len(started),
-        "completed": sum(1 for job in macos if job.get("status") == "completed"),
+        "completed": len(completed), "in_progress": len(started) - len(completed),
+        "conclusions": dict(collections.Counter(job.get("conclusion") or "-" for job in completed)),
         "oldest_queued_min": minutes_between(min((job["created_at"] for job in queued if job.get("created_at")), default=""), facts.get("collected_at", "")),
         "start_delay_min": (min(delays), max(delays)) if delays else None,
         "ubuntu_max_delay_min": max(ubuntu_delays) if ubuntu_delays else None,
         "labels": sorted({label for job in macos for label in job.get("labels", [])}),
+    }
+
+
+HARNESS_CHECK_RE = re.compile(r"(?:bom|ascii-only|parse|no Documents-based|root|SWIFTTERM_ROOT|Refresh-Path|Test-CanBindPort|Select-ListenPort|ingress yaml)\b|public host:")
+
+
+def summarise_ps_log(text: str) -> dict:
+    """Facts from the output of scripts/tests/windows-tunnel-common.tests.ps1 captured in a GitHub Actions job log.
+
+    Only lines printed by the test harness count: the helper under test prints its own PASS/FAIL words.
+    """
+    passed, failed = 0, []
+    summary = ps_version = os_name = error = ""
+    for raw in text.splitlines():
+        line = re.sub(r"^\d{4}-\d\d-\d\dT[\d:.]+Z ", "", raw).strip()
+        if line.startswith(("PASS ", "FAIL ")) and HARNESS_CHECK_RE.match(line[5:]):
+            if line.startswith("PASS "):
+                passed += 1
+            else:
+                failed.append(line[5:].strip())
+        elif line == "ALL PASSED" or re.fullmatch(r"\d+ FAILED", line):
+            summary = line
+        elif line.startswith("PSVersion"):
+            ps_version = line.split()[-1]
+        elif line.startswith("Microsoft Windows"):
+            os_name = line
+        elif not error and "is not recognized as the name of a cmdlet" in line:
+            error = line[:140]
+    return {"passed": passed, "failed": failed, "summary": summary, "ps_version": ps_version, "os": os_name, "error": error}
+
+
+ANSI_RE = re.compile(r"\x1b\[[0-9;]*m")
+SWIFT_WARNING_RE = re.compile(r"^/\S+?/SwiftTerm/SwiftTerm/(?P<loc>\S+\.swift:\d+:\d+): warning: (?P<msg>.*?)(?: \[#|\x1b|\]8;;|$)")
+
+
+def summarise_swift_log(text: str) -> dict:
+    """Toolchain and compile facts from the log of a macOS `swift build` job (GitHub Actions)."""
+    lines = [ANSI_RE.sub("", re.sub(r"^\d{4}-\d\d-\d\dT[\d:.]+Z ", "", raw)).rstrip() for raw in text.splitlines()]
+    facts: dict = {"image": "", "macos": "", "xcode": "", "result": "", "warnings": []}
+    seen: set[str] = set()
+    for index, line in enumerate(lines):
+        if line.startswith("Image: ") and not facts["image"]:
+            facts["image"] = line[7:].strip()
+        elif line.strip() == "##[group]Operating System" and index + 3 < len(lines):
+            facts["macos"] = f"{lines[index + 2].strip()} (build {lines[index + 3].strip()})"
+        elif "DEVELOPER_DIR:" in line and not facts["xcode"]:
+            found = re.search(r"Xcode_([\d.]+)\.app", line)
+            facts["xcode"] = f"Xcode {found.group(1)}" if found else ""
+        elif not facts["result"] and (line.startswith("Build complete!") or ": error:" in line):
+            facts["result"] = line.strip()[:120]
+        match = SWIFT_WARNING_RE.match(line)
+        if match and match["loc"] not in seen:
+            seen.add(match["loc"])
+            facts["warnings"].append({"location": match["loc"], "message": match["msg"].strip()})
+    return facts
+
+
+SWIFT_TREE_PATHS = ("Package.swift", "Sources", "Tests", "TerminalApp")
+
+
+def tree_equivalence(repo: "GitRepo", ref_a: str, ref_b: str, paths: Iterable[str] = SWIFT_TREE_PATHS) -> dict[str, bool] | None:
+    """Per path: do two refs hold the identical tree or blob? None when either commit is unknown to the repository."""
+    if not (repo.git_ok("cat-file", "-e", f"{ref_a}^{{commit}}") and repo.git_ok("cat-file", "-e", f"{ref_b}^{{commit}}")):
+        return None
+
+    def ident(ref: str, path: str) -> str | None:
+        try:
+            return repo.tree_id(f"{ref}:{path}")
+        except GitError:
+            return None
+
+    return {path: ident(ref_a, path) == ident(ref_b, path) for path in paths}
+
+
+CONCLUSION_VI = {"success": "đạt", "failure": "lỗi", "cancelled": "bị huỷ", "skipped": "bỏ qua", "timed_out": "quá thời gian"}
+
+# (job, step) pairs of the `Swift` workflow (.github/workflows/xcode.yml) that carry Apple-platform evidence.
+SWIFT_EVIDENCE = {
+    "mac_build": ("build", "Xcode Mac Build"),
+    "ios_build": ("build", "Xcode iOS Build"),
+    "swift_build": ("build", "Swift Package Build"),
+    "swift_test": ("build", "Run tests"),
+    "strict_concurrency": ("swiftpm-strict-concurrency", None),
+    "thread_sanitizer": ("thread-sanitizer", None),
+    "esctest": ("esctest", None),
+    "swift6_tools": ("swift6-tools", None),
+    "linux": ("linux-headless", None),
+}
+
+
+def job_state(job: dict | None, step: str | None = None) -> str:
+    """Vietnamese one-word state of a workflow job or of one of its steps."""
+    if job is None:
+        return "không có dữ liệu"
+    if job.get("status") == "queued":
+        return "chưa có runner nhận"
+    node = job if step is None else next((s for s in job.get("steps", []) if s.get("name") == step), None)
+    if node is None:
+        return "không có dữ liệu"
+    if node.get("conclusion"):
+        return CONCLUSION_VI.get(node["conclusion"], node["conclusion"])
+    return "đang chạy" if node.get("status") == "in_progress" else "chưa chạy"
+
+
+def swift_states(facts: dict) -> dict[str, str]:
+    """State of every evidence job/step of the audited `Swift` run (facts["swift_jobs"])."""
+    jobs = {job["name"]: job for job in facts.get("swift_jobs", [])}
+    return {key: job_state(jobs.get(job), step) for key, (job, step) in SWIFT_EVIDENCE.items()}
+
+
+def apple_evidence(states: dict[str, str]) -> dict[str, bool]:
+    """What the Swift run proves so far: macOS compile, iOS compile (covers HostHelpers), `swift test` on macOS."""
+    return {
+        "mac_compiled": "đạt" in (states["strict_concurrency"], states["mac_build"], states["swift_build"]),
+        "ios_compiled": states["ios_build"] == "đạt",
+        "mac_tested": states["swift_test"] == "đạt",
     }
 
 
