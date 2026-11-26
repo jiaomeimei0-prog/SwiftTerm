@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Minimal OpenStep/NeXT ASCII property-list parser (Xcode project.pbxproj).
 
 plistlib only reads XML and binary property lists. Xcode projects use the old

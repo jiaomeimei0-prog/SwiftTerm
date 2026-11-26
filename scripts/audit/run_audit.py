@@ -418,6 +418,15 @@ def doc_claims(st: GitRepo, ash: GitRepo, args: argparse.Namespace, results: Res
                         results.stale_pins.append({"location": f"{entry.path}:{number}", "sha": token, "subject": ash.git("log", "-1", "--format=%s", full).strip()[:70], "relation": relation})
 
 
+def minutes_between(start: str, end: str) -> int | None:
+    """Whole minutes from `start` to `end` (both GitHub `...Z` timestamps), or None if either is missing."""
+    try:
+        fmt = "%Y-%m-%dT%H:%M:%SZ"
+        return int((dt.datetime.strptime(end, fmt) - dt.datetime.strptime(start, fmt)).total_seconds() // 60)
+    except ValueError:
+        return None
+
+
 def load_github_facts(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
 
@@ -432,9 +441,19 @@ def refresh_github_facts(args: argparse.Namespace, path: Path, refs: dict[str, s
         run_info = json.loads(out)
         facts["swift_run"] = run_info
         if run_info.get("id"):
-            code, jobs = run(["gh", "api", f"repos/jiaomeimei0-prog/SwiftTerm/actions/runs/{run_info['id']}/jobs", "--jq", "[.jobs[]|{id,name,labels,status,conclusion,runner_name}]"])
+            code, jobs = run(["gh", "api", f"repos/jiaomeimei0-prog/SwiftTerm/actions/runs/{run_info['id']}/jobs", "--jq", "[.jobs[]|{id,name,labels,status,conclusion,runner_name,created_at,started_at}]"])
             if code == 0:
                 facts["swift_jobs"] = json.loads(jobs)
+    if args.apple_sha:
+        code, out = run(["gh", "api", f"repos/jiaomeimei0-prog/SwiftTerm/actions/workflows/apple-compile.yml/runs?head_sha={args.apple_sha}", "--jq",
+                         "[.workflow_runs[]|{id,html_url,head_sha,status,conclusion,event,created_at}]|sort_by(.created_at)|reverse|.[0]"])
+        if code == 0 and out.strip().startswith("{"):
+            apple = json.loads(out)
+            facts["apple_compile_run"] = apple
+            code, jobs = run(["gh", "api", f"repos/jiaomeimei0-prog/SwiftTerm/actions/runs/{apple['id']}/jobs", "--jq",
+                              "[.jobs[]|{id,name,labels,status,conclusion,runner_name,created_at,started_at,completed_at,html_url,steps:[.steps[]|{name,status,conclusion}]}]"])
+            if code == 0:
+                facts["apple_compile_jobs"] = json.loads(jobs)
     pin = refs["pin"]
     for key, endpoint, jq in (
         ("pin_vs_master", f"repos/jiaomeimei0-prog/a-shell/compare/master...{pin}", "{status,ahead_by,behind_by,merge_base:.merge_base_commit.sha}"),
@@ -461,11 +480,26 @@ def build_findings(results: Results, snaps: dict[str, C.AshellSnapshot]) -> Find
     for p in results.wrong_calls:
         by_kind[p["kind"]].append(p)
     jobs = facts.get("swift_jobs", [])
-    queued = [j["name"] for j in jobs if j.get("status") == "queued"]
-    if queued or any("xcode-27" in " ".join(j.get("labels", [])) for j in jobs):
-        reg.add("HIGH", "CI/assurance", "swiftterm", ".github/workflows/xcode.yml", "5 job macOS của CI không chạy được trên fork: fork không có runner mang nhãn `xcode-27` (nhãn hạ tầng của upstream)",
-                f"{len(queued)} job ở trạng thái queued không có runner: {', '.join(queued)}. Toàn bộ code Apple (Sources/SwiftTerm/{{Apple,Mac,iOS}}, gồm HostHelpers) không được build/test trong CI của fork. Chỉ job linux-headless chạy.",
-                "Thêm job biên dịch trên runner GitHub-hosted (repo public nên không tốn phí) — workflow `apple-compile.yml` trong nhánh này — hoặc đăng ký runner `xcode-27` cho fork.", "gh api repos/jiaomeimei0-prog/SwiftTerm/actions/runs/<id>/jobs")
+    queued = [j for j in jobs if j.get("status") == "queued"]
+    if queued:
+        waited = minutes_between(min((j["created_at"] for j in queued if j.get("created_at")), default=""), facts.get("collected_at", ""))
+        ran = [j["name"] for j in jobs if j.get("status") == "completed"]
+        reg.add("HIGH", "CI/assurance", "swiftterm", ".github/workflows/xcode.yml",
+                f"{len(queued)} job macOS của workflow `Swift` (`runs-on: xcode-27`) ở trạng thái queued, chưa runner nào nhận",
+                f"{len(queued)} job queued ({', '.join(j['name'] for j in queued)})" + (f", đã chờ ≥ {waited} phút khi thu thập" if waited is not None else "") +
+                f"; job {', '.join(ran) or '(không có)'} cùng run đã chạy xong ngay ⇒ runner Ubuntu hoạt động còn nhãn `xcode-27` không nhận job. "
+                "`xcode-27` được GitHub công bố là nhãn runner của họ (actions/runner-images#15397) nên nguyên nhân không xác định được từ bên ngoài: agent không đọc được danh sách runner (HTTP 403). "
+                "Giả thuyết cần chủ tài khoản kiểm tra: giới hạn gói/billing, dung lượng, hoặc nhãn không áp dụng cho repo fork. "
+                "Hệ quả đã quan sát: code Apple (Sources/SwiftTerm/{Apple,Mac,iOS}, gồm HostHelpers) không được biên dịch/test trong CI của fork.",
+                "Chủ tài khoản kiểm tra Settings → Actions → Runners và Billing. Phép thử đối chứng đã thêm: workflow `apple-compile.yml` chạy cùng lệnh trên runner `macos-26`.",
+                "gh api repos/jiaomeimei0-prog/SwiftTerm/actions/runs/<id>/jobs")
+    for job in facts.get("apple_compile_jobs", []):
+        if job.get("conclusion") == "failure":
+            failed = [s["name"] for s in job.get("steps", []) if s.get("conclusion") == "failure"]
+            reg.add("HIGH", "CI/assurance", "swiftterm", f".github/workflows/apple-compile.yml ({job['name']})",
+                    f"Job `{job['name']}` của Apple compile probe thất bại ở bước: {', '.join(failed) or '(không rõ)'}",
+                    f"job {job['id']} trên `{' '.join(job.get('labels', []))}` kết thúc `failure`. Runner `macos-26` có Xcode 26.x còn upstream CI dùng Xcode 27.1, nên chưa đủ để kết luận lỗi nằm ở mã nguồn.",
+                    "Đọc log job (cursor-github get_job_logs hoặc `gh run view --log-failed`), phân biệt lỗi toolchain với lỗi mã rồi sửa hoặc chuyển job sang runner có Xcode 27.", job.get("html_url", ""))
     fork_up = facts.get("fork_vs_upstream")
     failing = [r for r in results.test_runs if r["ref"] == "fork" and r["result"] == "FAIL"]
     if fork_up or failing:
@@ -556,7 +590,7 @@ def build_findings(results: Results, snaps: dict[str, C.AshellSnapshot]) -> Find
     if hs:
         reg.add("LOW", "Kiểm thử", "swiftterm", "scripts/e2e_acceptance_host.sh:77", "Bằng chứng HostHelpers chỉ ở mức L0 (grep chuỗi) và nhãn '20 APIs' đã lỗi thời: "
                 f"file khai báo {hs['declared']} API (script liệt kê {hs['listed_in_e2e_script']}); {len(untested)} API được a-Shell gọi nhưng SwiftTerm không có test; {len(unused)} API không ai dùng",
-                f"Không có test trong SwiftTerm: {', '.join(untested)}; không ai dùng: {', '.join(unused)}. HostHelpers bị bao bởi `{hs['platform_guard']}` nên không bao giờ biên dịch trên Linux (cũng không được CI macOS biên dịch vì job không chạy).",
+                f"Không có test trong SwiftTerm: {', '.join(untested)}; không ai dùng: {', '.join(unused)}. HostHelpers bị bao bởi `{hs['platform_guard']}` nên không bao giờ biên dịch trên Linux; workflow `Swift` gốc (macOS) của fork không chạy nên chỉ `Apple compile probe` có thể biên dịch nó.",
                 "Dùng workflow `apple-compile.yml` (biên dịch iOS) và thêm test cho các API chưa được phủ.", "audit_hostapi.analyse")
     if any(s["repo"] == "ashell" and s["kind"] == "key-or-certificate-file" for s in results.secrets):
         reg.add("INFO", "An ninh", "ashell", "cacert.pem", "Gói CA (cacert.pem, ~200 KB) commit trong repo (di sản upstream, dữ liệu công khai của curl.se)", "Không phải bí mật; cần cập nhật định kỳ.", "Cập nhật theo lịch.", "audit_security.secret_scan")
@@ -638,6 +672,7 @@ def main() -> int:
     parser.add_argument("--run-tests", action="store_true")
     parser.add_argument("--online", action="store_true")
     parser.add_argument("--ci-sha", default="")
+    parser.add_argument("--apple-sha", default="", help="commit whose `Apple compile probe` workflow run should be summarised")
     parser.add_argument("--linux-log", default="")
     parser.add_argument("--baseline-dir", default="", help="directory with summary.json + wrong_calls.csv of an earlier audit (before fixes)")
     parser.add_argument("--baseline-ref", default="", help="commit the baseline audit was run on (documentation only)")

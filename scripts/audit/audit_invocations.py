@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Check command invocations written in docs, scripts and workflows against what the repo defines.
 
 Covered: `swift run/build/test` names against Package.swift, `npm run` against package.json,
@@ -12,7 +11,7 @@ import posixpath
 import re
 from dataclasses import dataclass
 
-from audit_lib import TreeEntry
+from audit_lib import SELF_AUDIT_PREFIXES, TreeEntry
 from audit_scripts import WrongCall
 
 SWIFT_NAMES_RE = re.compile(r"\.(?:executable|library|executableTarget|target|testTarget|plugin)\(\s*name:\s*\"([^\"]+)\"")
@@ -60,7 +59,7 @@ def collect_targets(texts: dict[str, str]) -> Targets:
 def invocation_checks(repo_label: str, texts: dict[str, str], targets: Targets) -> list[WrongCall]:
     problems: list[WrongCall] = []
     for path, text in texts.items():
-        if posixpath.basename(path) == "Makefile" or not path.endswith(CHECKED_SUFFIXES):
+        if posixpath.basename(path) == "Makefile" or not path.endswith(CHECKED_SUFFIXES) or path.startswith(SELF_AUDIT_PREFIXES):
             continue
         is_doc = path.endswith(".md")
         in_fence = False

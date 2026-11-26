@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Shared helpers for the repository audit tools (standard library only)."""
 from __future__ import annotations
 
@@ -15,6 +14,11 @@ SEVERITY_ORDER = {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3, "INFO": 4}
 
 class GitError(RuntimeError):
     """A git command failed."""
+
+
+# The audit's own code and generated reports quote other repositories' scripts, workflow names and
+# mistyped domains on purpose (fixtures, evidence). Wrong-call detectors must not judge them.
+SELF_AUDIT_PREFIXES = ("scripts/audit/", "Docs/audit/")
 
 
 @dataclass(frozen=True)

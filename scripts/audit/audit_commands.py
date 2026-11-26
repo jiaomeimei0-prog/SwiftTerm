@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """a-Shell command inventory: plist catalogues, host built-ins, wiring in the Xcode project.
 
 Everything is read from git refs, so the same code can compare the manufacturer

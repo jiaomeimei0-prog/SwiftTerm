@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Language / size inventory of one git ref (what is in the tree, by language and area)."""
 from __future__ import annotations
 

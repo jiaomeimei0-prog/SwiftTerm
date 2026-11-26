@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Usage audit of the SwiftTerm HostHelpers bridge (the API a-Shell consumes).
 
 For each public member declared in AppleTerminalView+HostHelpers.swift, count the

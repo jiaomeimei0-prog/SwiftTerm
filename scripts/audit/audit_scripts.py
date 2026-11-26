@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Script inventory and wrong-call detection (missing files, filters, modes, PowerShell)."""
 from __future__ import annotations
 
@@ -6,7 +5,7 @@ import posixpath
 import re
 from dataclasses import dataclass, field
 
-from audit_lib import GitRepo, TreeEntry, classify, decode
+from audit_lib import SELF_AUDIT_PREFIXES, GitRepo, TreeEntry, classify, decode
 
 try:  # PyYAML is optional; workflows are still scanned textually without it.
     import yaml
@@ -144,6 +143,8 @@ def script_calls(repo_label: str, texts: dict[str, str], entries: list[TreeEntry
     modes = {e.path: e.mode for e in entries}
     problems: list[WrongCall] = []
     for path, text in texts.items():
+        if path.startswith(SELF_AUDIT_PREFIXES):
+            continue
         language = classify(path, text[:512].encode("utf-8", "replace"))
         if language not in SCRIPT_LANGUAGES and not path.startswith(".github/workflows/") and not path.endswith("Makefile"):
             continue
@@ -184,7 +185,7 @@ def doc_references(repo_label: str, texts: dict[str, str], entries: list[TreeEnt
     tree = tree | fallback
     problems: list[WrongCall] = []
     for path, text in texts.items():
-        if not path.endswith(".md"):
+        if not path.endswith(".md") or path.startswith(SELF_AUDIT_PREFIXES):
             continue
         base = posixpath.dirname(path)
         in_fence = False
@@ -245,9 +246,6 @@ def workflow_audit(repo_label: str, texts: dict[str, str]) -> tuple[list[dict], 
             problems.append(WrongCall("workflow-permissions", repo_label, path, "permissions:", "no top-level `permissions:` block (GITHUB_TOKEN gets the repository default)", f"secrets used: {secrets or 'none'}", "LOW"))
         if unpinned:
             problems.append(WrongCall("workflow-unpinned-actions", repo_label, path, ", ".join(sorted(set(unpinned))), "third-party actions referenced by mutable tag instead of commit SHA", f"{len(unpinned)} reference(s)", "LOW"))
-        for runner in runners:
-            if re.fullmatch(r"xcode-\d+", runner):
-                problems.append(WrongCall("ci-runner-never-runs", repo_label, path, f"runs-on: {runner}", "custom runner label that GitHub-hosted runners do not provide: jobs stay queued unless a runner with this label is registered for the repository", "see `gh run list`: jobs queued with no conclusion", "HIGH"))
     return rows, problems
 
 
@@ -347,17 +345,22 @@ def powershell_checks(repo_label: str, entries: list[TreeEntry], raw: dict[str, 
 WRONG_DOMAINS = {"tooltop1.vip": "toolvip1.top"}
 
 
+DOMAIN_ACK_RE = re.compile(r"(?i)không phải|không dùng|\bsai\b|nhầm|chưa đăng ký|NXDOMAIN|(?-i:\bNOT\b)|wrong|mistyped|typo")
+
+
 def domain_references(repo_label: str, texts: dict[str, str]) -> list[WrongCall]:
     """References to a mistyped project domain; code/config is MEDIUM, prose is LOW. Evidence files are history."""
     problems: list[WrongCall] = []
     for path, text in texts.items():
-        if path.startswith(("Docs/evidence/", "Docs/audit/", "scripts/audit/")):
+        if path.startswith(("Docs/evidence/", *SELF_AUDIT_PREFIXES)):
             continue
         is_prose = path.endswith(".md")
         header = "\n".join(text.splitlines()[:15])
         if is_prose and all(domain in header for domain in (*WRONG_DOMAINS, *WRONG_DOMAINS.values())):
             continue
         for number, line in enumerate(text.splitlines(), 1):
+            if is_prose and DOMAIN_ACK_RE.search(line):
+                continue
             for wrong, right in WRONG_DOMAINS.items():
                 if wrong in line:
                     problems.append(WrongCall(

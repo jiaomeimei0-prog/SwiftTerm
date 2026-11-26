@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Static security inventory: outbound hosts, command-execution sinks, listeners and secret scan.
 
 Every value that looks like a credential is redacted in the output (prefix + length only).

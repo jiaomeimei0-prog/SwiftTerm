@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Positive/negative controls for the audit detectors.
 
 A detector that never fires proves nothing, so every check is exercised on a known-bad
@@ -16,6 +15,8 @@ import audit_invocations as inv  # noqa: E402
 import audit_scripts as scripts  # noqa: E402
 import audit_security as sec  # noqa: E402
 import openstep  # noqa: E402
+import render_report  # noqa: E402
+import run_audit  # noqa: E402
 from audit_lib import FindingRegistry, TreeEntry, classify  # noqa: E402
 
 
@@ -146,7 +147,7 @@ class WorkflowTests(unittest.TestCase):
         text = "on: [push]\njobs:\n  a:\n    runs-on: xcode-27\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@" + "a" * 40 + "\n"
         rows, problems = scripts.workflow_audit("t", {".github/workflows/w.yml": text})
         kinds = sorted(p.kind for p in problems)
-        self.assertEqual(kinds, ["ci-runner-never-runs", "workflow-permissions", "workflow-unpinned-actions"])
+        self.assertEqual(kinds, ["workflow-permissions", "workflow-unpinned-actions"])
         self.assertEqual((rows[0]["pinned_actions"], rows[0]["unpinned_actions"]), (1, 1))
 
     def test_job_level_permissions_count(self) -> None:
@@ -176,10 +177,25 @@ class DomainAcknowledgementTests(unittest.TestCase):
             "note.md": f"# Note\nuse {wrong}\n",
             "ack.md": f"# Note\n> Correct domain: {right}; the typo {wrong} is historical.\nbody {wrong}\n",
             "scripts/audit/self.py": f"X = '{wrong}'\n",
+            "neg.md": f"# Title\nthe domain is {right} (NOT {wrong})\n",
+            "cfg.toml": f"# NOT {wrong}\nhost = '{wrong}'\n",
             "Docs/evidence/old.md": f"{wrong}\n",
         }
         got = sorted((p.location.split(":")[0], p.severity) for p in scripts.domain_references("t", texts))
-        self.assertEqual(got, [("note.md", "LOW"), ("wf.yml", "MEDIUM")])
+        self.assertEqual(got, [("cfg.toml", "MEDIUM"), ("cfg.toml", "MEDIUM"), ("note.md", "LOW"), ("wf.yml", "MEDIUM")])
+
+
+class SelfAuditSkipTests(unittest.TestCase):
+    """The audit quotes other repositories' scripts, workflows and mistyped domains on purpose."""
+
+    def test_wrong_call_detectors_ignore_audit_tooling_and_generated_reports(self) -> None:
+        entries = [blob("scripts/audit/fixture.py"), blob("Docs/audit/REPORT.md"), blob("scripts/real.sh"), blob("scripts/other.sh")]
+        quoted = "bash tests/ghost.sh\ngh workflow run ghost.yml\nsee `scripts/ghost.sh`\n"
+        texts = {"scripts/audit/fixture.py": quoted, "Docs/audit/REPORT.md": quoted, "scripts/real.sh": "#!/bin/sh\nbash tests/ghost.sh\n", "scripts/other.sh": "#!/bin/sh\ntrue\n"}
+        self.assertEqual([p.location for p in scripts.script_calls("t", texts, entries)], ["scripts/real.sh:2"])
+        self.assertEqual(scripts.doc_references("t", texts, entries), [])
+        targets = inv.collect_targets(texts)
+        self.assertEqual(inv.invocation_checks("t", texts, targets), [])
 
 
 class SecurityTests(unittest.TestCase):
@@ -277,6 +293,34 @@ class SecurityTests(unittest.TestCase):
         self.assertEqual([(h.rule, h.severity) for h in wide], [("http-listener", "MEDIUM")])
         spawn = self.scan("e.js", "JavaScript", "import { spawnSync } from 'node:child_process';\n")
         self.assertEqual([h.rule for h in spawn], ["child-process"])
+
+
+class CiFactsTests(unittest.TestCase):
+    def test_minutes_between_handles_missing_and_valid_stamps(self) -> None:
+        self.assertEqual(run_audit.minutes_between("2026-11-26T15:47:28Z", "2026-11-26T16:50:53Z"), 63)
+        self.assertIsNone(run_audit.minutes_between("", "2026-11-26T16:50:53Z"))
+
+    def test_queued_macos_jobs_are_reported_without_claiming_an_unproven_cause(self) -> None:
+        results = run_audit.Results(ci_facts={
+            "collected_at": "2026-11-26T16:50:00Z",
+            "swift_jobs": [
+                {"name": "build", "status": "queued", "conclusion": None, "labels": ["xcode-27"], "created_at": "2026-11-26T15:47:28Z"},
+                {"name": "linux-headless", "status": "completed", "conclusion": "success", "labels": ["ubuntu-latest"], "created_at": "2026-11-26T15:47:28Z"},
+            ]})
+        findings = run_audit.findings_to_dicts(run_audit.build_findings(results, {}))
+        ci = [f for f in findings if "xcode-27" in f["title"]]
+        self.assertEqual(len(ci), 1)
+        self.assertIn("≥ 62 phút", ci[0]["evidence"])
+        self.assertIn("không xác định được", ci[0]["evidence"])
+        self.assertNotIn("không có runner mang nhãn", ci[0]["title"] + ci[0]["evidence"])
+
+    def test_apple_probe_states_map_conclusions(self) -> None:
+        results = run_audit.Results(ci_facts={"apple_compile_jobs": [
+            {"name": "macOS build (MacTerminal + swift build)", "status": "completed", "conclusion": "success"},
+            {"name": "iOS build (iOSTerminal, covers HostHelpers)", "status": "completed", "conclusion": "failure"},
+            {"name": "macOS tests (swift test --no-parallel)", "status": "queued", "conclusion": None},
+        ]})
+        self.assertEqual(render_report.apple_states(results), {"macos-build": "đạt", "ios-build": "lỗi", "macos-tests": "chưa có runner nhận"})
 
 
 class MetaTests(unittest.TestCase):

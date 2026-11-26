@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """Render the Vietnamese audit report and the two full tables from audit results.
 
 Every number in the output is computed from `Results`; nothing is typed by hand except explanatory prose.
@@ -26,7 +25,6 @@ WRONG_CALL_INFO = {
     "ps1-hardcoded-root": "PowerShell gắn cứng gốc repo `%USERPROFILE%\\Documents\\SwiftTerm`",
     "ps1-no-bom": "PowerShell: thiếu UTF-8 BOM (PowerShell 5.1 đọc ANSI)",
     "wrong-domain-reference": "Tên miền sai `tooltop1.vip` (tên miền thật `toolvip1.top`)",
-    "ci-runner-never-runs": "Job dùng nhãn runner mà fork không có (`xcode-27`)",
     "workflow-permissions": "Workflow không khai báo `permissions:`",
     "workflow-unpinned-actions": "Action tham chiếu bằng tag, không ghim SHA",
     "broken-doc-path": "Tài liệu nêu đường dẫn không tồn tại",
@@ -307,6 +305,35 @@ def section_hostapi(r) -> str:
         table(["API", "Loại", "Trạng thái", "Số chỗ a-Shell gọi", "Số tham chiếu test SwiftTerm", "Vị trí gọi đầu tiên"], rows), ""])
 
 
+APPLE_JOBS = {"macos-build": "macOS build", "ios-build": "iOS build", "macos-tests": "macOS tests"}
+
+
+def apple_states(r) -> dict[str, str]:
+    """Short status of each Apple compile probe job, from the GitHub facts collected with --online."""
+    states: dict[str, str] = {}
+    for job in r.ci_facts.get("apple_compile_jobs", []):
+        for key, label in APPLE_JOBS.items():
+            if job["name"].startswith(label):
+                conclusion = job.get("conclusion")
+                states[key] = {"success": "đạt", "failure": "lỗi", "cancelled": "bị huỷ"}.get(conclusion) or (
+                    "đang chạy" if job["status"] == "in_progress" else "chưa có runner nhận" if job["status"] == "queued" else (conclusion or job["status"]))
+    return states
+
+
+def apple_probe_lines(r) -> list[str]:
+    run_info = r.ci_facts.get("apple_compile_run")
+    if not run_info:
+        return ["- Workflow `Apple compile probe` (`macos-26`): chưa có run nào khi thu thập số liệu."]
+    rows = []
+    for job in r.ci_facts.get("apple_compile_jobs", []):
+        steps = job.get("steps", [])
+        passed = sum(1 for s in steps if s.get("conclusion") == "success")
+        failed = [s["name"] for s in steps if s.get("conclusion") == "failure"]
+        rows.append([f"`{job['name']}`", job.get("runner_name") or "-", job["status"], job.get("conclusion") or "-", f"{passed}/{len(steps)} bước đạt" + (f"; lỗi: {', '.join(failed)}" if failed else "")])
+    return [f"- Workflow `Apple compile probe` (run {run_info['id']}, commit `{run_info['head_sha'][:10]}`, trạng thái `{run_info['status']}`/`{run_info.get('conclusion') or '-'}`; Xcode 26.x của image `macos-26`, không phải Xcode 27.1 mà upstream dùng):", "",
+            table(["Job", "Runner", "Trạng thái", "Kết luận", "Bước"], rows), ""]
+
+
 def section_tests(r) -> str:
     xct, swt, job_id = linux_numbers(r)
     inventory = [t for t in r.tests_inventory if t["repo"] == "swiftterm"]
@@ -335,17 +362,23 @@ def section_tests(r) -> str:
     if xct is not None and swt:
         evidence = (r.ci_facts.get("linux_headless_log") or {}).get("evidence_lines", [])
         out.append(f"- Job `linux-headless` (id {job_id}, `ubuntu-latest`): **{xct} XCTest** đạt, 0 lỗi + **{swt[0]} test Swift Testing / {swt[1]} suite** đạt. Log: " + " · ".join(f"`{line[:80]}`" for line in evidence[-2:]) + ".")
-    out += ["- 5 job còn lại của workflow `Swift` (macOS) ở trạng thái `queued` vì fork không có runner `xcode-27` ⇒ **chưa có bất kỳ kết quả biên dịch/test Apple nào** từ CI của fork.",
-            "- Số test khai báo tĩnh trong `Tests/` (regex; `@Test` có tham số tính 1) — không so trực tiếp với số đã chạy:", "",
+    queued = [j for j in r.ci_facts.get("swift_jobs", []) if j.get("status") == "queued"]
+    if queued:
+        out.append(f"- {len(queued)} job còn lại của workflow `Swift` (macOS, `runs-on: xcode-27`) ở trạng thái `queued`, chưa runner nào nhận; nguyên nhân chưa xác định (mục 10) ⇒ **workflow gốc của CI fork chưa cho kết quả biên dịch/test Apple nào**.")
+    out += apple_probe_lines(r)
+    out += ["- Số test khai báo tĩnh trong `Tests/` (regex; `@Test` có tham số tính 1) — không so trực tiếp với số đã chạy:", "",
             table(["Test target", "File", "XCTest (khai báo)", "@Test (khai báo)"], [[k, v[0], n(v[1]), n(v[2])] for k, v in sorted(per_target.items(), key=lambda kv: -(kv[1][1] + kv[1][2]))]), "",
             "### 6.4 Ma trận chức năng: đạt / chưa / đang được dùng", ""]
     wasm = next((x for x in r.ci_facts.get("runs_for_sha", []) if x["name"].startswith("WebAssembly")), None)
     wasm_cell = f"CI `WebAssembly browser API`: {wasm['status']}/{wasm['conclusion'] or '-'}" if wasm else "không có dữ liệu CI"
     failing = [x for x in r.test_runs if x["ref"] == "fork" and x["result"] == "FAIL"]
+    states = apple_states(r)
     out += [table(["Chức năng", "Ai dùng", "Bằng chứng hiện có", "Mức", "Kết luận"], [
         ["Lõi emulator (parser, buffer, headless)", "a-Shell, Web/WASM, TerminalApp", f"CI `linux-headless`: {xct} XCTest + {swt[0] if swt else '?'} Swift Testing đạt", "L2", "ĐẠT (phần chạy trên Linux)"],
-        ["View/renderer Apple (AppKit/UIKit/Metal)", "a-Shell iOS, TerminalApp macOS", "5 job macOS queued, không có kết quả", "—", "CHƯA CÓ BẰNG CHỨNG"],
-        [f"HostHelpers ({r.hostapi_script['declared']} API)", "a-Shell", "grep tĩnh; không biên dịch iOS", "L0", "CHƯA XÁC MINH BIÊN DỊCH"],
+        ["View/renderer Apple (AppKit/UIKit/Metal)", "a-Shell iOS, TerminalApp macOS", f"Apple compile probe: macOS build {states.get('macos-build', 'chưa có dữ liệu')}, iOS build {states.get('ios-build', 'chưa có dữ liệu')}", "L3" if states.get("macos-build") == "đạt" and states.get("ios-build") == "đạt" else "—",
+         "BIÊN DỊCH ĐẠT (Xcode 26.x); chưa chạy" if states.get("macos-build") == "đạt" and states.get("ios-build") == "đạt" else "CHƯA CÓ BẰNG CHỨNG BIÊN DỊCH"],
+        ["Test trên macOS (`swift test`)", "SwiftTerm", f"Apple compile probe: macOS tests {states.get('macos-tests', 'chưa có dữ liệu')}", "L2" if states.get("macos-tests") == "đạt" else "—", "ĐẠT (macOS)" if states.get("macos-tests") == "đạt" else "CHƯA CÓ BẰNG CHỨNG"],
+        [f"HostHelpers ({r.hostapi_script['declared']} API)", "a-Shell", ("iOS build đạt (biên dịch cả phần `os(iOS)`); " if states.get("ios-build") == "đạt" else "grep tĩnh; chưa biên dịch iOS; ") + f"{len([a for a in r.hostapi if a['status'] == 'USED_BY_ASHELL_UNTESTED_IN_SWIFTTERM'])} API a-Shell dùng nhưng SwiftTerm không test", "L3" if states.get("ios-build") == "đạt" else "L0", "BIÊN DỊCH ĐẠT; hành vi chưa kiểm" if states.get("ios-build") == "đạt" else "CHƯA XÁC MINH BIÊN DỊCH"],
         [f"Định nghĩa catalogue ({r.catalogue_sizes[0]['fork']}/{r.catalogue_sizes[1]['fork']} lệnh)", "a-Shell", "plist hợp lệ; fork≡upstream≡pin; `ssh-stock-registration.sh` PASS ×3 nguồn", "L1", "ĐẠT (tĩnh)"],
         ["Chạy thật các lệnh", "Người dùng cuối", "Chưa có", "L4", "PENDING_USER_DEVICE"],
         ["Gắn Worker A–J (`worker-binding.sh`)", "a-Shell", "upstream PASS; " + ("; ".join(f"{x['ref']} FAIL" for x in failing) or "fork/pin PASS"), "L1", "KHÔNG ĐẠT (fork)" if failing else "ĐẠT"],
@@ -355,7 +388,7 @@ def section_tests(r) -> str:
         ["Tên miền `toolvip1.top`", "Công chúng", "Probe từ VM không hợp lệ (egress allowlist)", "—", "CHƯA XÁC MINH từ bên ngoài"]]), "",
         "Về \"đang được sử dụng\": với HostHelpers, mức dùng đo được bằng số chỗ a-Shell gọi (mục 5). Với từng lệnh a-Shell, mức dùng thật chỉ đo được trên thiết bị — không có telemetry.", "",
         "### 6.5 Việc kiểm thử còn thiếu và cách đóng", "",
-        "1. **Biên dịch macOS/iOS** — workflow `.github/workflows/apple-compile.yml` (runner `macos-26` GitHub-hosted, repo public): `swift build` cho macOS và `xcodebuild` cho iOS (phủ `HostHelpers`). Kết quả thật nằm ở tab Actions của PR.",
+        "1. **Biên dịch macOS/iOS** — workflow `.github/workflows/apple-compile.yml` (runner `macos-26` GitHub-hosted, repo public): `xcodebuild` MacTerminal/iOSTerminal + `swift build` + `swift test` đúng lệnh của `xcode.yml` (phủ `HostHelpers`). Kết quả: mục 6.3; chạy lại bằng `workflow_dispatch` hoặc push.",
         "2. **Symbol nhị phân prebuilt** — đối chiếu `[framework, symbol]` của plist với `nm -gU` sau khi kiểm SHA-256 (chưa làm; cần job riêng).",
         "3. **158 lệnh trên thiết bị** — `scripts/verify_command_catalogue_158.sh` trong app; ma trận chờ ở `Docs/command-158-device-matrix-PENDING.csv`.",
         "4. **Tên miền** — probe từ GitHub Actions hoặc máy người dùng, không dùng VM.", ""]
@@ -400,7 +433,7 @@ def section_limits(r) -> str:
         "egress là allowlist (github.com, api.github.com) ⇒ không tải được framework prebuilt, không probe được `toolvip1.top`, và các kết luận \"FAIL\" tên miền chạy từ VM trong báo cáo cũ **không có giá trị**.", "",
         "**Việc tiếp theo, theo thứ tự giá trị:**", "",
         "1. Merge PR a-shell #8 rồi bump pin về commit nằm trên `master`; đồng bộ `upstream/master` vào fork để `worker-binding.sh` PASS.",
-        "2. Xem kết quả `apple-compile.yml` (L3) và quyết định có đăng ký runner `xcode-27` hay chuyển các job macOS sang runner GitHub-hosted.",
+        "2. Đọc kết quả `Apple compile probe` (mục 6.3). Nếu job `macos-26` chạy còn `xcode-27` vẫn `queued`, vấn đề nằm ở nhãn `xcode-27` của fork: kiểm Settings → Actions → Runners và Billing, hoặc chuyển job macOS của `xcode.yml` sang runner chạy được.",
         "3. Chạy `verify_command_catalogue_158.sh` trên iPhone/iPad và điền ma trận.",
         "4. Cấu hình `CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID`, tắt Access cho hostname demo công khai, probe `toolvip1.top` từ ngoài VM.",
         "5. Với upstream a-Shell: thu hẹp `didReceive challenge`, sinh chứng chỉ localhost theo máy, thống nhất escape JS (đề xuất, ngoài phạm vi repo này).", "",
@@ -467,7 +500,7 @@ def render(r, out: Path) -> None:
             + (f"Đã khắc phục: gốc repo PowerShell gắn cứng {base_by_kind.get('ps1-hardcoded-root', 0)} → {by_kind.get('ps1-hardcoded-root', 0)}, tên miền sai {base_by_kind.get('wrong-domain-reference', 0)} → {by_kind.get('wrong-domain-reference', 0)}, "
                f"workflow thiếu `permissions` {base_by_kind.get('workflow-permissions', 0)} → {by_kind.get('workflow-permissions', 0)}." if r.baseline else ""),
             f"3. **Kiểm thử:** lõi emulator đạt trên Linux CI ({xct} XCTest + {swt[0] if swt else '?'} Swift Testing). " +
-            ("**Fork a-Shell trượt bài test `worker-binding.sh` của nhà sản xuất** (upstream đạt). " if failing else "") + "Chưa có biên dịch Apple trong CI của fork (5 job macOS queued), chưa có chạy thật 158 lệnh.",
+            ("**Fork a-Shell trượt bài test `worker-binding.sh` của nhà sản xuất** (upstream đạt). " if failing else "") + "Biên dịch Apple (`Apple compile probe`): " + (", ".join(f"{APPLE_JOBS[k]} {v}" for k, v in apple_states(r).items()) or "chưa có kết quả") + "; workflow `Swift` gốc: job macOS `queued`. Chưa có chạy thật 158 lệnh.",
             f"4. **An ninh:** {sev.get('CRITICAL', 0)} nghiêm trọng, {sev.get('HIGH', 0)} cao, {sev.get('MEDIUM', 0)} trung bình, {sev.get('LOW', 0)} thấp, {sev.get('INFO', 0)} thông tin. "
             "Không lộ token đang hiệu lực; có khoá riêng localhost công khai, handler chấp nhận mọi chứng chỉ và ba chỗ nội suy JS thiếu escape (đều là mã gốc của nhà sản xuất).",
             "5. **Chưa thể khẳng định \"hoàn tất\"**: tên miền `toolvip1.top` chưa xác minh từ bên ngoài; 158 lệnh chưa chạy trên thiết bị; thiếu secrets Cloudflare. Chi tiết mục 6.4 và 10.", ""]
