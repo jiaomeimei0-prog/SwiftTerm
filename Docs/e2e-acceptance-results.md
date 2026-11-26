@@ -1,16 +1,16 @@
 # E2E acceptance results (host)
 
-- Generated: 2026-11-25T21:05:35Z UTC
+- Generated: 2026-11-26T09:50:39Z UTC
 - Root: `/workspace`
-- HEAD: `8e135176bdb8d5f075e87c2620f6502c5ab47222` (`8e13517 Add host E2E acceptance harness and report`)
+- HEAD: `59581633d9972894edb12ce58d487a21d185d230` (`5958163 Mark SoT↔a-Shell architecture complete; unify Apps/a-Shell pin`)
 
 === Host E2E acceptance ===
 
 ## 1. Pin graph
-PASS  SwiftTerm HEAD=8e135176bdb8d5f075e87c2620f6502c5ab47222
-PASS  Apps/a-Shell gitlink=68857ae1ab46216c312bdc8ef5ac6712160d9bb7
+PASS  SwiftTerm HEAD=59581633d9972894edb12ce58d487a21d185d230
+PASS  Apps/a-Shell gitlink=ef3ee3711539dbf067e93dbb68fe7f94b6b2e271
 PASS  Apps/a-Shell checkout matches gitlink
-PASS  nested SwiftTerm pin=edc5aae87c070887c1575b059e83a800a44e3bae
+PASS  nested SwiftTerm pin=633a592ee9dd9585a0536314d26e906154ac43db
 PASS  nested SwiftTerm is ancestor of monorepo HEAD (or equal)
 PASS  .gitmodules points at jiaomeimei0-prog/SwiftTerm
 
@@ -65,10 +65,10 @@ PASS  call-site wipeContents satisfied by HostHelpers
 
 ## 4. Upstream parity spot-check (identical host sources)
 PASS  identical to holzschu: a-Shell/SceneDelegate.swift
-PASS  identical to holzschu: a-Shell/SceneDelegate+TerminalView.swift
 PASS  identical to holzschu: a-Shell/ExtraCommands.swift
 PASS  identical to holzschu: a-Shell/Relay.swift
-PASS  identical to holzschu: a-Shell/AppDelegate.swift
+PASS  allowed intentional delta vs holzschu: a-Shell/SceneDelegate+TerminalView.swift
+PASS  allowed intentional delta vs holzschu: a-Shell/AppDelegate.swift
 
 ## 5. Network / side-channel defaults (static)
 PASS  Kitty clipboard policy default empty
@@ -90,9 +90,9 @@ WARN  pythonInstall.tar.gz fetched without local SHA-256 (upstream design)
 
 ## 7. Device script syntax
 PASS  verify_ashell_integrity.sh sh -n clean
-=== a-Shell integrity 2026-11-25T21:05:36Z ===
+=== a-Shell integrity 2026-11-26T09:50:39Z ===
 pwd=/workspace
-HOME=/tmp/tmp.DNouIwqodq
+HOME=/tmp/tmp.XUTNToQByW
 GROUP=
 
 ## env
@@ -113,10 +113,10 @@ PASS  help -l contains help
 PASS  help -l contains codex (full app)
 
 ## .relay.json
-PASS  found /tmp/tmp.DNouIwqodq/Documents/.relay.json
-PASS  /tmp/tmp.DNouIwqodq/Documents/.relay.json has enabled/bind/port keys
-PASS  /tmp/tmp.DNouIwqodq/Documents/.relay.json enabled is not true (safe default / stopped)
-PASS  /tmp/tmp.DNouIwqodq/Documents/.relay.json bind is loopback 127.0.0.1
+PASS  found /tmp/tmp.XUTNToQByW/Documents/.relay.json
+PASS  /tmp/tmp.XUTNToQByW/Documents/.relay.json has enabled/bind/port keys
+PASS  /tmp/tmp.XUTNToQByW/Documents/.relay.json enabled is not true (safe default / stopped)
+PASS  /tmp/tmp.XUTNToQByW/Documents/.relay.json bind is loopback 127.0.0.1
 WARN  relay command not available in this target
 
 ## clipboard pbcopy/pbpaste

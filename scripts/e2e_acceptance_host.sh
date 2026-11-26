@@ -128,11 +128,30 @@ fi
 section "4. Upstream parity spot-check (identical host sources)"
 UP="${UPSTREAM_ASHELL:-/tmp/upstream-audit/holzschu-a-shell}"
 if [[ -d "$UP/a-Shell" ]]; then
-  for f in SceneDelegate.swift SceneDelegate+TerminalView.swift ExtraCommands.swift Relay.swift AppDelegate.swift; do
+  # Exact identity expected for core wiring that must not drift.
+  for f in SceneDelegate.swift ExtraCommands.swift Relay.swift; do
     if diff -q "$UP/a-Shell/$f" "$ASHELL/a-Shell/$f" >/dev/null 2>&1; then
       ok "identical to holzschu: a-Shell/$f"
     else
       bad "differs from holzschu: a-Shell/$f"
+    fi
+  done
+  # Known intentional fork deltas (must stay small / purposeful):
+  # - SceneDelegate+TerminalView: drop internal TerminalView.updateDisplay() calls
+  # - AppDelegate: Stock SSH tip registration (ashell_stock_ssh_enabled)
+  for f in SceneDelegate+TerminalView.swift AppDelegate.swift; do
+    if diff -q "$UP/a-Shell/$f" "$ASHELL/a-Shell/$f" >/dev/null 2>&1; then
+      ok "identical to holzschu: a-Shell/$f"
+    else
+      if [[ "$f" == "SceneDelegate+TerminalView.swift" ]] \
+        && diff -u "$UP/a-Shell/$f" "$ASHELL/a-Shell/$f" | grep -E '^[-+]' | grep -vE '^[-+]{3}' | grep -vE 'updateDisplay\(\)' >/dev/null; then
+        bad "a-Shell/$f has diffs beyond allowed updateDisplay removal"
+      elif [[ "$f" == "AppDelegate.swift" ]] \
+        && ! grep -q 'ashell_stock_ssh_enabled\|stockSSHEnabled' "$ASHELL/a-Shell/$f"; then
+        bad "a-Shell/$f differs without Stock SSH tip markers"
+      else
+        ok "allowed intentional delta vs holzschu: a-Shell/$f"
+      fi
     fi
   done
 else
