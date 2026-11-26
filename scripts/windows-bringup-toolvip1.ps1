@@ -153,18 +153,20 @@ try {
     Write-Host "local http=$($l.StatusCode) swiftterm=$($l.Content -match 'SwiftTerm')"
 } catch { Write-Host "local FAIL $_" }
 
-Write-Host "=== PUBLIC CHECK ==="
+Write-Host "=== PUBLIC CHECK (no redirect follow) ==="
 try {
-    $p = Invoke-WebRequest "https://$Hostname/" -UseBasicParsing -TimeoutSec 20
+    $p = Invoke-WebRequest "https://$Hostname/" -UseBasicParsing -TimeoutSec 20 -MaximumRedirection 0
     $snip = $p.Content
     if ($snip.Length -gt 180) { $snip = $snip.Substring(0, 180) }
     Write-Host "public http=$($p.StatusCode)"
     Write-Host "public body snip: $snip"
-    if ($p.Content -match "SwiftTerm") {
+    if ($p.StatusCode -ge 300 -and $p.StatusCode -lt 400) {
+        Write-Host "FAIL: redirect Location=$($p.Headers['Location']) - Access or other gate"
+    } elseif ($p.Content -match "SwiftTerm") {
         Write-Host "PASS: public SwiftTerm"
     } elseif ($p.Content -match "Hello World") {
         Write-Host "FAIL: still Worker Hello World - delete Worker DNS for $Hostname"
-    } elseif ($p.Content -match "Sign in") {
+    } elseif ($p.Content -match "(?i)cloudflareaccess\.com|Sign in|Access") {
         Write-Host "FAIL: Access still on - delete Access app $Hostname"
     } elseif ($p.Content -match "1033|Tunnel error") {
         Write-Host "FAIL: Error 1033 - NamedTunnel window not registered"
@@ -172,8 +174,15 @@ try {
         Write-Host "WARN: unexpected body - paste this snip back to the agent"
     }
 } catch {
-    Write-Host "public FAIL: $($_.Exception.Message)"
-    Write-Host "If Error 1033 in browser: wait for Registered tunnel connection in NamedTunnel window."
+    $resp = $_.Exception.Response
+    if ($resp -and [int]$resp.StatusCode -ge 300 -and [int]$resp.StatusCode -lt 400) {
+        $loc = $null
+        try { $loc = $resp.Headers["Location"] } catch { }
+        Write-Host "public FAIL: HTTP $([int]$resp.StatusCode) redirect Location=$loc (Access gate)"
+    } else {
+        Write-Host "public FAIL: $($_.Exception.Message)"
+        Write-Host "If Error 1033 in browser: wait for Registered tunnel connection in NamedTunnel window."
+    }
 }
 
 Write-Host ""

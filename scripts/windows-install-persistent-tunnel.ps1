@@ -148,18 +148,29 @@ if ($AsService) {
 }
 
 Start-Sleep -Seconds 8
-Write-Host "=== PUBLIC CHECK ==="
+Write-Host "=== PUBLIC CHECK (no redirect follow) ==="
 try {
-    $p = Invoke-WebRequest "https://$Hostname/" -UseBasicParsing -TimeoutSec 25
+    $p = Invoke-WebRequest "https://$Hostname/" -UseBasicParsing -TimeoutSec 25 -MaximumRedirection 0
     $snip = $p.Content
     if ($snip.Length -gt 160) { $snip = $snip.Substring(0, 160) }
     Write-Host "http=$($p.StatusCode) snip=$snip"
-    if ($p.Content -match "SwiftTerm") { Write-Host "PASS public SwiftTerm" }
+    if ($p.StatusCode -ge 300 -and $p.StatusCode -lt 400) {
+        Write-Host "FAIL redirect Location=$($p.Headers['Location']) (Access/gate)"
+    }
+    elseif ($p.Content -match "SwiftTerm") { Write-Host "PASS public SwiftTerm" }
     elseif ($p.Content -match "1033|Tunnel error") { Write-Host "FAIL still 1033 - wait or check tunnel log" }
     elseif ($p.Content -match "Hello World") { Write-Host "FAIL Worker DNS still bound" }
+    elseif ($p.Content -match "(?i)cloudflareaccess\.com|Sign in|Access") { Write-Host "FAIL Access login wall" }
     else { Write-Host "WARN unexpected body" }
 } catch {
-    Write-Host "public error: $($_.Exception.Message)"
+    $resp = $_.Exception.Response
+    if ($resp -and [int]$resp.StatusCode -ge 300 -and [int]$resp.StatusCode -lt 400) {
+        $loc = $null
+        try { $loc = $resp.Headers["Location"] } catch { }
+        Write-Host "public FAIL: HTTP $([int]$resp.StatusCode) redirect Location=$loc (Access gate)"
+    } else {
+        Write-Host "public error: $($_.Exception.Message)"
+    }
 }
 
 Write-Host "Done."
