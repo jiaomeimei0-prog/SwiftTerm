@@ -72,3 +72,19 @@ local_index http=200
   28779       03:01 /tmp/cloudflared tunnel --url http://127.0.0.1:8765
 local=200 cf=200
 ```
+
+## Browser E2E (computerUse) — PASS
+
+- Verified: **2026-11-26 18:45:59 Asia/Bangkok**
+- Agent: browser verify CF tunnel (`bc-16259916-51f3-5919-810f-44381a4a2d0b`)
+- URL: https://folks-assumed-met-engine.trycloudflare.com/
+- Title: SwiftTerm WASM (Cloudflare)
+- Terminal canvas visible; Live stream counter advancing (1→25+)
+- Typed into canvas: no PTY echo (expected — page says Local stream only)
+- WASM via browser download: Done ~889 KB; curl wasm HTTP/2 200 application/wasm
+- Screenshots:
+  - `/opt/cursor/artifacts/cf-tunnel-browser-loaded.webp`
+  - `/opt/cursor/artifacts/cf-tunnel-browser-live-stream.webp`
+  - `/opt/cursor/artifacts/cf-tunnel-wasm-download.webp`
+- Tunnel still alive after browser check: yes
+

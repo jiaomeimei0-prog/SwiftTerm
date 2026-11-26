@@ -8,7 +8,7 @@ Múi giờ báo cáo: **Asia/Bangkok (UTC+7)**. Các timestamp UTC trong evidenc
 |----------|-----------|-------------|
 | Catalogue 158 lệnh (source / plist) | **ĐẠT identity** | Agent (đếm 158 keys) |
 | Host E2E SwiftTerm lõi (pin, HostHelpers, call-sites) | **ĐẠT host static** | Agent (`Docs/e2e-acceptance-results.md`) |
-| Cloudflare Quick Tunnel + WASM demo trên trình duyệt | **ĐẠT runtime (agent host)** | Agent curl + browser |
+| Cloudflare Quick Tunnel + WASM demo trên trình duyệt | **ĐẠT runtime (curl + Chrome)** | Agent — screenshots `cf-tunnel-browser-*.webp` |
 | 158 lệnh chạy thật trong a-Shell trên thiết bị bạn | **CHƯA ĐẠT / PENDING_USER_DEVICE** | **Chỉ bạn** |
 | Gọi nhiệm vụ “hoàn thành tuyệt đối” theo chuẩn nhà sản xuất | **CHƯA** | Sau khi bạn đối chiếu và xác nhận |
 

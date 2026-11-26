@@ -20,7 +20,7 @@ Timezone ghi nhận: Asia/Bangkok (UTC+7). Timestamp máy agent = UTC.
 | CF-02 | Quick Tunnel | `cloudflared tunnel --url http://127.0.0.1:8765` | URL `https://folks-assumed-met-engine.trycloudflare.com` | ĐẠT |
 | CF-03 | Index qua CF | `curl …/ ` | HTTP/2 200, `server: cloudflare` | ĐẠT |
 | CF-04 | WASM qua CF | `curl …/pkg/swiftterm-embedded.wasm` | 200, 909857 bytes | ĐẠT |
-| CF-05 | Browser mở URL CF | computerUse / thủ công | xem evidence + screenshot | ĐẠT khi browser PASS |
+| CF-05 | Browser mở URL CF | computerUse Chrome | PASS — title đúng, Live stream chạy, wasm 200 | **ĐẠT** |
 | CF-06 | Phiên không tự đóng | để process chạy | pid cloudflared + python còn sống | ĐẠT trên agent host |
 
 Evidence: `Docs/evidence/cloudflare-quick-tunnel-evidence.md`
