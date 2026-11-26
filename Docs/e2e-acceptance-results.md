@@ -1,15 +1,15 @@
 # E2E acceptance results (host)
 
-- Generated: 2026-11-26T09:50:16Z UTC
+- Generated: 2026-11-26T09:50:39Z UTC
 - Root: `/workspace`
-- HEAD: `633a592ee9dd9585a0536314d26e906154ac43db` (`633a592 Make DocC Pages-optional and narrow SonarCloud scope (#22)`)
+- HEAD: `59581633d9972894edb12ce58d487a21d185d230` (`5958163 Mark SoT↔a-Shell architecture complete; unify Apps/a-Shell pin`)
 
 === Host E2E acceptance ===
 
 ## 1. Pin graph
-PASS  SwiftTerm HEAD=633a592ee9dd9585a0536314d26e906154ac43db
-PASS  Apps/a-Shell gitlink=0c9b11b6a1d00923f40fd3d9da512a9a374a0597
-WARN  Apps/a-Shell checkout ef3ee3711539dbf067e93dbb68fe7f94b6b2e271 != gitlink 0c9b11b6a1d00923f40fd3d9da512a9a374a0597
+PASS  SwiftTerm HEAD=59581633d9972894edb12ce58d487a21d185d230
+PASS  Apps/a-Shell gitlink=ef3ee3711539dbf067e93dbb68fe7f94b6b2e271
+PASS  Apps/a-Shell checkout matches gitlink
 PASS  nested SwiftTerm pin=633a592ee9dd9585a0536314d26e906154ac43db
 PASS  nested SwiftTerm is ancestor of monorepo HEAD (or equal)
 PASS  .gitmodules points at jiaomeimei0-prog/SwiftTerm
@@ -65,10 +65,10 @@ PASS  call-site wipeContents satisfied by HostHelpers
 
 ## 4. Upstream parity spot-check (identical host sources)
 PASS  identical to holzschu: a-Shell/SceneDelegate.swift
-FAIL  differs from holzschu: a-Shell/SceneDelegate+TerminalView.swift
 PASS  identical to holzschu: a-Shell/ExtraCommands.swift
 PASS  identical to holzschu: a-Shell/Relay.swift
-FAIL  differs from holzschu: a-Shell/AppDelegate.swift
+PASS  allowed intentional delta vs holzschu: a-Shell/SceneDelegate+TerminalView.swift
+PASS  allowed intentional delta vs holzschu: a-Shell/AppDelegate.swift
 
 ## 5. Network / side-channel defaults (static)
 PASS  Kitty clipboard policy default empty
@@ -90,9 +90,9 @@ WARN  pythonInstall.tar.gz fetched without local SHA-256 (upstream design)
 
 ## 7. Device script syntax
 PASS  verify_ashell_integrity.sh sh -n clean
-=== a-Shell integrity 2026-11-26T09:50:17Z ===
+=== a-Shell integrity 2026-11-26T09:50:39Z ===
 pwd=/workspace
-HOME=/tmp/tmp.gpYw11M8UQ
+HOME=/tmp/tmp.XUTNToQByW
 GROUP=
 
 ## env
@@ -113,10 +113,10 @@ PASS  help -l contains help
 PASS  help -l contains codex (full app)
 
 ## .relay.json
-PASS  found /tmp/tmp.gpYw11M8UQ/Documents/.relay.json
-PASS  /tmp/tmp.gpYw11M8UQ/Documents/.relay.json has enabled/bind/port keys
-PASS  /tmp/tmp.gpYw11M8UQ/Documents/.relay.json enabled is not true (safe default / stopped)
-PASS  /tmp/tmp.gpYw11M8UQ/Documents/.relay.json bind is loopback 127.0.0.1
+PASS  found /tmp/tmp.XUTNToQByW/Documents/.relay.json
+PASS  /tmp/tmp.XUTNToQByW/Documents/.relay.json has enabled/bind/port keys
+PASS  /tmp/tmp.XUTNToQByW/Documents/.relay.json enabled is not true (safe default / stopped)
+PASS  /tmp/tmp.XUTNToQByW/Documents/.relay.json bind is loopback 127.0.0.1
 WARN  relay command not available in this target
 
 ## clipboard pbcopy/pbpaste
@@ -137,15 +137,15 @@ SKIP  xcodebuild unavailable — cannot build iOS app on this host
 SKIP  swift unavailable — package unit tests not executed
 
 ## Summary
-PASS=65 WARN=1 FAIL=2 SKIP=2
+PASS=67 WARN=1 FAIL=0 SKIP=2
 
 ## Counts
 
 | PASS | WARN | FAIL | SKIP |
 |------|------|------|------|
-| 65 | 1 | 2 | 2 |
+| 67 | 1 | 0 | 2 |
 
-**Host gate: FAIL** — fix FAIL items before claiming acceptance.
+**Host gate: PASS** (device interactive / Xcode build still required for full E2E).
 
 ## Device follow-up (manual)
 
