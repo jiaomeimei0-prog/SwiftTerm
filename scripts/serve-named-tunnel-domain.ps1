@@ -1,4 +1,4 @@
-﻿-# Named Cloudflare Tunnel -> custom domain (Windows, windows stay open).
+﻿# Named Cloudflare Tunnel -> custom domain (Windows, windows stay open).
 # ASCII-only for Windows PowerShell 5.1 encoding safety.
 #
 # Prerequisites:
