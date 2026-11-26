@@ -17,6 +17,8 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "windows-tunnel-common.ps1")
+
 $Root = Join-Path $env:USERPROFILE "Documents\SwiftTerm"
 $Site = Join-Path $Root "Web\cloudflare\site"
 $EvidenceDir = Join-Path $Root "Docs\evidence"
@@ -25,63 +27,6 @@ New-Item -ItemType Directory -Force -Path $EvidenceDir | Out-Null
 
 if (-not (Test-Path -LiteralPath (Join-Path $Site "index.html"))) {
     throw "Missing site at $Site"
-}
-
-function Refresh-Path {
-    $machine = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
-    $user = [System.Environment]::GetEnvironmentVariable("Path", "User")
-    if ($null -eq $machine) { $machine = "" }
-    if ($null -eq $user) { $user = "" }
-    $env:Path = $machine + ";" + $user
-}
-
-# cloudflared writes WRN/INF to stderr; with ErrorAction Stop + 2>&1 that becomes terminating on PS 5.1.
-function Invoke-Cloudflared {
-    param([Parameter(ValueFromRemainingArguments = $true)][string[]]$CfArgs)
-    $prev = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
-    try {
-        $out = & cloudflared @CfArgs 2>&1
-        $code = $LASTEXITCODE
-    } finally {
-        $ErrorActionPreference = $prev
-    }
-    $text = ($out | ForEach-Object { "$_" }) -join "`n"
-    return @{ ExitCode = $code; Text = $text; Lines = @($out | ForEach-Object { "$_" }) }
-}
-
-function Test-CanBindPort {
-    param([int]$TestPort)
-    $listener = $null
-    try {
-        $listener = New-Object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Loopback, $TestPort)
-        $listener.Start()
-        $listener.Stop()
-        return $true
-    } catch {
-        return $false
-    } finally {
-        if ($listener) {
-            try { $listener.Stop() } catch { }
-        }
-    }
-}
-
-function Select-ListenPort {
-    param([int]$Preferred)
-    $candidates = @()
-    if ($Preferred -gt 0) { $candidates += $Preferred }
-    $candidates += 8787, 8888, 18080, 19000, 28080, 3000, 8080, 8765
-    $seen = @{}
-    foreach ($p in $candidates) {
-        if ($seen.ContainsKey($p)) { continue }
-        $seen[$p] = $true
-        if (Test-CanBindPort -TestPort $p) {
-            return $p
-        }
-        Write-Host "Port $p not bindable (in use or WinError 10013 excluded) - trying next..."
-    }
-    throw "No bindable local port found. Run as Admin or free a port. Check: netsh interface ipv4 show excludedportrange protocol=tcp"
 }
 
 Refresh-Path

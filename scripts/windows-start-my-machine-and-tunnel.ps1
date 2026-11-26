@@ -1,15 +1,8 @@
 ﻿# One-shot on the USER Windows PC:
-# 1) Start Cursor My Machines worker (agent must stay running - keep window open)
+# 1) Start Cursor My Machines worker (KEEP window open)
 # 2) Install detached HTTP origin + named tunnel for toolvip1.top
 #
-# Run:
-#   cd $env:USERPROFILE\Documents\SwiftTerm
-#   git fetch origin
-#   git checkout cursor/fix-named-tunnel-ps1-45fd
-#   git pull
 #   powershell -ExecutionPolicy Bypass -File .\scripts\windows-start-my-machine-and-tunnel.ps1
-#
-# Without a live "agent worker start" process, cloud agents still cannot drive this PC.
 
 param(
     [string]$Hostname = "toolvip1.top",
@@ -19,17 +12,11 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "windows-tunnel-common.ps1")
+
 $Root = Join-Path $env:USERPROFILE "Documents\SwiftTerm"
 if (-not (Test-Path -LiteralPath $Root)) { throw "Repo missing: $Root - clone SwiftTerm there first" }
 Set-Location -LiteralPath $Root
-
-function Refresh-Path {
-    $m = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
-    $u = [System.Environment]::GetEnvironmentVariable("Path", "User")
-    if ($null -eq $m) { $m = "" }
-    if ($null -eq $u) { $u = "" }
-    $env:Path = $m + ";" + $u
-}
 Refresh-Path
 
 Write-Host "=== 1/2 My Machines worker ==="
@@ -52,9 +39,9 @@ if ($SkipWorker) {
 Write-Host "=== 2/2 persistent tunnel for $Hostname ==="
 $install = Join-Path $Root "scripts\windows-install-persistent-tunnel.ps1"
 if (-not (Test-Path -LiteralPath $install)) { throw "Missing $install - git pull this branch" }
-$args = @("-ExecutionPolicy","Bypass","-File",$install,"-Hostname",$Hostname)
-if ($AsService) { $args += "-AsService" }
-& powershell.exe @args
+$argList = @("-ExecutionPolicy","Bypass","-File",$install,"-Hostname",$Hostname)
+if ($AsService) { $argList += "-AsService" }
+& powershell.exe @argList
 if ($LASTEXITCODE -ne 0) { throw "persistent tunnel install failed exit=$LASTEXITCODE" }
 
 Write-Host ""

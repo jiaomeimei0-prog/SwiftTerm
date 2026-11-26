@@ -1,8 +1,9 @@
 ﻿# Quick local diagnostics for toolvip1.top named tunnel on Windows.
-# Run while HTTP + tunnel should already be running:
 #   powershell -ExecutionPolicy Bypass -File .\scripts\diagnose-toolvip1.ps1
 
 $ErrorActionPreference = "Continue"
+. (Join-Path $PSScriptRoot "windows-tunnel-common.ps1")
+
 $config = Join-Path $env:USERPROFILE ".cloudflared\swiftterm-web-config.yml"
 if (-not (Test-Path -LiteralPath $config)) {
     $config = Join-Path $env:USERPROFILE ".cloudflared\config.yml"
@@ -47,36 +48,5 @@ if (-not (Get-Process cloudflared -ErrorAction SilentlyContinue)) {
 }
 
 Write-Host ""
-Write-Host "-- public https (no follow redirects; Access 302 must not look like PASS) --"
-try {
-    # MaximumRedirection 0: Cloudflare Access login is a 302; following it yields fake 200 login HTML
-    $p = Invoke-WebRequest -Uri "https://toolvip1.top/" -UseBasicParsing -TimeoutSec 15 -MaximumRedirection 0
-    $snip = $p.Content
-    if ($snip.Length -gt 160) { $snip = $snip.Substring(0, 160) }
-    Write-Host "https://toolvip1.top/ => $($p.StatusCode)"
-    Write-Host "snip: $snip"
-    if ($p.StatusCode -ge 300 -and $p.StatusCode -lt 400) {
-        $loc = $p.Headers["Location"]
-        Write-Host "FAIL redirect Location=$loc (Cloudflare Access or other gate)"
-    } elseif ($p.Content -match '(?i)cloudflareaccess\.com|Access|Sign in|login') {
-        Write-Host "FAIL body looks like Access/login wall"
-    } elseif ($p.Content -match 'SwiftTerm') {
-        Write-Host "PASS public SwiftTerm"
-    } elseif ($p.Content -match '1033|Tunnel error') {
-        Write-Host "FAIL Error 1033 / tunnel down"
-    } elseif ($p.Content -match 'Hello World') {
-        Write-Host "FAIL Worker Hello World DNS"
-    } else {
-        Write-Host "WARN unexpected body"
-    }
-} catch {
-    $resp = $_.Exception.Response
-    if ($resp -and [int]$resp.StatusCode -ge 300 -and [int]$resp.StatusCode -lt 400) {
-        $loc = $null
-        try { $loc = $resp.Headers["Location"] } catch { }
-        Write-Host "https://toolvip1.top/ => $([int]$resp.StatusCode) redirect Location=$loc"
-        Write-Host "FAIL Cloudflare Access (or redirect gate) - delete Access app on apex"
-    } else {
-        Write-Host "https://toolvip1.top/ FAIL: $($_.Exception.Message)"
-    }
-}
+Write-Host "-- public https --"
+[void](Test-PublicSwiftTermHost -Hostname "toolvip1.top" -TimeoutSec 15)

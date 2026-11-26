@@ -21,44 +21,9 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-
-function Refresh-Path {
-    $m = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
-    $u = [System.Environment]::GetEnvironmentVariable("Path", "User")
-    if ($null -eq $m) { $m = "" }
-    if ($null -eq $u) { $u = "" }
-    $env:Path = $m + ";" + $u
-}
-
-function Test-CanBindPort([int]$TestPort) {
-    $listener = $null
-    try {
-        $listener = New-Object System.Net.Sockets.TcpListener([System.Net.IPAddress]::Loopback, $TestPort)
-        $listener.Start()
-        $listener.Stop()
-        return $true
-    } catch {
-        return $false
-    } finally {
-        if ($listener) { try { $listener.Stop() } catch { } }
-    }
-}
-
-function Select-ListenPort([int]$Preferred) {
-    $candidates = @()
-    if ($Preferred -gt 0) { $candidates += $Preferred }
-    $candidates += 8787, 8888, 18080, 19000, 28080, 3000, 8080
-    $seen = @{}
-    foreach ($p in $candidates) {
-        if ($seen.ContainsKey($p)) { continue }
-        $seen[$p] = $true
-        if (Test-CanBindPort $p) { return $p }
-        Write-Host "Port $p blocked - next..."
-    }
-    throw "No bindable local port. Check: netsh interface ipv4 show excludedportrange protocol=tcp"
-}
-
+. (Join-Path $PSScriptRoot "windows-tunnel-common.ps1")
 Refresh-Path
+
 $Root = Join-Path $env:USERPROFILE "Documents\SwiftTerm"
 $Site = Join-Path $Root "Web\cloudflare\site"
 $CfgDir = Join-Path $env:USERPROFILE ".cloudflared"
@@ -77,15 +42,7 @@ if (-not $py) { throw "Python missing" }
 $Port = Select-ListenPort $Port
 Write-Host "Using origin port $Port"
 
-$yaml = @(
-    "tunnel: $TunnelId"
-    "credentials-file: $Cred"
-    "ingress:"
-    "  - hostname: $Hostname"
-    "    service: http://127.0.0.1:$Port"
-    "  - service: http_status:404"
-) -join "`r`n"
-[System.IO.File]::WriteAllText($Cfg, $yaml + "`r`n")
+Write-SwiftTermIngressConfig -Path $Cfg -TunnelId $TunnelId -CredentialsFile $Cred -Hostname $Hostname -Port $Port
 Copy-Item -Force $Cfg (Join-Path $CfgDir "swiftterm-web-config.yml")
 Write-Host "Wrote $Cfg"
 
@@ -112,18 +69,9 @@ if ($AsService) {
     }
     $sysHome = "C:\Windows\System32\config\systemprofile\.cloudflared"
     New-Item -ItemType Directory -Force -Path $sysHome | Out-Null
-    # Service reads credentials-file path INSIDE its config; rewrite path for System profile
     $sysCred = Join-Path $sysHome ($TunnelId + ".json")
     Copy-Item -Force $Cred $sysCred
-    $sysYaml = @(
-        "tunnel: $TunnelId"
-        "credentials-file: $sysCred"
-        "ingress:"
-        "  - hostname: $Hostname"
-        "    service: http://127.0.0.1:$Port"
-        "  - service: http_status:404"
-    ) -join "`r`n"
-    [System.IO.File]::WriteAllText((Join-Path $sysHome "config.yml"), $sysYaml + "`r`n")
+    Write-SwiftTermIngressConfig -Path (Join-Path $sysHome "config.yml") -TunnelId $TunnelId -CredentialsFile $sysCred -Hostname $Hostname -Port $Port
     Write-Host "Copied tunnel config+cred to $sysHome for Local System service"
 
     $prev = $ErrorActionPreference
@@ -148,29 +96,6 @@ if ($AsService) {
 }
 
 Start-Sleep -Seconds 8
-Write-Host "=== PUBLIC CHECK (no redirect follow) ==="
-try {
-    $p = Invoke-WebRequest "https://$Hostname/" -UseBasicParsing -TimeoutSec 25 -MaximumRedirection 0
-    $snip = $p.Content
-    if ($snip.Length -gt 160) { $snip = $snip.Substring(0, 160) }
-    Write-Host "http=$($p.StatusCode) snip=$snip"
-    if ($p.StatusCode -ge 300 -and $p.StatusCode -lt 400) {
-        Write-Host "FAIL redirect Location=$($p.Headers['Location']) (Access/gate)"
-    }
-    elseif ($p.Content -match "SwiftTerm") { Write-Host "PASS public SwiftTerm" }
-    elseif ($p.Content -match "1033|Tunnel error") { Write-Host "FAIL still 1033 - wait or check tunnel log" }
-    elseif ($p.Content -match "Hello World") { Write-Host "FAIL Worker DNS still bound" }
-    elseif ($p.Content -match "(?i)cloudflareaccess\.com|Sign in|Access") { Write-Host "FAIL Access login wall" }
-    else { Write-Host "WARN unexpected body" }
-} catch {
-    $resp = $_.Exception.Response
-    if ($resp -and [int]$resp.StatusCode -ge 300 -and [int]$resp.StatusCode -lt 400) {
-        $loc = $null
-        try { $loc = $resp.Headers["Location"] } catch { }
-        Write-Host "public FAIL: HTTP $([int]$resp.StatusCode) redirect Location=$loc (Access gate)"
-    } else {
-        Write-Host "public error: $($_.Exception.Message)"
-    }
-}
-
+Write-Host "=== PUBLIC CHECK ==="
+[void](Test-PublicSwiftTermHost -Hostname $Hostname -TimeoutSec 25)
 Write-Host "Done."
