@@ -65,3 +65,10 @@ local_index http=200
 - This proves: SwiftTerm WASM demo is reachable over Cloudflare Quick Tunnel in a real browser/network path.
 - This does NOT prove: a-Shell 158 ios_system commands executed on device.
 - Sessions left running: python http.server :8765 + cloudflared (pid above).
+## Live process check 2026-11-26T11:45:10Z
+```
+    PID     ELAPSED CMD
+  28011       03:49 python3 -m http.server 8765 --bind 127.0.0.1
+  28779       03:01 /tmp/cloudflared tunnel --url http://127.0.0.1:8765
+local=200 cf=200
+```
