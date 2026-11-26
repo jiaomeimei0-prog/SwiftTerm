@@ -1,8 +1,8 @@
 @echo off
 setlocal
-cd /d "%USERPROFILE%\Documents\SwiftTerm\Web\cloudflare\site"
+cd /d "%~dp0..\Web\cloudflare\site"
 if not exist index.html (
-  echo Missing site. Clone repo to Documents\SwiftTerm first.
+  echo Missing site. Run this from a SwiftTerm clone (scripts\ next to Web\).
   exit /b 1
 )
 
@@ -21,7 +21,7 @@ start "SwiftTerm-local-8765" /min cmd /c "cd /d \"%CD%\" && python -m http.serve
 timeout /t 2 >nul
 
 echo.
-echo === Cloudflare Tunnel — copy the https://....trycloudflare.com line below ===
+echo === Cloudflare Tunnel - copy the https://....trycloudflare.com line below ===
 echo === Open THAT url on your phone (NOT 127.0.0.1) ===
 echo.
 cloudflared tunnel --url http://127.0.0.1:8765

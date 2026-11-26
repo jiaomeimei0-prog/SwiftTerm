@@ -24,7 +24,7 @@ $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "windows-tunnel-common.ps1")
 Refresh-Path
 
-$Root = Join-Path $env:USERPROFILE "Documents\SwiftTerm"
+$Root = Get-SwiftTermRoot $PSScriptRoot
 $Site = Join-Path $Root "Web\cloudflare\site"
 $CfgDir = Join-Path $env:USERPROFILE ".cloudflared"
 $Cred = Join-Path $CfgDir ($TunnelId + ".json")
