@@ -82,14 +82,16 @@ sh scripts/verify_command_catalogue_158.sh
 | `Docs/evidence/cloudflare-quick-tunnel-evidence.md` | curl + tunnel CF |
 | `Docs/e2e-acceptance-results.md` | Host gate SwiftTerm lõi |
 
-## Domain custom (tooltop1.vip) — CHƯA ĐẠT
+## Domain custom — cập nhật (CHƯA bền vững)
 
-Lệnh thật: `Docs/evidence/domain-tooltop1-vip-probe.md` · blocker: `Docs/domain-tooltop1-vip-blocker.md`
+Chi tiết còn lại: `Docs/acceptance-remaining-checklist.md` · PR tunnel: [#28](https://github.com/jiaomeimei0-prog/SwiftTerm/pull/28)
 
-- `tooltop1.vip` = NXDOMAIN / RDAP 404 (chưa đăng ký)
-- `toolvip1.top` = Cloudflare Access 302 (không phải WASM)
-- GitHub `CLOUDFLARE_*` secrets trống → Pages deploy fail
-- Wiring đã sẵn: workflow + `scripts/cloudflare-connect-domain.sh` + named-tunnel PS1
+- `tooltop1.vip` = NXDOMAIN / RDAP 404 (chưa đăng ký) — không dùng
+- `toolvip1.top` = đã từng trả **SwiftTerm** khi `swiftterm-web` + HTTP `:8787` chạy; lúc tắt tunnel → **Error 1033**
+- Từng bị Access Sign-in + Worker `patient-pond-3427` (Hello World) — đã hướng dẫn xóa
+- One-shot PC: `scripts/windows-bringup-toolvip1.ps1`
+- GitHub `CLOUDFLARE_*` secrets vẫn trống → Pages CI fail
+- Agent **không** điều khiển PC Windows nếu chưa `agent worker start`
 
 ## Cam kết chống báo cáo giả
 
