@@ -49,14 +49,9 @@ Site output: `Web/cloudflare/site/` · config: `Web/cloudflare/wrangler.toml`.
 
 URL dạng: `https://swiftterm-web.<account>.pages.dev/`
 
-### Custom domain: `tooltop1.vip` (yêu cầu) + `toolvip1.top` (zone sẵn)
+### Custom domain: `toolvip1.top`
 
-**Trạng thái lệnh thật (2026-11-26):** xem `Docs/domain-tooltop1-vip-blocker.md`.
-
-| Domain | Hiện trạng |
-|--------|------------|
-| `tooltop1.vip` | **NXDOMAIN / RDAP 404** — chưa đăng ký; phải mua + trỏ NS Cloudflare trước |
-| `toolvip1.top` | NS Cloudflare OK nhưng **Cloudflare Access** chặn (302 Sign-in) |
+**Trạng thái lệnh thật (2026-11-26):** `toolvip1.top` có NS Cloudflare nhưng đang bị **Cloudflare Access** chặn (302 Sign-in) — cần tắt Access cho hostname demo. Lịch sử điều tra: `Docs/domain-tooltop1-vip-blocker.md` (`tooltop1.vip` là tên gõ nhầm, đã bỏ).
 
 **Bắt buộc** GitHub Actions secrets `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` —
 nếu thiếu, job deploy **fail** (không còn success giả).
@@ -64,7 +59,7 @@ nếu thiếu, job deploy **fail** (không còn success giả).
 Sau khi secrets có + domain DNS sẵn:
 
 ```sh
-bash scripts/cloudflare-connect-domain.sh tooltop1.vip toolvip1.top www.toolvip1.top
+bash scripts/cloudflare-connect-domain.sh toolvip1.top www.toolvip1.top
 ```
 
 Hoặc workflow **Cloudflare Pages (Web WASM)** → `workflow_dispatch`.

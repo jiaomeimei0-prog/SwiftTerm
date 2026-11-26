@@ -1,5 +1,7 @@
 # Kết nối domain — blocker thật (không báo cáo giả)
 
+> **Đính chính (2026-11-26):** tên miền thật của dự án là **`toolvip1.top`**. `tooltop1.vip` là tên gõ nhầm, chưa đăng ký, và đã bị gỡ khỏi workflow/script. Tài liệu này được giữ lại như lịch sử điều tra, không phải hướng dẫn vận hành.
+
 Cập nhật: **2026-11-26 18:59 Asia/Bangkok**  
 Evidence lệnh: `Docs/evidence/domain-tooltop1-vip-probe.md`
 

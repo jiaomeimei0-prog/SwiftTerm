@@ -1,5 +1,7 @@
 # Kiểm tra `tooltop1` + hướng dẫn cụ thể (kèm phương án khi không làm được)
 
+> **Đính chính (2026-11-26):** tên miền thật của dự án là **`toolvip1.top`**. `tooltop1.vip` là tên gõ nhầm, chưa đăng ký, và đã bị gỡ khỏi workflow/script. Tài liệu này được giữ lại như lịch sử điều tra, không phải hướng dẫn vận hành.
+
 - Probe lúc: **2026-11-26 19:25:07 Asia/Bangkok** (`2026-11-26T12:25:07Z`)
 - Resolver: `dig @1.1.1.1`
 - Evidence thô: `Docs/evidence/domain-tooltop1-vip-probe.md` (bản trước) + bảng dưới (bản mới)
