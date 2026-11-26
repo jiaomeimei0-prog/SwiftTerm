@@ -139,8 +139,8 @@ if ($route.Text -match "(?i)already|success|added|cname") {
     Write-Host "DNS route may have failed. In Cloudflare DNS: DELETE Worker record for $Hostname, then Add CNAME @ -> $TunnelId.cfargotunnel.com (Proxied)."
 }
 
-# Start tunnel window
-$tunCmd = "Refresh-Path; function Refresh-Path{ `$m=[System.Environment]::GetEnvironmentVariable('Path','Machine'); `$u=[System.Environment]::GetEnvironmentVariable('Path','User'); if(`$null -eq `$m){`$m=''}; if(`$null -eq `$u){`$u=''}; `$env:Path=`$m+';'+`$u }; Refresh-Path; `$Host.UI.RawUI.WindowTitle='SwiftTerm-NamedTunnel-KEEP-OPEN'; Write-Host 'TUNNEL $Hostname -> 127.0.0.1:$Port - keep open (Error 1033 if you close this)'; & cloudflared tunnel --config '$Cfg' run '$TunnelName'"
+# Start tunnel window (inline PATH refresh BEFORE use; do not call undefined Refresh-Path first)
+$tunCmd = "`$m=[System.Environment]::GetEnvironmentVariable('Path','Machine'); `$u=[System.Environment]::GetEnvironmentVariable('Path','User'); if(`$null -eq `$m){`$m=''}; if(`$null -eq `$u){`$u=''}; `$env:Path=`$m+';'+`$u; `$Host.UI.RawUI.WindowTitle='SwiftTerm-NamedTunnel-KEEP-OPEN'; Write-Host 'TUNNEL $Hostname -> 127.0.0.1:$Port - keep open (Error 1033 if you close this)'; & cloudflared tunnel --config '$Cfg' run '$TunnelName'"
 Start-Process powershell.exe -ArgumentList "-NoExit","-ExecutionPolicy","Bypass","-Command",$tunCmd | Out-Null
 
 Write-Host "Waiting 8s for tunnel register..."

@@ -1,12 +1,24 @@
 ﻿# Quick local diagnostics for toolvip1.top named tunnel on Windows.
-# Run while HTTP + NamedTunnel windows should already be open:
+# Run while HTTP + tunnel should already be running:
 #   powershell -ExecutionPolicy Bypass -File .\scripts\diagnose-toolvip1.ps1
 
 $ErrorActionPreference = "Continue"
-$Port = 8765
 $config = Join-Path $env:USERPROFILE ".cloudflared\swiftterm-web-config.yml"
+if (-not (Test-Path -LiteralPath $config)) {
+    $config = Join-Path $env:USERPROFILE ".cloudflared\config.yml"
+}
+
+# Prefer port from config ingress (auto-selected 8787+), not hard-coded 8765
+$Port = 8787
+if (Test-Path -LiteralPath $config) {
+    $cfgText = Get-Content -LiteralPath $config -Raw
+    if ($cfgText -match 'http://127\.0\.0\.1:(\d+)') {
+        $Port = [int]$Matches[1]
+    }
+}
 
 Write-Host "=== diagnose toolvip1.top $(Get-Date -Format o) ==="
+Write-Host "probed_port=$Port config=$config"
 Write-Host ""
 
 Write-Host "-- local origin --"
@@ -16,7 +28,7 @@ try {
     if ($r.Content -match 'SwiftTerm') { Write-Host "body contains SwiftTerm: YES" } else { Write-Host "body contains SwiftTerm: NO" }
 } catch {
     Write-Host "FAIL local origin: $($_.Exception.Message)"
-    Write-Host "=> Start/fix the SwiftTerm-HTTP-$Port-KEEP-OPEN window."
+    Write-Host "=> Start origin on the port in config (often 8787). Run windows-install-persistent-tunnel.ps1"
 }
 
 Write-Host ""
@@ -24,31 +36,24 @@ Write-Host "-- config --"
 if (Test-Path -LiteralPath $config) {
     Get-Content -LiteralPath $config
 } else {
-    Write-Host "Missing $config"
+    Write-Host "Missing config under .cloudflared"
 }
 
 Write-Host ""
 Write-Host "-- cloudflared processes --"
 Get-Process cloudflared -ErrorAction SilentlyContinue | Format-Table Id,ProcessName,StartTime -AutoSize
 if (-not (Get-Process cloudflared -ErrorAction SilentlyContinue)) {
-    Write-Host "No cloudflared process. NamedTunnel window is not running."
+    Write-Host "No cloudflared process. Tunnel is down => Error 1033 publicly."
 }
 
 Write-Host ""
-Write-Host "-- public https (may show Access or origin error) --"
+Write-Host "-- public https --"
 try {
-    $p = Invoke-WebRequest -Uri "https://toolvip1.top/" -UseBasicParsing -TimeoutSec 15 -MaximumRedirection 0
+    $p = Invoke-WebRequest -Uri "https://toolvip1.top/" -UseBasicParsing -TimeoutSec 15
+    $snip = $p.Content
+    if ($snip.Length -gt 160) { $snip = $snip.Substring(0, 160) }
     Write-Host "https://toolvip1.top/ => $($p.StatusCode)"
+    Write-Host "snip: $snip"
 } catch {
-    $resp = $_.Exception.Response
-    if ($resp) {
-        Write-Host "https://toolvip1.top/ => $([int]$resp.StatusCode) $($resp.StatusCode)"
-        Write-Host "If 302 to cloudflareaccess.com => DELETE Access application in Zero Trust."
-    } else {
-        Write-Host "https://toolvip1.top/ FAIL: $($_.Exception.Message)"
-    }
+    Write-Host "https://toolvip1.top/ FAIL: $($_.Exception.Message)"
 }
-
-Write-Host ""
-Write-Host "Same WiFi = Access login  => turn OFF Access."
-Write-Host "Other WiFi = Unable to connect to origin => fix NamedTunnel + local HTTP windows."

@@ -1,11 +1,16 @@
-﻿# Install SwiftTerm origin + Cloudflare tunnel as persistent Windows processes
-# so Error 1033 does not return when you close a PowerShell window.
+﻿# Install SwiftTerm origin + Cloudflare tunnel as detached Windows processes
+# so Error 1033 does not return when you close the launcher window.
 #
-# Run ONCE in elevated PowerShell (Run as Administrator) if service install is desired:
+# Usage:
 #   powershell -ExecutionPolicy Bypass -File .\scripts\windows-install-persistent-tunnel.ps1
 #
-# Non-admin fallback: starts detached processes that survive the launcher window
-# (still die on reboot unless Scheduled Task is created).
+# Notes on -AsService:
+#   cloudflared Windows service runs as Local System and reads
+#   C:\Windows\System32\config\systemprofile\.cloudflared\config.yml
+#   This script copies config+credentials there when -AsService is set (Admin required).
+#   Origin (python http.server) is still a user-session process unless you also
+#   create a Scheduled Task; reboot will drop origin unless you re-run or add a task.
+#   Do NOT claim full reboot survival for origin with -AsService alone.
 
 param(
     [string]$Hostname = "toolvip1.top",
@@ -39,6 +44,20 @@ function Test-CanBindPort([int]$TestPort) {
     }
 }
 
+function Select-ListenPort([int]$Preferred) {
+    $candidates = @()
+    if ($Preferred -gt 0) { $candidates += $Preferred }
+    $candidates += 8787, 8888, 18080, 19000, 28080, 3000, 8080
+    $seen = @{}
+    foreach ($p in $candidates) {
+        if ($seen.ContainsKey($p)) { continue }
+        $seen[$p] = $true
+        if (Test-CanBindPort $p) { return $p }
+        Write-Host "Port $p blocked - next..."
+    }
+    throw "No bindable local port. Check: netsh interface ipv4 show excludedportrange protocol=tcp"
+}
+
 Refresh-Path
 $Root = Join-Path $env:USERPROFILE "Documents\SwiftTerm"
 $Site = Join-Path $Root "Web\cloudflare\site"
@@ -55,14 +74,9 @@ $py = Get-Command python -ErrorAction SilentlyContinue
 if (-not $py) { $py = Get-Command py -ErrorAction SilentlyContinue }
 if (-not $py) { throw "Python missing" }
 
-if (-not (Test-CanBindPort $Port)) {
-    foreach ($p in 8888, 18080, 19000, 28080) {
-        if (Test-CanBindPort $p) { $Port = $p; break }
-    }
-}
+$Port = Select-ListenPort $Port
 Write-Host "Using origin port $Port"
 
-# Standard cloudflared config.yml (used by `cloudflared service`)
 $yaml = @(
     "tunnel: $TunnelId"
     "credentials-file: $Cred"
@@ -75,12 +89,10 @@ $yaml = @(
 Copy-Item -Force $Cfg (Join-Path $CfgDir "swiftterm-web-config.yml")
 Write-Host "Wrote $Cfg"
 
-# Stop leftover python servers on this port if we can identify them
 Get-NetTCPConnection -LocalPort $Port -ErrorAction SilentlyContinue |
     ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }
 
-# Start origin detached (hidden window, survives parent)
-$originLog = Join-Path $LogDir "origin-8787.log"
+$originLog = Join-Path $LogDir ("origin-" + $Port + ".log")
 $originArgs = "-NoProfile -WindowStyle Hidden -Command `"Set-Location -LiteralPath '$Site'; & '$($py.Source)' -m http.server $Port --bind 127.0.0.1 *>> '$originLog'`""
 Start-Process -FilePath "powershell.exe" -ArgumentList $originArgs -WindowStyle Hidden | Out-Null
 
@@ -94,21 +106,45 @@ if (-not $ok) { throw "Origin did not become healthy on :$Port - see $originLog"
 Write-Host "Origin PASS SwiftTerm on :$Port"
 
 if ($AsService) {
-    # Requires Administrator
+    $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+    if (-not $isAdmin) {
+        throw "-AsService requires Administrator PowerShell (Local System profile copy)."
+    }
+    $sysHome = "C:\Windows\System32\config\systemprofile\.cloudflared"
+    New-Item -ItemType Directory -Force -Path $sysHome | Out-Null
+    # Service reads credentials-file path INSIDE its config; rewrite path for System profile
+    $sysCred = Join-Path $sysHome ($TunnelId + ".json")
+    Copy-Item -Force $Cred $sysCred
+    $sysYaml = @(
+        "tunnel: $TunnelId"
+        "credentials-file: $sysCred"
+        "ingress:"
+        "  - hostname: $Hostname"
+        "    service: http://127.0.0.1:$Port"
+        "  - service: http_status:404"
+    ) -join "`r`n"
+    [System.IO.File]::WriteAllText((Join-Path $sysHome "config.yml"), $sysYaml + "`r`n")
+    Write-Host "Copied tunnel config+cred to $sysHome for Local System service"
+
     $prev = $ErrorActionPreference
     $ErrorActionPreference = "Continue"
-    & cloudflared service uninstall 2>&1 | Out-Null
-    & cloudflared service install 2>&1 | Write-Host
-    Start-Service cloudflared -ErrorAction SilentlyContinue
-    Get-Service cloudflared -ErrorAction SilentlyContinue | Format-List *
+    $un = & cloudflared service uninstall 2>&1 | Out-String
+    $ins = & cloudflared service install 2>&1 | Out-String
+    Write-Host $un
+    Write-Host $ins
+    if ($ins -match '(?i)error|fail|access is denied') {
+        $ErrorActionPreference = $prev
+        throw "cloudflared service install failed:`n$ins"
+    }
+    Start-Service cloudflared -ErrorAction Stop
+    Get-Service cloudflared | Format-List Name,Status,StartType
     $ErrorActionPreference = $prev
-    Write-Host "Attempted cloudflared Windows service install/start."
+    Write-Host "cloudflared service started. Origin is still a USER process - re-run this script after reboot to restore http.server (or add a Scheduled Task)."
 } else {
-    # Detached tunnel process (survives this script; dies on logout/reboot)
     $tunLog = Join-Path $LogDir "tunnel-swiftterm-web.log"
     $tunArgs = "-NoProfile -WindowStyle Hidden -Command `"& cloudflared tunnel --config '$Cfg' run '$TunnelName' *>> '$tunLog'`""
     Start-Process -FilePath "powershell.exe" -ArgumentList $tunArgs -WindowStyle Hidden | Out-Null
-    Write-Host "Started detached cloudflared (log $tunLog)"
+    Write-Host "Started detached cloudflared (log $tunLog). Survives this window; dies on logout/reboot."
 }
 
 Start-Sleep -Seconds 8
@@ -126,4 +162,4 @@ try {
     Write-Host "public error: $($_.Exception.Message)"
 }
 
-Write-Host "Done. Processes should keep running after this window closes (until reboot unless -AsService)."
+Write-Host "Done."

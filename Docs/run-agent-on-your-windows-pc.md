@@ -1,27 +1,45 @@
 # Chay agent tren may Windows (My Machines)
 
-Cai CLI thoi **chua du**. Agent chi dieu khien PC khi process worker dang chay.
+Cai ung dung / CLI **chua du**. Agent chi dieu khien PC khi process `agent worker start` dang chay (list-self-hosted-workers khong con `workers: []`).
 
-## Bat worker (giu cua so mo)
+## One-shot (khuyen dung)
+
+Trong PowerShell tren PC:
+
+```powershell
+cd $env:USERPROFILE\Documents\SwiftTerm
+git fetch origin
+git checkout cursor/fix-named-tunnel-ps1-45fd
+git pull
+powershell -ExecutionPolicy Bypass -File .\scripts\windows-start-my-machine-and-tunnel.ps1
+```
+
+Script se:
+
+1. Mo cua so **KEEP OPEN** chay `agent worker ... start` (ten `windows-pc`)
+2. Cai origin + named tunnel `swiftterm-web` detached cho `toolvip1.top`
+
+Neu chua co CLI:
 
 ```powershell
 irm 'https://cursor.com/install?win32=true' | iex
 agent login
-cd $env:USERPROFILE\Documents\SwiftTerm
-agent worker --computer-use --name windows-pc --worker-dir $PWD start
 ```
 
-Roi mo https://cursor.com/agents -> chon **My Machines** -> **windows-pc** (hoac doi session hien tai thay worker online).
+Roi chay lai one-shot. Them `-AsService` (Admin) neu muon cloudflared Windows Service (origin van can user session / Scheduled Task sau reboot).
 
-Kiem tra: agent goi list-self-hosted-workers phai thay worker `windows-pc`, khong con `workers: []`.
-
-## Khac phuc Error 1033 (tunnel) tren PC
+## Chi tunnel (khong worker)
 
 ```powershell
-cd $env:USERPROFILE\Documents\SwiftTerm
-git checkout cursor/fix-named-tunnel-ps1-45fd
-git pull
 powershell -ExecutionPolicy Bypass -File .\scripts\windows-install-persistent-tunnel.ps1
 ```
 
-Script nay chay origin + cloudflared **detached** (khong can giu cua so bring-up). Them `-AsService` neu PowerShell Admin de cai Windows Service.
+Chan doan: `.\scripts\diagnose-toolvip1.ps1` (doc port tu config, khong hard-code 8765).
+
+## Khi nao agent "lam tren may ban" duoc
+
+| Trang thai | Agent co the chay lenh tren PC? |
+| --- | --- |
+| Chi cai Use my computer / CLI | Khong |
+| `agent worker start` dang chay, workers khong rong | Co |
+| Dong cua so worker / sleep PC | Mat ket noi ngay |
