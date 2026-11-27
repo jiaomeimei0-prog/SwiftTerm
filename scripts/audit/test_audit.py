@@ -592,6 +592,22 @@ class CatalogueRobustnessTests(unittest.TestCase):
         self.assertEqual(suite_verdict({}), "CHƯA CHẠY")
         self.assertEqual(suite_verdict({"upstream": "PASS"}), "CHƯA ĐỦ DỮ LIỆU")
 
+    def test_an_unreadable_on_demand_catalogue_does_not_fail_the_bundled_definition(self) -> None:
+        runs = [{"suite": "a-Shell tests/ssh-stock-registration.sh catalog", "ref": ref, "result": "PASS"} for ref in ("upstream", "fork", "pin")]
+
+        def row_for(calls: list[str]) -> list[str]:
+            results = run_audit.Results(
+                test_runs=runs, commands=[{"command": "a", "drift_fork_vs_upstream": "same", "drift_pin_vs_fork": "same"}],
+                wrong_calls=[{"kind": "catalogue-unreadable", "call": call} for call in calls], hostapi=[],
+                hostapi_script={"declared": 0}, catalogue_sizes=[{"fork": 158}, {"fork": 136}], ci_facts={})
+            return next(row for row in render_report.function_matrix(results) if str(row[0]).startswith("Định nghĩa catalogue"))
+
+        on_demand = row_for(["tex", "sshStock"])
+        self.assertEqual(on_demand[-1], "ĐẠT")
+        self.assertIn("catalogue khác không đọc được: sshStock, tex", on_demand[2])
+        bundled = row_for(["full"])
+        self.assertEqual(bundled[-1], "KHÔNG ĐẠT (plist full không đọc được)")
+
 
 class RegistryTests(unittest.TestCase):
     def test_ids_follow_severity_order(self) -> None:

@@ -401,12 +401,22 @@ def function_matrix(r) -> list[list[str]]:
     windows_run = next((x for x in r.ci_facts.get("runs_for_sha", []) if x["name"] == "Windows scripts"), None)
     windows_ok = bool(windows_run and windows_run["conclusion"] == "success")
     drifted = sorted(c["command"] for c in r.commands if c["drift_fork_vs_upstream"] != "same" or c["drift_pin_vs_fork"] != "same")
-    unreadable = [p for p in r.wrong_calls if p["kind"] == "catalogue-unreadable"]
-    ssh_verdict = "KHÔNG ĐẠT (plist không đọc được)" if unreadable else suite_verdict(ssh)
+    unreadable = {p.get("call", "") for p in r.wrong_calls if p["kind"] == "catalogue-unreadable"}
+    bundled_bad = sorted(unreadable & {"full", "mini"})
+    other_bad = sorted(unreadable - {"full", "mini"})
+    # This row is the bundled 158/136 definition. An unreadable on-demand catalogue (extra, llvm, tex, luatex, sshStock)
+    # is named in the evidence but does not override a passing full/mini check.
+    ssh_verdict = f"KHÔNG ĐẠT (plist {', '.join(bundled_bad)} không đọc được)" if bundled_bad else suite_verdict(ssh)
     if ssh_verdict == "ĐẠT" and drifted:
         ssh_verdict = "ĐẠT TEST; CÓ KHÁC BIỆT ĐỊNH NGHĨA GIỮA CÁC NGUỒN"
     elif ssh_verdict == "CHƯA CHẠY":
         ssh_verdict = "CHƯA CHẠY TEST (chỉ có đối chiếu tĩnh)"
+    if bundled_bad:
+        plist_note = f"plist {', '.join(bundled_bad)} không đọc được; "
+    elif other_bad:
+        plist_note = f"plist full/mini đọc được; catalogue khác không đọc được: {', '.join(other_bad)}; "
+    else:
+        plist_note = "plist đọc được; "
     if linux["ok"]:
         linux_cell, linux_verdict = f"CI `linux-headless`: {xct['executed']} XCTest ({xct['failures']} lỗi) + {swt['tests']} Swift Testing ({swt['result']})", "ĐẠT (phần chạy trên Linux)"
     else:
@@ -425,7 +435,7 @@ def function_matrix(r) -> list[list[str]]:
         ["Test trên macOS (`swift test`)", "SwiftTerm", f"workflow Swift: bước `Run tests` {states['swift_test']}", "L2" if proven["mac_tested"] else "—", "ĐẠT (macOS)" if proven["mac_tested"] else "CHƯA CÓ BẰNG CHỨNG"],
         [f"HostHelpers ({r.hostapi_script['declared']} API)", "a-Shell", helpers_cell, "L3" if proven["ios_compiled"] else "L0", "BIÊN DỊCH ĐẠT; hành vi chưa kiểm" if proven["ios_compiled"] else "CHƯA XÁC MINH BIÊN DỊCH"],
         [f"Định nghĩa catalogue ({r.catalogue_sizes[0]['fork']}/{r.catalogue_sizes[1]['fork']} lệnh)", "a-Shell",
-         ("có plist không đọc được; " if unreadable else "plist đọc được; ") + f"fork≡upstream≡pin: {len(r.commands) - len(drifted)}/{len(r.commands)} lệnh" + (f" (khác: {', '.join(drifted[:6])})" if drifted else "") + f"; `ssh-stock-registration.sh`: {suite_summary(ssh) or 'chưa chạy'}",
+         plist_note + f"fork≡upstream≡pin: {len(r.commands) - len(drifted)}/{len(r.commands)} lệnh" + (f" (khác: {', '.join(drifted[:6])})" if drifted else "") + f"; `ssh-stock-registration.sh`: {suite_summary(ssh) or 'chưa chạy'}",
          "L1" if ssh else "L0", ssh_verdict],
         ["Chạy thật các lệnh", "Người dùng cuối", "Chưa có", "L4", "PENDING_USER_DEVICE"],
         ["Gắn Worker A–J (`worker-binding.sh`)", "a-Shell", suite_summary(binding) or "chưa chạy (cần `--run-tests`)", "L1" if binding else "—", suite_verdict(binding)],
