@@ -1,0 +1,30 @@
+{
+  "probed_at_utc": "2026-11-27T17:26:16Z",
+  "probed_at_vn": "2026-11-28 00:26 gi\u1edd Vi\u1ec7t Nam (UTC+7)",
+  "method": "computerUse Chrome + DNS from agent VM",
+  "results": {
+    "https://toolvip1.top/": {
+      "dns": "resolves to Cloudflare (A 104.21.95.42 / 172.67.142.251; AAAA 2606:4700:...)",
+      "browser": "ERR_CONNECTION_CLOSED \u2014 This site can't be reached; connection closed during TLS",
+      "curl_agent_vm": "SSL_ERROR_SYSCALL after ClientHello",
+      "not_seen": [
+        "SwiftTerm page",
+        "Cloudflare Access login",
+        "Error 1033",
+        "Hello World"
+      ],
+      "screenshot": "Docs/evidence/toolvip1-top-connection-closed-2026-11-28.webp"
+    },
+    "https://www.toolvip1.top/": {
+      "dns": "NXDOMAIN",
+      "browser": "DNS_PROBE_FINISHED_NXDOMAIN",
+      "screenshot": "Docs/evidence/www-toolvip1-top-nxdomain-2026-11-28.webp"
+    }
+  },
+  "deploy_blocker": {
+    "github_actions_secrets": "CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID are empty in workflow env (run 45821872722 and earlier)",
+    "cursor_personal_secrets": "same names exist in Cursor personal secrets but values never reach this VM and are not GitHub Actions secrets",
+    "self_hosted_workers": "none connected",
+    "consequence": "Cloudflare Pages workflow cannot deploy or attach toolvip1.top"
+  }
+}
