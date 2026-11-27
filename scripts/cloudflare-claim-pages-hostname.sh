@@ -151,10 +151,12 @@ PY
   echo "=== Ensure Pages DNS (CNAME → ${PROJECT}.pages.dev, proxied) ==="
   # Apex missing A/AAAA causes Chrome DNS_PROBE_FINISHED_NXDOMAIN even though
   # the zone exists (NOERROR / ANSWER:0). Pages expects a proxied CNAME; CF
-  # flattens apex CNAMEs.
+  # flattens apex CNAMEs. If Zone DNS API is forbidden for this token, we fall
+  # back to Pages domain rebind (delete+add) which recreates DNS.
   TARGET="${PROJECT}.pages.dev"
-  python3 - "$DNS_JSON" "$ZONE_ID" "$TOKEN" "$APEX" "www.${APEX}" "$TARGET" <<'PY'
-import json, os, sys, urllib.request
+  DNS_ENSURE_RC=0
+  python3 - "$DNS_JSON" "$ZONE_ID" "$TOKEN" "$APEX" "www.${APEX}" "$TARGET" <<'PY' || DNS_ENSURE_RC=$?
+import json, sys, urllib.error, urllib.request
 
 dns_json, zone_id, token, apex, www, target = sys.argv[1:7]
 data = json.loads(dns_json)
@@ -179,14 +181,16 @@ def req(method, url, body=None):
         },
     )
     with urllib.request.urlopen(r, timeout=45) as resp:
-        return json.load(resp)
+        raw = resp.read().decode("utf-8", "replace")
+        return json.loads(raw) if raw.strip() else {"success": True}
 
-# Index existing by name
 by_name = {}
 for row in records:
     name = (row.get("name") or "").rstrip(".")
     by_name.setdefault(name, []).append(row)
 
+wrote = 0
+denied = False
 for host, (typ, content) in wanted.items():
     existing = by_name.get(host, [])
     good = [
@@ -196,7 +200,6 @@ for host, (typ, content) in wanted.items():
     if good:
         print(f"OK DNS already: {typ} {host} -> {content} proxied")
         continue
-    # Remove conflicting A/AAAA/CNAME on this name so Pages CNAME can be created.
     for r in existing:
         rid = r.get("id")
         if not rid:
@@ -207,6 +210,7 @@ for host, (typ, content) in wanted.items():
                 out = req("DELETE", f"https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records/{rid}")
                 print(f"  success={out.get('success')} errors={out.get('errors')}")
             except Exception as exc:
+                denied = True
                 print(f"  WARN delete failed: {exc}")
     body = {
         "type": typ,
@@ -219,18 +223,38 @@ for host, (typ, content) in wanted.items():
     try:
         out = req("POST", f"https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records", body)
         print(f"  success={out.get('success')} errors={out.get('errors')} id={(out.get('result') or {}).get('id','')[:8]}")
+        if out.get("success"):
+            wrote += 1
+        else:
+            denied = True
     except Exception as exc:
+        denied = True
         print(f"  WARN create failed: {exc}")
 
-# Refresh listing
-final = req("GET", f"https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records?per_page=100")
-print("=== DNS after ensure ===")
-for row in final.get("result") or []:
-    print(f"  {(row.get('type') or ''):6} {(row.get('name') or ''):40} -> {row.get('content')}  proxied={row.get('proxied')}")
+try:
+    final = req("GET", f"https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records?per_page=100")
+    print("=== DNS after ensure ===")
+    for row in final.get("result") or []:
+        print(f"  {(row.get('type') or ''):6} {(row.get('name') or ''):40} -> {row.get('content')}  proxied={row.get('proxied')}")
+except Exception as exc:
+    denied = True
+    print(f"WARN: cannot list DNS after ensure: {exc}")
+
+if denied and wrote == 0:
+    print("DNS_API_DENIED=1")
+    sys.exit(42)
+print(f"DNS_ENSURE wrote={wrote} denied={denied}")
 PY
+
+  if [[ "$DNS_ENSURE_RC" -eq 42 ]]; then
+    echo "Zone DNS API denied for this token — will rebind Pages domains to recreate DNS"
+    export PAGES_DOMAIN_REBIND=1
+  fi
 fi
 
 echo "=== Re-assert Pages custom domains for project=${PROJECT} ==="
+# Always rebind once when apex has no addresses (NXDOMAIN / ANSWER:0).
+export PAGES_DOMAIN_REBIND="${PAGES_DOMAIN_REBIND:-1}"
 bash "$(dirname "$0")/cloudflare-pages-attach-domains.sh" "${HOSTS[@]}"
 
 echo "=== Pages domain status ==="
