@@ -1,10 +1,11 @@
 # Ma trận nghiệm thu 158 lệnh — PENDING thiết bị
 
-- Generated: 2026-11-26T11:43:21Z UTC
+- Updated: 2026-11-28 (ICT) — pin a-Shell đã gồm a-shell#8 (`verify_command_catalogue_158.sh`)
 - Identity: `Apps/a-Shell/Resources/commandDictionary.plist` = **158** keys (byte catalogue vs holzschu full dictionary)
 - Runtime: **PENDING_USER_DEVICE** for all 158 until you paste observed output in the CSV
 - CSV làm việc: `Docs/command-158-device-matrix-PENDING.csv`
 - Script trên device: `Apps/a-Shell/scripts/verify_command_catalogue_158.sh`
+- Runbook: `Docs/l4-device-acceptance-runbook.md`
 
 ## Quy tắc đối chiếu (không được sửa thành PASS giả)
 

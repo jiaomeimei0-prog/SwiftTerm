@@ -20,15 +20,20 @@ HTTPS: Cloudflare Pages/Tunnel terminate TLS giúp bạn (edge HTTPS).
 
 ### 1. Một lần trên Cloudflare Dashboard
 
-1. Tạo API Token: **Account → Cloudflare Pages → Edit** (+ Account Settings Read nếu cần).  
-2. Lấy **Account ID** (sidebar Overview).  
+1. Tạo API Token (Edit token / Create Custom Token) với tối thiểu:
+   - **Account** → Cloudflare Pages → **Edit**
+   - **Account** → Account Settings → **Read**
+   - **Account** → Workers Scripts → **Edit** (để xóa Worker `swiftterm` / Workers Builds Hello World)
+   - **Zone** `toolvip1.top` → Zone → **Read**
+   - **Zone** `toolvip1.top` → DNS → **Edit** ← bắt buộc để agent/CI tự tạo CNAME apex (thiếu quyền này → NXDOMAIN / 403 DNS API)
+2. Lấy **Account ID** (sidebar Overview) — **không** phải Zone ID.
 3. (Tuỳ chọn) tạo sẵn Pages project tên `swiftterm-web`.
 
 ### 2. Secrets trên GitHub (`jiaomeimei0-prog/SwiftTerm`)
 
 | Secret | Giá trị |
 |--------|---------|
-| `CLOUDFLARE_API_TOKEN` | token vừa tạo |
+| `CLOUDFLARE_API_TOKEN` | token vừa tạo (Roll lại nếu thiếu DNS:Edit / Workers Scripts:Edit) |
 | `CLOUDFLARE_ACCOUNT_ID` | account id |
 
 ### 3. Deploy
@@ -51,22 +56,24 @@ URL dạng: `https://swiftterm-web.<account>.pages.dev/`
 
 ### Custom domain: `toolvip1.top`
 
-**Trạng thái lệnh thật (2026-11-26):** `toolvip1.top` có NS Cloudflare nhưng đang bị **Cloudflare Access** chặn (302 Sign-in) — cần tắt Access cho hostname demo. Lịch sử điều tra: `Docs/domain-tooltop1-vip-blocker.md` (`tooltop1.vip` là tên gõ nhầm, đã bỏ).
+**Trạng thái (2026-11-28):** `https://toolvip1.top` đã phục vụ **SwiftTerm WASM (Cloudflare)** (xác minh user device). Evidence: `Docs/evidence/toolvip1-user-verify-swiftterm-2026-11-28.md`.
 
 **Bắt buộc** GitHub Actions secrets `CLOUDFLARE_API_TOKEN` + `CLOUDFLARE_ACCOUNT_ID` —
 nếu thiếu, job deploy **fail** (không còn success giả).
 
-Sau khi secrets có + domain DNS sẵn:
+Sau khi secrets có:
 
 ```sh
 bash scripts/cloudflare-connect-domain.sh toolvip1.top www.toolvip1.top
+# hoặc CI: workflow Cloudflare Pages (Web WASM)
+bash scripts/cloudflare-disable-worker-swiftterm.sh   # dọn Worker/Workers Builds "swiftterm"
 ```
 
-Hoặc workflow **Cloudflare Pages (Web WASM)** → `workflow_dispatch`.
+**Workers Builds `swiftterm`:** nếu GitHub vẫn hiện check fail `Workers Builds: swiftterm`, xóa script Worker đó (script trên) hoặc Dashboard → Workers → `swiftterm` → Settings → xóa / ngắt GitHub Builds. Không để custom domain Worker đè Pages.
 
 **Access:** Zero Trust → Applications → tắt bảo vệ hostname demo (public WASM).
 
-**DNS lỗi thường gặp:** apex chỉ còn AAAA `100::` (blackhole) → xóa `100::`, để Pages ghi lại.
+**DNS lỗi thường gặp:** apex không có A/CNAME → Chrome `DNS_PROBE_FINISHED_NXDOMAIN`. Thêm CNAME `@` → `swiftterm-web.pages.dev` (Proxied), hoặc cấp token **DNS:Edit** rồi chạy lại claim script.
 
 Tạm thời (đã chứng minh): Quick Tunnel `*.trycloudflare.com` — không thay custom domain.
 
