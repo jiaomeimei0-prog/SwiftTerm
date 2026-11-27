@@ -24,6 +24,7 @@ on:
       - 'scripts/prepare-cloudflare-web.sh'
       - 'scripts/cloudflare-resolve-account.sh'
       - 'scripts/cloudflare-pages-attach-domains.sh'
+      - 'scripts/cloudflare-claim-pages-hostname.sh'
       - 'scripts/wasm-toolchain.env'
       - '.github/workflows/cloudflare-pages-web.yml'
 
@@ -103,4 +104,6 @@ jobs:
           source scripts/cloudflare-resolve-account.sh
           bash scripts/cloudflare-pages-attach-domains.sh \
             "$CUSTOM_DOMAIN" "www.${CUSTOM_DOMAIN}"
+          # Drop Worker Hello-World custom domains/routes still owning the hostname.
+          bash scripts/cloudflare-claim-pages-hostname.sh
           echo "Also open the pages.dev URL printed by wrangler deploy above."
