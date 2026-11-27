@@ -1,4 +1,4 @@
-# Persistent Windows E2E launcher for SwiftTerm Cloudflare WASM demo.
+﻿# Persistent Windows E2E launcher for SwiftTerm Cloudflare WASM demo.
 # Opens SEPARATE windows for http.server and cloudflared that stay open.
 # Does NOT kill those windows when this launcher exits.
 #
@@ -10,6 +10,7 @@
 #   $env:USERPROFILE\Documents\SwiftTerm\Docs\evidence\windows-persistent-e2e-log.txt
 
 $ErrorActionPreference = "Stop"
+. (Join-Path $PSScriptRoot "windows-tunnel-common.ps1")
 
 $Root = Join-Path $env:USERPROFILE "Documents\SwiftTerm"
 $Site = Join-Path $Root "Web\cloudflare\site"
@@ -19,17 +20,9 @@ $Log = Join-Path $EvidenceDir "windows-persistent-e2e-log.txt"
 $UrlFile = Join-Path $EvidenceDir "windows-trycloudflare-url.txt"
 
 if (-not (Test-Path -LiteralPath $Index)) {
-    throw "Missing $Index — clone https://github.com/jiaomeimei0-prog/SwiftTerm.git into Documents\SwiftTerm first."
+    throw "Missing $Index - clone https://github.com/jiaomeimei0-prog/SwiftTerm.git into Documents\SwiftTerm first."
 }
 New-Item -ItemType Directory -Force -Path $EvidenceDir | Out-Null
-
-function Refresh-Path {
-    $machine = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
-    $user = [System.Environment]::GetEnvironmentVariable("Path", "User")
-    if ($null -eq $machine) { $machine = "" }
-    if ($null -eq $user) { $user = "" }
-    $env:Path = $machine + ";" + $user
-}
 
 function Ensure-Cloudflared {
     Refresh-Path
@@ -61,15 +54,15 @@ $stamp = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ")
     "NOTE: http.server and cloudflared run in separate windows; leave them open."
 ) | Set-Content -LiteralPath $Log -Encoding UTF8
 
-# Free 8765 only if needed (optional — comment out if you want to keep an existing server)
+# Free 8765 only if needed (optional - comment out if you want to keep an existing server)
 $listeners = Get-NetTCPConnection -LocalPort 8765 -ErrorAction SilentlyContinue
 if ($listeners) {
-    "port 8765 busy — leaving existing listener; not killing (persistent policy)." | Add-Content $Log
+    "port 8765 busy - leaving existing listener; not killing (persistent policy)." | Add-Content $Log
 } else {
     $serverCmd = @"
 `$Host.UI.RawUI.WindowTitle = 'SwiftTerm-HTTP-8765-KEEP-OPEN'
 Set-Location -LiteralPath '$Site'
-Write-Host 'Serving $Site on http://127.0.0.1:8765 — keep this window open.'
+Write-Host 'Serving $Site on http://127.0.0.1:8765 - keep this window open.'
 & '$Python' -m http.server 8765 --bind 127.0.0.1
 "@
     Start-Process -FilePath "powershell.exe" -ArgumentList @(
@@ -86,7 +79,7 @@ $tunnelCmd = @"
 if (`$null -eq `$m) { `$m = '' }
 if (`$null -eq `$u) { `$u = '' }
 `$env:Path = `$m + ';' + `$u
-Write-Host 'Cloudflare Quick Tunnel — copy https://....trycloudflare.com URL below.'
+Write-Host 'Cloudflare Quick Tunnel - copy https://....trycloudflare.com URL below.'
 Write-Host 'Keep this window open. Do not close until you finish acceptance.'
 & cloudflared tunnel --url http://127.0.0.1:8765
 "@
