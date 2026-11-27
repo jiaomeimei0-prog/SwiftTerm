@@ -17,3 +17,6 @@ Web/node_modules/
 Web/dist/
 Web/test-results/
 esctest.log
+
+__pycache__/
+*.pyc

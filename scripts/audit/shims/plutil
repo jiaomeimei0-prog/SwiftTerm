@@ -1,0 +1,78 @@
+#!/usr/bin/env python3
+"""Linux stand-in for the subset of Apple's plutil used by a-Shell's own tests.
+
+Supported:
+  plutil -convert json -o <file|-> <input>
+  plutil -extract <key> raw -o <file|-> <input>
+  plutil -lint <input>
+"""
+from __future__ import annotations
+
+import base64
+import datetime
+import json
+import os
+import sys
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+import openstep  # noqa: E402
+
+
+def to_jsonable(value):
+    if isinstance(value, dict):
+        return {str(k): to_jsonable(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [to_jsonable(v) for v in value]
+    if isinstance(value, bytes):
+        return base64.b64encode(value).decode("ascii")
+    if isinstance(value, datetime.datetime):
+        return value.isoformat()
+    return value
+
+
+def write(target: str, text: str) -> None:
+    if target == "-":
+        sys.stdout.write(text)
+    else:
+        with open(target, "w", encoding="utf-8") as handle:
+            handle.write(text)
+
+
+def main(argv: list[str]) -> int:
+    if not argv:
+        sys.stderr.write("usage: plutil -convert json|-extract key raw|-lint ...\n")
+        return 2
+    out = "-"
+    if "-o" in argv:
+        idx = argv.index("-o")
+        out = argv[idx + 1]
+        argv = argv[:idx] + argv[idx + 2:]
+    mode = argv[0]
+    try:
+        if mode == "-convert" and argv[1] == "json":
+            with open(argv[2], "rb") as handle:
+                data = openstep.loads(handle.read())
+            write(out, json.dumps(to_jsonable(data), indent=2, sort_keys=True) + "\n")
+            return 0
+        if mode == "-extract" and argv[2] == "raw":
+            with open(argv[3], "rb") as handle:
+                data = openstep.loads(handle.read())
+            value = data
+            for part in argv[1].split("."):
+                value = value[int(part)] if isinstance(value, list) else value[part]
+            write(out, str(value) + "\n")
+            return 0
+        if mode == "-lint":
+            with open(argv[1], "rb") as handle:
+                openstep.loads(handle.read())
+            sys.stdout.write(f"{argv[1]}: OK\n")
+            return 0
+    except (OSError, KeyError, IndexError, ValueError) as exc:
+        sys.stderr.write(f"plutil: {exc}\n")
+        return 1
+    sys.stderr.write(f"plutil shim: unsupported arguments {argv}\n")
+    return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

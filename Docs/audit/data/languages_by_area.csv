@@ -1,0 +1,24 @@
+repo,sha,area,files,lines,nonblank,bytes
+swiftterm,8025a28594,engine+libraries,181,86161,78587,3694373
+swiftterm,8025a28594,tests,243,57226,49898,3432339
+swiftterm,8025a28594,sample apps,83,8950,8381,1736145
+swiftterm,8025a28594,web (TS/WASM/Cloudflare),81,7929,7864,1288718
+swiftterm,8025a28594,dev tools,58,8764,8023,708979
+swiftterm,8025a28594,scripts,38,6697,5907,368341
+swiftterm,8025a28594,docs/evidence,46,5975,4755,345929
+swiftterm,8025a28594,root files,13,2197,1860,95630
+swiftterm,8025a28594,ci,7,597,507,20139
+swiftterm,8025a28594,build plugins,1,164,147,6555
+swiftterm,8025a28594,submodule glue,2,68,51,2859
+swiftterm,8025a28594,config,2,55,55,1463
+ashell,4f039cdb70,bundled resources,20226,4133362,3591554,216821321
+ashell,4f039cdb70,app (Swift),54,26388,25484,1616229
+ashell,4f039cdb70,root files,31,32938,29561,1191427
+ashell,4f039cdb70,native command recipes,131,22164,20921,833404
+ashell,4f039cdb70,build config,8,7186,7160,764888
+ashell,4f039cdb70,tests,25,1795,1721,103701
+ashell,4f039cdb70,app (workers),12,2054,1957,99452
+ashell,4f039cdb70,localization,15,2585,2234,85029
+ashell,4f039cdb70,ci/scripts,13,1975,1893,73336
+ashell,4f039cdb70,app (intents),18,1261,1186,58318
+ashell,4f039cdb70,docs,1,21,13,3186

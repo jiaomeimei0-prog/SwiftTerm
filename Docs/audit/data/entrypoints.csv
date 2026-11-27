@@ -1,0 +1,41 @@
+repo,type,name,defined_in,command
+swiftterm,workflow,cloudflare-pages-web.yml,.github/workflows/cloudflare-pages-web.yml,deploy
+swiftterm,workflow,docc.yml,.github/workflows/docc.yml,"build,deploy"
+swiftterm,workflow,web-wasm.yml,.github/workflows/web-wasm.yml,"released-wasi,browser"
+swiftterm,workflow,windows-scripts.yml,.github/workflows/windows-scripts.yml,powershell-5-1
+swiftterm,workflow,xcode.yml,.github/workflows/xcode.yml,"build,esctest,thread-sanitizer,swiftpm-strict-concurrency,swift6-tools,linux-headless"
+swiftterm,make-target,all,Makefile,
+swiftterm,make-target,regen-unicode-width,Makefile,
+swiftterm,make-target,check-unicode-width,Makefile,
+swiftterm,make-target,benchmark-unicode-width,Makefile,
+swiftterm,make-target,build-fuzzer,Makefile,
+swiftterm,make-target,run-fuzzer,Makefile,
+swiftterm,make-target,run-fuzzer-ghostty,Makefile,
+swiftterm,make-target,run-fuzzer-ghostty2,Makefile,
+swiftterm,make-target,clone-esctest,Makefile,
+swiftterm,make-target,esctest-report,Makefile,
+swiftterm,make-target,run-bench,Makefile,
+swiftterm,swift-executable,SwiftTermFuzz,Package.swift,
+swiftterm,swift-library,SwiftTerm,Package.swift,
+swiftterm,swift-executable,SwiftTermFuzz,Package.swift,
+swiftterm,swift-executable,termcast,Package.swift,
+swiftterm,swift-library,SwiftTerm,Package.swift,
+swiftterm,swift-library,SwiftTerm,Package.swift,
+swiftterm,swift-executable,SwiftTermWasmSmoke,Package.swift,
+swiftterm,swift-executable,SwiftTermWebWasm,Package.swift,
+swiftterm,make-target,test,TerminalApp/Makefile,
+swiftterm,make-target,open,TerminalApp/Makefile,
+swiftterm,swift-executable,web-terminal,TerminalApp/WebTerminal/Package.swift,
+swiftterm,swift-library,VTEBenchWorkloads,Tools/SwiftTermBenchmarks/Package.swift,
+swiftterm,swift-executable,SwiftTermProfile,Tools/SwiftTermBenchmarks/Package.swift,
+swiftterm,npm-script,deploy,Web/cloudflare/package.json,wrangler pages deploy site --project-name=swiftterm-web
+swiftterm,npm-script,preview,Web/cloudflare/package.json,wrangler pages dev site
+swiftterm,npm-script,domain,Web/cloudflare/package.json,wrangler pages domain add toolvip1.top --project-name=swiftterm-web
+swiftterm,npm-script,build,Web/package.json,tsc -p tsconfig.json && node package-dist.mjs
+swiftterm,npm-script,test,Web/package.json,npm run build && node --test ../Tests/WebWasmTests/*.test.mjs
+swiftterm,npm-script,test:browser,Web/package.json,npm run build && node ../Tests/WebWasmTests/browser.mjs
+swiftterm,npm-script,benchmark,Web/package.json,npm run build && node ../Tests/WebWasmTests/benchmark.mjs
+ashell,workflow,app-build.yml,.github/workflows/app-build.yml,build
+ashell,workflow,native-frameworks.yml,.github/workflows/native-frameworks.yml,"build,node-slice,node,release"
+ashell,workflow,openrsync.yml,.github/workflows/openrsync.yml,"build,release"
+ashell,workflow,pico-framework.yml,.github/workflows/pico-framework.yml,"build,release"

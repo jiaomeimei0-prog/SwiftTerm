@@ -1,0 +1,56 @@
+repo,sha,top_dir,files,lines,bytes,top_languages
+swiftterm,8025a28594,Sources,181,86161,3694373,"Swift (153), Markdown (27), Metal (1)"
+swiftterm,8025a28594,Tests,243,57226,3432339,"Swift (214), JavaScript (15), Binary asset (9)"
+swiftterm,8025a28594,TerminalApp,83,8950,1736145,"Binary asset (28), Swift (22), JavaScript (8)"
+swiftterm,8025a28594,Web,81,7929,1288718,"TypeScript (39), JavaScript (26), JSON (6)"
+swiftterm,8025a28594,Tools,57,8723,707426,"Swift (18), JSON (10), Python (7)"
+swiftterm,8025a28594,scripts,38,6697,368341,"Python (15), PowerShell (9), Shell (6)"
+swiftterm,8025a28594,Docs,46,5975,345929,"Markdown (36), CSV (2), JSON (2)"
+swiftterm,8025a28594,(root files),13,2197,95630,"Markdown (4), Config (3), Text (1)"
+swiftterm,8025a28594,.github,7,597,20139,"YAML (5), Markdown (2)"
+swiftterm,8025a28594,Plugins,1,164,6555,Swift (1)
+swiftterm,8025a28594,Apps,2,68,2859,"Markdown (1), Other/no extension (1)"
+swiftterm,8025a28594,Benchmarks,1,41,1553,Swift (1)
+swiftterm,8025a28594,.swiftpm,2,55,1463,plist (2)
+ashell,4f039cdb70,Resources,19364,3846482,194082892,"JavaScript (9454), Other (.vim) (1631), Perl (1318)"
+ashell,4f039cdb70,Resources_mini,524,54664,14917953,"Other/no extension (162), JavaScript (115), TypeScript (83)"
+ashell,4f039cdb70,man,193,231799,7549086,"man page (158), Other (.5) (11), Other (.7) (10)"
+ashell,4f039cdb70,a-Shell,49,25815,1592814,"Swift (20), Binary asset (18), JSON (3)"
+ashell,4f039cdb70,(root files),31,32938,1191427,"JavaScript (9), Shell (4), Markdown (3)"
+ashell,4f039cdb70,a-Shell.xcodeproj,5,6801,746648,"plist (2), Xcode project (1), Other (.xcworkspacedata) (1)"
+ashell,4f039cdb70,codex,41,8651,295365,"Patch (29), Rust (4), Shell (2)"
+ashell,4f039cdb70,terminfo,122,0,164668,Binary asset (122)
+ashell,4f039cdb70,Herdr,13,3588,134690,"Patch (4), Rust (4), Shell (2)"
+ashell,4f039cdb70,node,22,2639,119572,"Patch (9), Shell (5), JavaScript (3)"
+ashell,4f039cdb70,tests,25,1795,103701,"Shell (12), Objective-C (6), Markdown (5)"
+ashell,4f039cdb70,ShellWorkers,12,2054,99452,"Objective-C (4), C/C++/ObjC header (3), Swift (2)"
+ashell,4f039cdb70,Assets.xcassets,21,122,85494,"Binary asset (19), JSON (2)"
+ashell,4f039cdb70,helix,10,1715,70240,"Patch (4), Config (1), Markdown (1)"
+ashell,4f039cdb70,fzf,11,1555,53097,"Go (3), Shell (3), Patch (2)"
+ashell,4f039cdb70,navi,6,1358,49576,"Shell (2), Markdown (1), Objective-C (1)"
+ashell,4f039cdb70,rg,6,891,35257,"Shell (2), Config (1), Markdown (1)"
+ashell,4f039cdb70,ruff,8,730,30168,"Shell (3), Config (1), Markdown (1)"
+ashell,4f039cdb70,a-Shell-Intents,5,589,27855,"Swift (3), plist (2)"
+ashell,4f039cdb70,Base.lproj,1,840,27509,Other (.intentdefinition) (1)
+ashell,4f039cdb70,gitoxide,7,608,26143,"Shell (2), Config (1), Markdown (1)"
+ashell,4f039cdb70,en.lproj,1,740,24003,Other (.intentdefinition) (1)
+ashell,4f039cdb70,Util,5,573,23415,Swift (5)
+ashell,4f039cdb70,ODR,2,295,21228,Shell (2)
+ashell,4f039cdb70,ci,3,468,21074,"Markdown (1), Python (1), Shell (1)"
+ashell,4f039cdb70,scripts,3,414,19454,Shell (3)
+ashell,4f039cdb70,fd,7,429,19296,"Shell (3), Config (1), Markdown (1)"
+ashell,4f039cdb70,xcfs,3,385,18240,"Swift (2), SwiftPM lock (1)"
+ashell,4f039cdb70,Settings.bundle,7,301,17575,"Localization (6), plist (1)"
+ashell,4f039cdb70,patches,3,673,17286,Patch (3)
+ashell,4f039cdb70,a-Shell-LongCommands,2,348,17101,Swift (2)
+ashell,4f039cdb70,.github,4,420,15522,YAML (4)
+ashell,4f039cdb70,a-Shell-IntentsUI,5,157,6791,"plist (2), Interface Builder (1), Swift (1)"
+ashell,4f039cdb70,a-Shell-mini-IntentsUI,4,91,3940,"plist (2), Interface Builder (1), Localization (1)"
+ashell,4f039cdb70,docs,1,21,3186,Markdown (1)
+ashell,4f039cdb70,ja.lproj,1,117,2962,Localization (1)
+ashell,4f039cdb70,fr.lproj,1,120,2718,Localization (1)
+ashell,4f039cdb70,ko.lproj,1,119,2646,Localization (1)
+ashell,4f039cdb70,a-Shell-mini-Intents,2,76,2631,plist (2)
+ashell,4f039cdb70,de.lproj,1,118,2603,Localization (1)
+ashell,4f039cdb70,es.lproj,1,113,2551,Localization (1)
+ashell,4f039cdb70,zh-Hans.lproj,1,117,2462,Localization (1)

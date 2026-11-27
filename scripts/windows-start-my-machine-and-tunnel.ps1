@@ -14,7 +14,7 @@ param(
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "windows-tunnel-common.ps1")
 
-$Root = Join-Path $env:USERPROFILE "Documents\SwiftTerm"
+$Root = Get-SwiftTermRoot $PSScriptRoot
 if (-not (Test-Path -LiteralPath $Root)) { throw "Repo missing: $Root - clone SwiftTerm there first" }
 Set-Location -LiteralPath $Root
 Refresh-Path

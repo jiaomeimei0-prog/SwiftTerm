@@ -1,0 +1,14 @@
+suite,ref,sha,exit,result,detail,script_origin
+a-Shell tests/ssh-stock-registration.sh catalog,upstream,17b01a4d36,0,PASS,Stock SSH catalog check passed,ref
+a-Shell tests/ssh-stock-registration.sh project,upstream,17b01a4d36,0,PASS,Stock SSH project check passed,ref
+a-Shell tests/ssh-stock-registration.sh activation-wiring,upstream,17b01a4d36,0,PASS,Stock SSH activation-wiring check passed,ref
+a-Shell tests/worker-binding.sh,upstream,17b01a4d36,0,PASS,PASS generated host binding and all ten worker source references,ref
+a-Shell tests/ssh-stock-registration.sh catalog,fork,4f039cdb70,0,PASS,Stock SSH catalog check passed,ref
+a-Shell tests/ssh-stock-registration.sh project,fork,4f039cdb70,0,PASS,Stock SSH project check passed,ref
+a-Shell tests/ssh-stock-registration.sh activation-wiring,fork,4f039cdb70,0,PASS,Stock SSH activation-wiring check passed,ref
+a-Shell tests/worker-binding.sh,fork,4f039cdb70,1,FAIL,FAIL worker targets do not compile the generated Worker.swift,ref
+a-Shell tests/ssh-stock-registration.sh catalog,pin,d63526ba82,0,PASS,Stock SSH catalog check passed,ref
+a-Shell tests/ssh-stock-registration.sh project,pin,d63526ba82,0,PASS,Stock SSH project check passed,ref
+a-Shell tests/ssh-stock-registration.sh activation-wiring,pin,d63526ba82,0,PASS,Stock SSH activation-wiring check passed,ref
+a-Shell tests/worker-binding.sh,pin,d63526ba82,1,FAIL,FAIL worker targets do not compile the generated Worker.swift,ref
+SwiftTerm scripts/e2e_acceptance_host.sh (static greps + dry-run),swiftterm,8025a28594,0,PASS,"{""pass"": 67, ""warn"": 1, ""fail"": 0, ""skip"": 2}",ref

@@ -1,0 +1,8 @@
+catalogue,file,upstream,fork,pin
+full,Resources/commandDictionary.plist,158,158,158
+mini,Resources_mini/commandDictionary.plist,136,136,136
+extra,Resources/extraCommandsDictionary.plist,8,8,8
+llvm,Resources/llvmDictionary.plist,10,10,10
+tex,Resources/texCommandsDictionary.plist,31,31,31
+luatex,Resources/luatexCommandsDictionary.plist,7,7,7
+sshStock,Resources_mini/sshStockCommands.plist,4,4,4

@@ -1,16 +1,17 @@
-# Serve SwiftTerm WASM locally and expose it through Cloudflare Quick Tunnel.
+﻿# Serve SwiftTerm WASM locally and expose it through Cloudflare Quick Tunnel.
 # Phone can open the https://*.trycloudflare.com URL (works off LAN / 4G).
 #
 # Usage (Windows PowerShell 5.1+):
-#   cd $env:USERPROFILE\Documents\SwiftTerm
+#   cd <path-to-your-SwiftTerm-clone>
 #   powershell -ExecutionPolicy Bypass -File .\scripts\serve-via-cloudflare-tunnel.ps1
 
 $ErrorActionPreference = "Stop"
 
-$Site = Join-Path $env:USERPROFILE "Documents\SwiftTerm\Web\cloudflare\site"
+$Root = if ($env:SWIFTTERM_ROOT) { $env:SWIFTTERM_ROOT } elseif ($PSScriptRoot) { Split-Path -Parent $PSScriptRoot } else { throw "Run this script from a file or set SWIFTTERM_ROOT." }
+$Site = Join-Path $Root "Web\cloudflare\site"
 $Index = Join-Path $Site "index.html"
 if (-not (Test-Path -LiteralPath $Index)) {
-    throw "Missing site at $Site - clone https://github.com/jiaomeimei0-prog/SwiftTerm.git into Documents first."
+    throw "Missing site at $Site - clone https://github.com/jiaomeimei0-prog/SwiftTerm.git and run this script from that clone."
 }
 
 function Refresh-Path {

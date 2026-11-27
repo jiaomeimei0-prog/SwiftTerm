@@ -2,7 +2,7 @@
 # Fixes seen on PC: WinError 10013, wrong tunnel Hello World, Error 1033, Access/Worker DNS.
 #
 # Usage (PowerShell on Windows PC, keep windows open):
-#   cd $env:USERPROFILE\Documents\SwiftTerm
+#   cd <path-to-your-SwiftTerm-clone>
 #   git pull origin cursor/fix-named-tunnel-ps1-45fd
 #   powershell -ExecutionPolicy Bypass -File .\scripts\windows-bringup-toolvip1.ps1
 
@@ -17,7 +17,7 @@ $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "windows-tunnel-common.ps1")
 Refresh-Path
 
-$Root = Join-Path $env:USERPROFILE "Documents\SwiftTerm"
+$Root = Get-SwiftTermRoot $PSScriptRoot
 $Site = Join-Path $Root "Web\cloudflare\site"
 $CfgDir = Join-Path $env:USERPROFILE ".cloudflared"
 $Cfg = Join-Path $CfgDir "swiftterm-web-config.yml"

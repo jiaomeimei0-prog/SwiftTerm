@@ -2,6 +2,13 @@
 # Dot-source from caller:
 #   . (Join-Path $PSScriptRoot 'windows-tunnel-common.ps1')
 
+function Get-SwiftTermRoot([string]$ScriptDir) {
+    # Repo root = parent of scripts\ ; SWIFTTERM_ROOT overrides it for unusual layouts.
+    if ($env:SWIFTTERM_ROOT) { return $env:SWIFTTERM_ROOT }
+    if (-not $ScriptDir) { throw "Cannot locate the repo: run the script from a file or set SWIFTTERM_ROOT." }
+    return (Split-Path -Parent $ScriptDir)
+}
+
 function Refresh-Path {
     $m = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
     $u = [System.Environment]::GetEnvironmentVariable("Path", "User")

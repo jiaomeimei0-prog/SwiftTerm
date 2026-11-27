@@ -6,7 +6,7 @@
 #   2. cloudflared installed. cert.pem already present is OK (skip tunnel login).
 #
 # Usage:
-#   cd $env:USERPROFILE\Documents\SwiftTerm
+#   cd <path-to-your-SwiftTerm-clone>
 #   powershell -ExecutionPolicy Bypass -File .\scripts\serve-named-tunnel-domain.ps1 -Hostname toolvip1.top
 
 param(
@@ -19,7 +19,7 @@ param(
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "windows-tunnel-common.ps1")
 
-$Root = Join-Path $env:USERPROFILE "Documents\SwiftTerm"
+$Root = Get-SwiftTermRoot $PSScriptRoot
 $Site = Join-Path $Root "Web\cloudflare\site"
 $EvidenceDir = Join-Path $Root "Docs\evidence"
 $Log = Join-Path $EvidenceDir "windows-named-tunnel-log.txt"

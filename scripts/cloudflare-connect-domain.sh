@@ -8,7 +8,7 @@
 #   export CLOUDFLARE_API_TOKEN=... CLOUDFLARE_ACCOUNT_ID=...
 #   bash scripts/cloudflare-connect-domain.sh [domain ...]
 #
-# Default domains: tooltop1.vip toolvip1.top www.toolvip1.top
+# Default domains: toolvip1.top www.toolvip1.top
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -23,7 +23,7 @@ fi
 
 DOMAINS=("$@")
 if [[ ${#DOMAINS[@]} -eq 0 ]]; then
-  DOMAINS=(tooltop1.vip toolvip1.top www.toolvip1.top)
+  DOMAINS=(toolvip1.top www.toolvip1.top)
 fi
 
 cd "$CF_DIR"

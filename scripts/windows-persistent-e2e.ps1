@@ -3,16 +3,16 @@
 # Does NOT kill those windows when this launcher exits.
 #
 # Usage:
-#   cd $env:USERPROFILE\Documents\SwiftTerm
+#   cd <path-to-your-SwiftTerm-clone>
 #   powershell -ExecutionPolicy Bypass -File .\scripts\windows-persistent-e2e.ps1
 #
 # Results land in:
-#   $env:USERPROFILE\Documents\SwiftTerm\Docs\evidence\windows-persistent-e2e-log.txt
+#   <repo>\Docs\evidence\windows-persistent-e2e-log.txt
 
 $ErrorActionPreference = "Stop"
 . (Join-Path $PSScriptRoot "windows-tunnel-common.ps1")
 
-$Root = Join-Path $env:USERPROFILE "Documents\SwiftTerm"
+$Root = Get-SwiftTermRoot $PSScriptRoot
 $Site = Join-Path $Root "Web\cloudflare\site"
 $Index = Join-Path $Site "index.html"
 $EvidenceDir = Join-Path $Root "Docs\evidence"
@@ -20,7 +20,7 @@ $Log = Join-Path $EvidenceDir "windows-persistent-e2e-log.txt"
 $UrlFile = Join-Path $EvidenceDir "windows-trycloudflare-url.txt"
 
 if (-not (Test-Path -LiteralPath $Index)) {
-    throw "Missing $Index - clone https://github.com/jiaomeimei0-prog/SwiftTerm.git into Documents\SwiftTerm first."
+    throw "Missing $Index - clone https://github.com/jiaomeimei0-prog/SwiftTerm.git and run this script from that clone."
 }
 New-Item -ItemType Directory -Force -Path $EvidenceDir | Out-Null
 
