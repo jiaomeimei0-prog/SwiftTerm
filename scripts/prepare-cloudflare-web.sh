@@ -15,7 +15,8 @@ cp Web/dist/*.js Web/dist/*.d.ts Web/dist/package.json Web/dist/LICENSE Web/clou
 cp Web/dist/swiftterm-embedded.wasm Web/cloudflare/site/pkg/
 cp Web/dist/src/* Web/cloudflare/site/pkg/src/
 cp Web/dist/example/* Web/cloudflare/site/pkg/example/
-ln -sfn . Web/cloudflare/site/pkg/dist
+# Do NOT create pkg/dist -> . — wrangler pages deploy follows that self-link
+# into ELOOP (dist/dist/dist/...). Paths are rewritten to /pkg/ below.
 cp Web/example/index.html Web/cloudflare/site/index.html
 python3 - <<'PY'
 from pathlib import Path
