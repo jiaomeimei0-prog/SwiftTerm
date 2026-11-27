@@ -5,8 +5,11 @@
 # Requires (after cloudflare-resolve-account.sh):
 #   CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID
 #
-# Safe by default: lists + removes custom domains/routes for claimed hosts,
-# then deletes the worker script named "swiftterm" if present.
+# Token needs (user-owned API token preferred for Builds API):
+#   Account · Workers Scripts: Edit
+#   Account · Workers Builds Configuration: Edit  (aka Workers CI Write)
+#
+# Steps: disconnect Builds triggers → drop Worker custom domains → delete script.
 set -euo pipefail
 
 ACCOUNT_ID="${CLOUDFLARE_ACCOUNT_ID:?}"
@@ -47,6 +50,9 @@ PY
   return "$rc"
 }
 
+rm -f /tmp/cf-worker-script-found /tmp/cf-worker-script-tag /tmp/cf-worker-triggers.txt
+echo "0" >/tmp/cf-worker-script-found
+
 echo "=== List Workers scripts (look for ${SCRIPT}) ==="
 SCRIPTS_JSON="$(cf_get "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/workers/scripts")"
 python3 - "$SCRIPTS_JSON" "$SCRIPT" <<'PY'
@@ -56,23 +62,87 @@ want = sys.argv[2]
 if not data.get("success"):
     print("WARN: list scripts failed:", data.get("errors"))
     sys.exit(0)
-names = []
+found = False
+tag = ""
 for row in data.get("result") or []:
-    # result may be list of script objects or {id: ...}
     name = row.get("id") or row.get("name") or ""
-    names.append(name)
+    row_tag = row.get("tag") or row.get("script_tag") or ""
     mark = " <== TARGET" if name == want else ""
-    print(f"  script={name}{mark}")
-if want not in names:
+    print(f"  script={name} tag={row_tag or '?'}{mark}")
+    if name == want:
+        found = True
+        tag = row_tag
+if not found:
     print(f"OK: worker script '{want}' not present")
+    open("/tmp/cf-worker-script-found", "w").write("0")
 else:
-    print(f"FOUND: worker script '{want}'")
-open("/tmp/cf-worker-script-found","w").write("1" if want in names else "0")
+    print(f"FOUND: worker script '{want}' tag={tag or '(empty)'}")
+    open("/tmp/cf-worker-script-found", "w").write("1")
+    if tag:
+        open("/tmp/cf-worker-script-tag", "w").write(tag)
 PY
+
+SCRIPT_TAG=""
+if [[ -f /tmp/cf-worker-script-tag ]]; then
+  SCRIPT_TAG="$(cat /tmp/cf-worker-script-tag)"
+fi
+
+# Fallback: fetch single-script metadata for tag when list omitted it.
+if [[ "$(cat /tmp/cf-worker-script-found)" == "1" ]] && [[ -z "$SCRIPT_TAG" ]]; then
+  echo "=== Fetch script metadata for tag ==="
+  META="$(cf_get "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/workers/scripts/${SCRIPT}")"
+  SCRIPT_TAG="$(python3 - "$META" <<'PY'
+import json, sys
+data = json.loads(sys.argv[1])
+row = data.get("result") or {}
+if isinstance(row, dict):
+    print(row.get("tag") or row.get("script_tag") or "", end="")
+PY
+)"
+  if [[ -n "$SCRIPT_TAG" ]]; then
+    echo "  tag=${SCRIPT_TAG}"
+    printf '%s' "$SCRIPT_TAG" >/tmp/cf-worker-script-tag
+  else
+    echo "WARN: could not resolve Workers Builds script_tag for ${SCRIPT}"
+  fi
+fi
+
+echo "=== Disconnect Workers Builds triggers ==="
+if [[ -n "$SCRIPT_TAG" ]]; then
+  TRIG_JSON="$(cf_get "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/builds/workers/${SCRIPT_TAG}/triggers")"
+  python3 - "$TRIG_JSON" <<'PY' >/tmp/cf-worker-triggers.txt
+import json, sys
+data = json.loads(sys.argv[1])
+if not data.get("success"):
+    print(f"# WARN list triggers failed: {data.get('errors')}", file=sys.stderr)
+    sys.exit(0)
+for row in data.get("result") or []:
+    tid = row.get("trigger_uuid") or row.get("id") or ""
+    name = row.get("trigger_name") or "?"
+    repo = ""
+    conn = row.get("repo_connection") or {}
+    if isinstance(conn, dict):
+        repo = conn.get("repo_name") or ""
+    if tid:
+        print(f"{tid}\t{name}\t{repo}")
+PY
+  if [[ -s /tmp/cf-worker-triggers.txt ]]; then
+    while IFS=$'\t' read -r tid name repo; do
+      [[ "$tid" == \#* ]] && continue
+      echo "DELETE builds/triggers ${tid} name=${name} repo=${repo}"
+      cf_delete "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/builds/triggers/${tid}" \
+        || echo "WARN: trigger delete failed (need Workers Builds Configuration:Edit on user-owned token)"
+    done </tmp/cf-worker-triggers.txt
+  else
+    echo "No Builds triggers listed for tag=${SCRIPT_TAG} (already disconnected or token lacks Builds API)"
+  fi
+else
+  echo "Skip Builds trigger delete — no script_tag (script absent or list failed)"
+fi
 
 echo "=== Remove Worker custom domains on ${HOSTS[*]} ==="
 DOMAINS_JSON="$(cf_get "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/workers/domains")"
-python3 - "$DOMAINS_JSON" "${HOSTS[@]}" <<'PY' > /tmp/cf-worker-domains-del.txt
+python3 - "$DOMAINS_JSON" "${HOSTS[@]}" <<'PY' >/tmp/cf-worker-domains-del.txt
 import json, sys
 data = json.loads(sys.argv[1])
 wanted = set(sys.argv[2:])
@@ -88,36 +158,39 @@ if [[ -s /tmp/cf-worker-domains-del.txt ]]; then
     echo "DELETE workers/domains ${host} service=${service}"
     cf_delete "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/workers/domains/${did}" \
       || echo "WARN: domain delete failed (continuing)"
-  done < /tmp/cf-worker-domains-del.txt
+  done </tmp/cf-worker-domains-del.txt
 else
   echo "No Worker custom domains on claimed hosts"
 fi
 
-if [[ -f /tmp/cf-worker-script-found ]] && [[ "$(cat /tmp/cf-worker-script-found)" == "1" ]]; then
-  echo "=== Delete Workers script ${SCRIPT} (stops Workers Builds Hello World) ==="
-  cf_delete "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/workers/scripts/${SCRIPT}" \
-    || echo "WARN: could not delete script ${SCRIPT} — remove Workers Builds trigger in dashboard if it returns"
+if [[ "$(cat /tmp/cf-worker-script-found)" == "1" ]]; then
+  echo "=== Delete Workers script ${SCRIPT} ==="
+  if cf_delete "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/workers/scripts/${SCRIPT}"; then
+    echo "OK: deleted worker script ${SCRIPT}"
+  else
+    echo "WARN: could not delete script ${SCRIPT} — need Account · Workers Scripts:Edit"
+    echo "      Dashboard: https://dash.cloudflare.com/${ACCOUNT_ID}/workers/services/view/${SCRIPT}/production"
+  fi
 else
-  echo "Skip script delete — '${SCRIPT}' not listed (already gone or token lacks Workers Scripts:Edit)"
+  echo "Skip script delete — '${SCRIPT}' not listed"
 fi
 
-echo "=== Try list Workers Builds / CI triggers (best-effort) ==="
-for path in \
-  "builds/workers/triggers" \
-  "workers/scripts/${SCRIPT}/deployments" \
-  ; do
-  url="https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/${path}"
-  code="$(curl --proto '=https' --tlsv1.2 -sS -o /tmp/cf-builds.json -w '%{http_code}' "${auth_hdr[@]}" "$url" || echo 000)"
-  echo "GET /${path} -> HTTP ${code}"
-  python3 - <<'PY' 2>/dev/null || true
-import json
-try:
-    d=json.load(open("/tmp/cf-builds.json"))
-    print("  success=", d.get("success"), "errors=", d.get("errors"), "n=", len(d.get("result") or []) if isinstance(d.get("result"), list) else type(d.get("result")).__name__)
-except Exception as e:
-    print("  parse:", e)
+echo "=== Post-check: re-list scripts ==="
+POST="$(cf_get "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/workers/scripts")"
+python3 - "$POST" "$SCRIPT" <<'PY'
+import json, sys
+data = json.loads(sys.argv[1])
+want = sys.argv[2]
+if not data.get("success"):
+    print("WARN: post-check list failed:", data.get("errors"))
+    sys.exit(0)
+names = [(row.get("id") or row.get("name") or "") for row in (data.get("result") or [])]
+if want in names:
+    print(f"STILL_PRESENT: worker '{want}' — disconnect Builds in dashboard or fix token perms")
+    sys.exit(0)
+print(f"CLEAN: worker script '{want}' gone from account")
 PY
-done
 
-echo "Done. Confirm GitHub check 'Workers Builds: swiftterm' stops after next push,"
-echo "or disconnect the Workers Builds project in Cloudflare Dashboard → Workers → ${SCRIPT}."
+echo "Done. GitHub check 'Workers Builds: ${SCRIPT}' should stop after next push once triggers are deleted."
+echo "If it still fires: Dashboard → Workers → ${SCRIPT} → Settings → Builds → Disconnect,"
+echo "or delete the Worker entirely. Token must be user-owned for Builds API."
