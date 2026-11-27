@@ -50,8 +50,9 @@ codes = {e.get("code") for e in errs if isinstance(e, dict)}
 msgs = "; ".join(
     str(e.get("message") or e) for e in errs
 ) or raw[:300]
-if ok or http in {"200", "201", "409"} or 8000012 in codes or 8000032 in codes:
-    status = (data.get("result") or {}).get("status") or "ok"
+already = "already added this custom domain" in msgs.lower()
+if ok or already or http in {"200", "201", "409"} or 8000012 in codes or 8000032 in codes:
+    status = (data.get("result") or {}).get("status") or ("already" if already else "ok")
     print(f"OK: {host} attached (http={http} status={status})")
     sys.exit(0)
 print(f"WARN: {host} not attached (http={http}): {msgs}")

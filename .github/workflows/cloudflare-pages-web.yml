@@ -97,13 +97,12 @@ jobs:
             --project-name="$PAGES_PROJECT" \
             --commit-dirty=true
 
-      - name: Attach custom domain (toolvip1.top)
+      - name: Claim domain for Pages (drop Worker Hello World)
         run: |
           set -euo pipefail
           # shellcheck source=/dev/null
           source scripts/cloudflare-resolve-account.sh
-          bash scripts/cloudflare-pages-attach-domains.sh \
-            "$CUSTOM_DOMAIN" "www.${CUSTOM_DOMAIN}"
-          # Drop Worker Hello-World custom domains/routes still owning the hostname.
+          # Delete Worker custom domain/route on toolvip1.top (service=swiftterm
+          # was serving Hello World), then re-assert Pages hostnames.
           bash scripts/cloudflare-claim-pages-hostname.sh
           echo "Also open the pages.dev URL printed by wrangler deploy above."
