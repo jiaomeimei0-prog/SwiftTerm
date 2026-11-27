@@ -23,9 +23,34 @@ cf_get() {
   curl --proto '=https' --tlsv1.2 -sS "${auth_hdr[@]}" "$url"
 }
 
+# DELETE may return an empty body on 200 — never crash on that.
 cf_delete() {
   local url="$1"
-  curl --proto '=https' --tlsv1.2 -sS -X DELETE "${auth_hdr[@]}" "$url"
+  local body http
+  body="$(mktemp)"
+  http="$(
+    curl --proto '=https' --tlsv1.2 -sS -o "$body" -w '%{http_code}' \
+      -X DELETE "${auth_hdr[@]}" "$url" || echo "000"
+  )"
+  python3 - "$body" "$http" <<'PY'
+import json, sys
+path, http = sys.argv[1], sys.argv[2]
+raw = open(path, encoding="utf-8").read().strip()
+if not raw:
+    print(f"  http={http} (empty body)")
+    sys.exit(0 if http in {"200", "201", "204", "404"} else 1)
+try:
+    data = json.loads(raw)
+except json.JSONDecodeError:
+    print(f"  http={http} non-JSON: {raw[:200]}")
+    sys.exit(0 if http in {"200", "201", "204", "404"} else 1)
+ok = bool(data.get("success")) or http in {"200", "201", "204", "404"}
+print(f"  http={http} success={data.get('success')} errors={data.get('errors')}")
+sys.exit(0 if ok else 1)
+PY
+  local rc=$?
+  rm -f "$body"
+  return "$rc"
 }
 
 echo "=== Resolve zone for ${APEX} ==="
@@ -54,7 +79,7 @@ if [[ -s /tmp/cf-worker-domains-to-delete.txt ]]; then
   while IFS=$'\t' read -r did host service; do
     echo "DELETE workers/domains id=${did} host=${host} service=${service}"
     cf_delete "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/workers/domains/${did}" \
-      | python3 -c 'import json,sys; d=json.load(sys.stdin); print("  success=", d.get("success"), "errors=", d.get("errors"))'
+      || echo "WARN: delete workers/domains ${did} returned non-success (continuing)"
   done < /tmp/cf-worker-domains-to-delete.txt
 else
   echo "No Worker custom domains matched ${HOSTS[*]}"
@@ -79,7 +104,7 @@ PY
     while IFS=$'\t' read -r rid pattern script; do
       echo "DELETE workers/routes id=${rid} pattern=${pattern} script=${script}"
       cf_delete "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/workers/routes/${rid}" \
-        | python3 -c 'import json,sys; d=json.load(sys.stdin); print("  success=", d.get("success"), "errors=", d.get("errors"))'
+        || echo "WARN: delete workers/routes ${rid} returned non-success (continuing)"
     done < /tmp/cf-worker-routes-to-delete.txt
   else
     echo "No Worker routes matched ${HOSTS[*]}"
@@ -98,7 +123,6 @@ for row in data.get("result") or []:
     print(f"  {typ:6} {name:40} -> {content}  proxied={proxied}")
 PY
 
-  # Drop DNS that clearly targets workers.dev Hello-World style hosts.
   python3 - "$DNS_JSON" "${HOSTS[@]}" <<'PY' > /tmp/cf-dns-to-delete.txt
 import json, sys
 data = json.loads(sys.argv[1])
@@ -118,7 +142,7 @@ PY
     while IFS=$'\t' read -r rid typ name content; do
       echo "DELETE dns ${typ} ${name} -> ${content}"
       cf_delete "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records/${rid}" \
-        | python3 -c 'import json,sys; d=json.load(sys.stdin); print("  success=", d.get("success"))'
+        || echo "WARN: delete dns ${rid} failed (continuing)"
     done < /tmp/cf-dns-to-delete.txt
   else
     echo "No workers.dev DNS records to delete for claimed hosts"
@@ -137,9 +161,25 @@ if not data.get("success"):
     print("WARN: list domains failed:", data.get("errors"))
     sys.exit(0)
 for row in data.get("result") or []:
-    print(f"  {(row.get('name') or '?'):30} status={row.get('status')} verification={row.get('verification_data')}")
+    print(f"  {(row.get('name') or '?'):30} status={row.get('status')}")
+PY
+
+echo "=== Remaining Worker custom domains (should be empty for claimed hosts) ==="
+LEFT="$(cf_get "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT_ID}/workers/domains")"
+python3 - "$LEFT" "${HOSTS[@]}" <<'PY'
+import json, sys
+data = json.loads(sys.argv[1])
+wanted = set(sys.argv[2:])
+left = []
+for row in data.get("result") or []:
+    host = row.get("hostname") or row.get("domain") or ""
+    if host in wanted:
+        left.append(f"{host} -> service={row.get('service')}")
+if left:
+    print("WARN still bound:", "; ".join(left))
+else:
+    print("OK: no Worker custom domains on claimed hosts")
 PY
 
 echo "Done. Open https://${APEX}/ — expect SwiftTerm WASM title, not Hello World."
-echo "If Hello World remains: Cloudflare Dashboard → Workers → delete script bound to ${APEX},"
-echo "and Workers Builds project 'swiftterm' custom domains if present."
+echo "Also verify https://${PROJECT}.pages.dev/"
