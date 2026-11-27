@@ -30,7 +30,7 @@ import audit_invocations as I  # noqa: E402
 import audit_languages as L  # noqa: E402
 import audit_scripts as S  # noqa: E402
 import audit_security as X  # noqa: E402
-from audit_lib import FindingRegistry, GitRepo, apple_evidence, decode, defect_codes, findings_to_dicts, macos_ci_stats, minutes_between, summarise_build_log, summarise_ps_log, summarise_swift_log, swift_states, tree_equivalence, write_csv, write_json  # noqa: E402
+from audit_lib import FindingRegistry, GitRepo, apple_evidence, decode, defect_codes, findings_to_dicts, macos_ci_stats, minutes_between, suite_results, suite_summary, summarise_build_log, summarise_linux_log, summarise_ps_log, summarise_swift_log, swift_states, tree_equivalence, write_csv, write_json  # noqa: E402
 
 TABLE_ORDER = ["full", "mini", "extra", "llvm", "tex", "luatex", "sshStock"]
 BASELINE = {"full", "mini"}
@@ -202,8 +202,12 @@ def entrypoints(label: str, texts: dict[str, str]) -> list[dict]:
 def command_table(snaps: dict[str, C.AshellSnapshot], results: Results) -> None:
     fork, upstream, pin = snaps["fork"], snaps["upstream"], snaps["pin"]
     symbols = {label: C.locate_symbols(s, {row[1] for t in s.tables.values() for row in (t or {}).values() if row[0] == "SELF"} | {b.symbol for b in s.builtins}) for label, s in snaps.items()}
-    arg_types = {row[3] for t in upstream.tables.values() for row in (t or {}).values() if len(row) > 3}
+    arg_types = {row[3] for key, t in upstream.tables.items() for name, row in (t or {}).items() if name not in upstream.malformed.get(key, {})}
     cat_for_target = C.target_catalogues(fork)
+    for label, snap in snaps.items():
+        for key, message in sorted(snap.plist_errors.items()):
+            results.wrong_calls.append(asdict(S.WrongCall("catalogue-unreadable", "ashell", f"{C.PLIST_FILES[key]} @ {label}", key, message,
+                                                           f"plist at {snap.ref} cannot be parsed, so its commands are missing from this audit", "HIGH")))
     names: set[str] = set()
     for snap in snaps.values():
         names.update(n for t in snap.tables.values() for n in (t or {}))
@@ -215,11 +219,15 @@ def command_table(snaps: dict[str, C.AshellSnapshot], results: Results) -> None:
     def defects_for(label: str, name: str) -> dict[str, str]:
         snap = snaps[label]
         found: dict[str, str] = {}
-        table_defs = defs(snap, name)
-        for key, row in table_defs.items():
-            if len(row) != 4 or not all(isinstance(x, str) for x in row):
-                found["D08"] = f"{key}: tuple is not 4 strings"
-            elif row[3] not in arg_types:
+        entries = defs(snap, name)
+        table_defs = {}
+        for key, row in entries.items():
+            reason = snap.malformed.get(key, {}).get(name)
+            if reason:
+                found["D08"] = f"{key}: {reason}"
+                continue
+            table_defs[key] = row
+            if row[3] not in arg_types:
                 found["D08"] = f"{key}: argtype '{row[3]}' not used by manufacturer"
         distinct = {key: row for key, row in table_defs.items() if key not in ("sshStock", "extra")}
         if len({row for row in distinct.values()}) > 1:
@@ -238,7 +246,7 @@ def command_table(snaps: dict[str, C.AshellSnapshot], results: Results) -> None:
                 elif category.startswith("downloadFrameworks.sh tarball"):
                     found["D10"] = f"{key}: {row[0]} comes from a tarball downloaded without checksum verification"
         for b in snap.builtins:
-            if b.name == name and not symbols[label][b.symbol]["defined"] and not table_defs:
+            if b.name == name and not symbols[label][b.symbol]["defined"] and not entries:
                 found["D05"] = f"replaceCommand('{name}','{b.symbol}') symbol not defined in repo sources and no catalogue entry"
             elif b.name == name and not symbols[label][b.symbol]["defined"]:
                 found["D05"] = f"replaceCommand('{name}','{b.symbol}') symbol not defined in repo sources"
@@ -318,7 +326,7 @@ def command_table(snaps: dict[str, C.AshellSnapshot], results: Results) -> None:
     for target, key in sorted(cat_for_target.items()):
         info = fork.targets[target]
         missing = sorted({C._framework_name(r[0]) for r in (fork.tables[key] or {}).values() if r[0] != "SELF" and not r[0].startswith("/") and C._framework_name(r[0]) not in info.embedded})
-        results.target_matrix.append({"target": target, "catalogue": key, "catalogue_entries": len(fork.tables[key]), "embedded_frameworks": len(info.embedded), "frameworks_referenced_but_not_embedded": ";".join(missing), "missing_count": len(missing)})
+        results.target_matrix.append({"target": target, "catalogue": key, "catalogue_entries": len(fork.tables[key] or {}), "embedded_frameworks": len(info.embedded), "frameworks_referenced_but_not_embedded": ";".join(missing), "missing_count": len(missing)})
 
 
 def hostapi_section(st: GitRepo, snaps: dict[str, C.AshellSnapshot], args: argparse.Namespace, results: Results) -> None:
@@ -472,8 +480,7 @@ def refresh_github_facts(args: argparse.Namespace, path: Path, refs: dict[str, s
     if args.build_log and Path(args.build_log).exists():
         facts["build_log"] = summarise_build_log(Path(args.build_log).read_text(encoding="utf-8", errors="replace"))
     if args.linux_log and Path(args.linux_log).exists():
-        text = Path(args.linux_log).read_text(encoding="utf-8", errors="replace").splitlines()
-        facts["linux_headless_log"] = {"path_note": "log of the linux-headless job (downloaded via MCP get_job_logs)", "evidence_lines": [ln.split("Z ", 1)[-1].strip() for ln in text if re.search(r"Executed \d+ tests, with \d+ failures|Test run with \d+ tests", ln)][-3:]}
+        facts["linux_headless_log"] = summarise_linux_log(Path(args.linux_log).read_text(encoding="utf-8", errors="replace"))
     path.write_text(json.dumps(facts, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     return facts
 
@@ -495,11 +502,13 @@ def build_findings(results: Results, snaps: dict[str, C.AshellSnapshot]) -> Find
         reg.add("HIGH" if stats["completed"] == 0 else "MEDIUM", "CI/assurance", "swiftterm", ".github/workflows/xcode.yml",
                 f"Hàng đợi job macOS của fork chạy rất chậm: {stats['completed']}/{stats['jobs']} job `{'/'.join(stats['labels'])}` đã xong, {stats['in_progress']} đang chạy, {stats['queued']} còn queued",
                 f"Trong {stats['runs']} run gần nhất của workflow `Swift`: {stats['jobs']} job macOS, {stats['started']} đã được runner GitHub nhận" +
-                (f" (chờ {delay[0]}–{delay[1]} phút)" if delay else "") + f", {stats['completed']} xong ({done}), {stats['queued']} còn queued" +
+                (f" (chờ {delay[0]}–{delay[1]} phút)" if delay else "") + f", {stats['completed']} xong sau khi có runner ({done}), {stats['in_progress']} đang chạy, {stats['queued']} còn queued" +
+                (f", {stats['not_started']} kết thúc khi chưa có runner (không tính là đã chạy)" if stats["not_started"] else "") +
                 (f", job cũ nhất đã chờ ≥ {stats['oldest_queued_min']} phút khi thu thập" if stats["oldest_queued_min"] is not None else "") +
                 (f"; toàn repo có {queued_swift} run `Swift` đang queued" if "queued_runs" in facts else "") +
                 (f"; job Ubuntu cùng các run chờ tối đa {stats['ubuntu_max_delay_min']} phút. " if stats["ubuntu_max_delay_min"] is not None else ". ") +
-                "Nhãn `xcode-27` là image do GitHub cung cấp (actions/runner-images#15397; log job ghi `Image: xcode-27-arm64`) và đã có job chạy xong, nên không phải thiếu nhãn. " +
+                "Nhãn `xcode-27` là image do GitHub cung cấp (actions/runner-images#15397; log job ghi `Image: xcode-27-arm64`). " +
+                ("Đã có job chạy xong trên nhãn đó, nên không phải thiếu nhãn. " if stats["completed"] else "Đã có job được runner nhận trên nhãn đó, nên không phải thiếu nhãn. " if stats["started"] else "Chưa quan sát được job nào chạy trên nhãn đó trong các run này. ") +
                 (f"Hàng đợi đang được phục vụ chậm chứ không đứng yên (có job được nhận sau {delay[1]} phút). " if delay and delay[1] >= 30 else "") +
                 "Nguyên nhân chậm chưa xác định (giới hạn số job macOS chạy đồng thời, billing hoặc thiếu runner phía GitHub — chưa kiểm chứng; agent không đọc được thông tin runner/billing, HTTP 403). " +
                 f"Hệ quả đã quan sát trên run {swift_run.get('id', '?')}: biên dịch macOS {'ĐÃ' if proven['mac_compiled'] else 'CHƯA'} có bằng chứng, biên dịch iOS (HostHelpers) {'ĐÃ' if proven['ios_compiled'] else 'CHƯA'}, `swift test` trên macOS {'ĐÃ' if proven['mac_tested'] else 'CHƯA'} có kết quả.",
@@ -524,14 +533,19 @@ def build_findings(results: Results, snaps: dict[str, C.AshellSnapshot]) -> Find
         reg.add("HIGH", "CI/assurance", "swiftterm", ".github/workflows/windows-scripts.yml", "Bộ kiểm thử script Windows (PowerShell 5.1) thất bại trên commit CI",
                 f"run {windows['id']} kết thúc `{windows['conclusion']}`.", "Đọc log job `PowerShell 5.1 (parse, encoding, helper tests)` và sửa script hoặc test.", windows.get("html_url", ""))
     fork_up = facts.get("fork_vs_upstream")
-    failing = [r for r in results.test_runs if r["ref"] == "fork" and r["result"] == "FAIL"]
-    if fork_up or failing:
-        evidence = (f"fork ahead {fork_up['ahead_by']} / behind {fork_up['behind_by']} so với holzschu/a-shell master (merge-base {fork_up['merge_base'][:10]}); "
+    binding = suite_results(results.test_runs, "worker-binding.sh")
+    failing_runs = [r for r in results.test_runs if "worker-binding.sh" in r["suite"] and r["ref"] in ("fork", "pin") and r["result"] == "FAIL"]
+    behind = (fork_up or {}).get("behind_by", 0)
+    if behind or failing_runs:
+        control = {"PASS": "cùng script trên upstream = PASS", "FAIL": "cùng script trên upstream cũng FAIL (nguyên nhân có thể nằm ở môi trường chạy)"}.get(binding.get("upstream", ""), "chưa chạy đối chứng trên upstream")
+        evidence = (f"fork ahead {fork_up['ahead_by']} / behind {behind} so với holzschu/a-shell master (merge-base {fork_up['merge_base'][:10]}); "
                     f"{len(facts.get('upstream_only_commits', []))} commit upstream chưa có trong fork. " if fork_up else "") + \
-                   "; ".join(f"{r['suite']} trên {r['ref']}: {r['detail']}" for r in failing) + \
-                   ". Đối chứng: cùng script trên upstream = PASS (test do upstream thêm sau merge-base)."
-        reg.add("HIGH", "Toàn vẹn build", "ashell", "a-Shell.xcodeproj/project.pbxproj; tests/worker-binding.sh", "Fork a-Shell tụt hậu upstream và không qua bài test `worker-binding.sh` của nhà sản xuất", evidence,
-                "Merge `upstream/master` vào fork rồi chạy lại `tests/worker-binding.sh`; xem nhánh đồng bộ upstream.", "bash tests/worker-binding.sh (plutil shim) trên cây fork; đối chứng upstream PASS")
+                   "; ".join(f"{r['suite']} trên {r['ref']}: {r['detail']}" + (" (script không có ở ref này, áp bản của upstream)" if str(r.get("script_origin", "")).startswith("upstream") else "") for r in failing_runs) + \
+                   (". " if failing_runs else "") + f"Đối chứng: {control}."
+        reasons = ([f"tụt hậu upstream {behind} commit"] if behind else []) + ([f"không qua bài test `worker-binding.sh` của nhà sản xuất (trên {', '.join(sorted({r['ref'] for r in failing_runs}))})"] if failing_runs else [])
+        title = "Fork a-Shell " + " và ".join(reasons)
+        reg.add("HIGH" if failing_runs else "MEDIUM", "Toàn vẹn build", "ashell", "a-Shell.xcodeproj/project.pbxproj; tests/worker-binding.sh", title, evidence,
+                "Merge `upstream/master` vào fork rồi chạy lại `tests/worker-binding.sh`; xem nhánh đồng bộ upstream.", f"bash tests/worker-binding.sh (plutil shim) trên cây fork; kết quả hiện có: {suite_summary(binding) or 'chưa chạy'}")
     pvm, pulls = facts.get("pin_vs_master"), facts.get("pin_pulls", [])
     unmerged = (pvm and pvm.get("ahead_by", 0) > 0) or (not pvm and not g.get("pin_reachable_from_fork_master", True))
     if unmerged:
@@ -567,6 +581,7 @@ def build_findings(results: Results, snaps: dict[str, C.AshellSnapshot]) -> Find
                 "Symbol không được định nghĩa trong mã nguồn repo, nên chỉ kiểm chứng được bằng nhị phân prebuilt (VM không tải được). Nếu framework không export symbol này, `replaceCommand` chỉ ghi NSLog và không làm gì. Giống upstream (di sản TeX). Đây là khoảng trống kiểm chứng, chưa phải lỗi đã xác nhận.",
                 "Xác minh bằng `nm -gU` trên framework `tex`/`luatex` (job CI trên macOS) hoặc kiểm trên thiết bị: chạy `pdftex --version`.", "audit_commands.locate_symbols + ios_system.m replaceCommand semantics")
     for kind, severity, title, rec in (
+        ("catalogue-unreadable", "HIGH", "Catalogue plist của a-Shell không đọc được (các lệnh trong đó không được kiểm)", "Sửa plist (`plutil -lint`) rồi chạy lại báo cáo."),
         ("ps1-hardcoded-root", "MEDIUM", "Script PowerShell gắn cứng gốc repo `%USERPROFILE%\\Documents\\SwiftTerm`", "Suy ra gốc từ `$PSScriptRoot`."),
         ("wrong-domain-reference", "MEDIUM", "Tham chiếu tên miền sai `tooltop1.vip` (tên miền thật: toolvip1.top)", "Chuyển `toolvip1.top` thành tên miền chính trong workflow/script; thêm biểu ngữ vào tài liệu cũ."),
         ("ps1-no-bom", "LOW", "Script PowerShell thiếu UTF-8 BOM (PowerShell 5.1 đọc theo ANSI)", "Ghi lại file với BOM."),

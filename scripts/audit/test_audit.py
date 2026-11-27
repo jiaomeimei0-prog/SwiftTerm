@@ -13,6 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import audit_commands  # noqa: E402
 import audit_invocations as inv  # noqa: E402
 import audit_scripts as scripts  # noqa: E402
 import audit_security as sec  # noqa: E402
@@ -20,7 +21,7 @@ import openstep  # noqa: E402
 import render_report  # noqa: E402
 import run_audit  # noqa: E402
 from audit_lib import (FindingRegistry, GitRepo, TreeEntry, apple_evidence, classify, defect_codes, defect_targets, job_state, macos_ci_stats,  # noqa: E402
-                       minutes_between, summarise_build_log, summarise_ps_log, summarise_swift_log, swift_states, tree_equivalence)
+                       minutes_between, suite_results, suite_summary, suite_verdict, summarise_build_log, summarise_ps_log, summarise_swift_log, swift_states, tree_equivalence)
 
 
 def blob(path: str, mode: str = "100644", size: int = 10) -> TreeEntry:
@@ -335,7 +336,21 @@ class CiFactsTests(unittest.TestCase):
         self.assertEqual(stats["start_delay_min"], (5, 5))
         self.assertEqual(stats["oldest_queued_min"], 72)
         self.assertEqual(stats["ubuntu_max_delay_min"], 0)
+        self.assertEqual(stats["not_started"], 0)
         self.assertIsNone(macos_ci_stats({"swift_recent": [{"jobs": [{"labels": ["ubuntu-latest"]}]}]}))
+
+    def test_cancelled_before_a_runner_is_not_a_finished_job(self) -> None:
+        facts = {"collected_at": "2026-11-26T17:00:00Z", "swift_recent": [{"id": 1, "jobs": [
+            {"name": "build", "status": "completed", "conclusion": "cancelled", "labels": ["xcode-27"], "created_at": "2026-11-26T15:47:28Z", "started_at": "2026-11-26T15:47:28Z", "runner_name": None},
+            {"name": "build", "status": "queued", "conclusion": None, "labels": ["xcode-27"], "created_at": "2026-11-26T15:47:28Z", "started_at": "2026-11-26T15:47:28Z", "runner_name": None}]}]}
+        stats = macos_ci_stats(facts)
+        self.assertEqual((stats["completed"], stats["in_progress"], stats["not_started"], stats["queued"]), (0, 0, 1, 1))
+        self.assertGreaterEqual(stats["in_progress"], 0)
+        findings = run_audit.findings_to_dicts(run_audit.build_findings(run_audit.Results(ci_facts=facts), {}))
+        ci = [f for f in findings if "Hàng đợi job macOS" in f["title"]]
+        self.assertEqual([f["severity"] for f in ci], ["HIGH"])
+        self.assertIn("0/2 job", ci[0]["title"])
+        self.assertIn("1 kết thúc khi chưa có runner", ci[0]["evidence"])
 
     def test_ci_finding_reports_observed_queueing_and_denies_the_missing_label_theory(self) -> None:
         results = run_audit.Results(ci_facts=self.FACTS)
@@ -424,6 +439,19 @@ class CiFactsTests(unittest.TestCase):
         self.assertIn("đỏ trên bản lỗi và xanh trên bản đã sửa", text)
         self.assertEqual(render_report.windows_lines(run_audit.Results(ci_facts={})), [])
 
+    def test_section_calls_the_queue_slow_only_while_jobs_are_still_waiting(self) -> None:
+        finished = {"collected_at": "2026-11-26T17:00:00Z", "swift_recent": [{"id": 1, "jobs": [
+            {"name": "build", "status": "completed", "conclusion": "success", "labels": ["xcode-27"], "created_at": "2026-11-26T16:50:54Z", "started_at": "2026-11-26T16:51:10Z", "runner_name": "r"}]}]}
+        self.assertNotIn("chạy chậm", render_report.section_tests(self._report(finished)))
+        waiting = render_report.section_tests(self._report(self.FACTS))
+        self.assertIn("chạy chậm", waiting)
+        self.assertIn("CHƯA CÓ BẰNG CHỨNG", waiting)
+        self.assertNotIn("fork/pin PASS", waiting)
+
+    def _report(self, facts: dict) -> run_audit.Results:
+        return run_audit.Results(ci_facts=facts, tests_inventory=[], unit_tests={}, test_runs=[], commands=[], wrong_calls=[], hostapi=[],
+                                  hostapi_script={"declared": 0}, catalogue_sizes=[{"fork": 0}, {"fork": 0}])
+
 
 class LogSummaryTests(unittest.TestCase):
     PS_LOG = "\n".join([
@@ -472,6 +500,17 @@ class LogSummaryTests(unittest.TestCase):
         failed = summarise_build_log("2026-11-26T17:11:08Z ** BUILD FAILED **")
         self.assertEqual((failed["xcodebuild_succeeded"], failed["xcodebuild_failed"], failed["hosthelpers_projects"]), (0, 1, []))
 
+    def test_hosthelpers_project_comes_from_the_xcodebuild_invocation_when_cd_is_the_shared_root(self) -> None:
+        compile_line = "SwiftCompile normal arm64 /src/AppleTerminalView+HostHelpers.swift (in target 'SwiftTerm' from project 'SwiftTerm')"
+        log = "\n".join([
+            "xcodebuild -project TerminalApp/MacTerminal.xcodeproj -scheme MacTerminal",
+            compile_line, "    cd /Users/runner/work/SwiftTerm/SwiftTerm/TerminalApp",
+            "** BUILD SUCCEEDED **",
+            "xcodebuild -project TerminalApp/iOSTerminal.xcodeproj -scheme iOSTerminal",
+            compile_line, "    cd /Users/runner/work/SwiftTerm/SwiftTerm/TerminalApp",
+            "** BUILD SUCCEEDED **"])
+        self.assertEqual(summarise_build_log(log)["hosthelpers_projects"], ["MacTerminal", "iOSTerminal"])
+
 
 class TreeEquivalenceTests(unittest.TestCase):
     def test_same_and_different_trees_between_commits(self) -> None:
@@ -505,6 +544,53 @@ class MetaTests(unittest.TestCase):
             if isinstance(node, ast.ClassDef):
                 methods = [f.name for f in node.body if isinstance(f, ast.FunctionDef)]
                 self.assertEqual(len(methods), len(set(methods)), f"duplicate methods in {node.name}")
+
+
+class CatalogueRobustnessTests(unittest.TestCase):
+    def test_short_catalogue_rows_are_recorded_and_do_not_abort_the_table(self) -> None:
+        rows, bad = audit_commands.normalise_table({"ok": ["SELF", "sym", "", "none"], "bad": ["only-framework"], "odd": "text"})
+        self.assertEqual(bad["bad"], "expected 4 strings, got 1 item(s)")
+        self.assertIn("odd", bad)
+        self.assertEqual(rows["bad"], ["only-framework", "", "", ""])
+        snaps = {}
+        for label in ("fork", "upstream", "pin"):
+            snaps[label] = audit_commands.AshellSnapshot(
+                label=label, ref=label, sha="s", tables={"full": rows, "mini": None, "extra": None, "llvm": None, "tex": None, "luatex": None, "sshStock": None},
+                builtins=[], bins={}, mans=set(), xcfs_targets=set(), targets={}, absolute_refs=[], entries={}, sources={},
+                malformed={"full": bad}, plist_errors={})
+        results = run_audit.Results()
+        run_audit.command_table(snaps, results)
+        recorded = {c["command"]: c["defects"] for c in results.commands}
+        self.assertIn("D08", recorded["bad"])
+        self.assertNotIn("D01", recorded["ok"])
+
+    def test_group_relative_paths_select_the_mini_catalogue(self) -> None:
+        objects = {
+            "ROOT": {"isa": "PBXGroup", "children": ["MINI", "FULL"], "sourceTree": "<group>"},
+            "MINI": {"isa": "PBXGroup", "path": "Resources_mini", "children": ["F"], "sourceTree": "<group>"},
+            "F": {"isa": "PBXFileReference", "path": "commandDictionary.plist", "sourceTree": "<group>"},
+            "FULL": {"isa": "PBXFileReference", "path": "Resources/commandDictionary.plist", "sourceTree": "<group>"},
+        }
+        paths = audit_commands.pbx_paths(objects)
+        self.assertEqual(paths["F"], "Resources_mini/commandDictionary.plist")
+        self.assertEqual(audit_commands.catalogue_key(paths["F"]), "mini")
+        self.assertEqual(audit_commands.catalogue_key(paths["FULL"]), "full")
+        bare = audit_commands.AshellSnapshot(
+            label="t", ref="t", sha="s", tables={}, builtins=[], bins={}, mans=set(), xcfs_targets=set(),
+            targets={"a-Shell": audit_commands.TargetInfo("a-Shell", "commandDictionary.plist"),
+                     "a-Shell-mini": audit_commands.TargetInfo("a-Shell-mini", "Resources_mini/commandDictionary.plist")},
+            absolute_refs=[], entries={}, sources={})
+        self.assertEqual(audit_commands.target_catalogues(bare), {"a-Shell-mini": "mini"})
+
+    def test_suite_verdicts_come_from_the_runs_that_exist(self) -> None:
+        runs = [{"suite": "a-Shell tests/worker-binding.sh", "ref": "upstream", "result": "PASS"},
+                {"suite": "a-Shell tests/worker-binding.sh", "ref": "fork", "result": "FAIL"},
+                {"suite": "a-Shell tests/worker-binding.sh", "ref": "pin", "result": "NOT_RUN"}]
+        binding = suite_results(runs, "worker-binding.sh")
+        self.assertEqual(suite_summary(binding), "upstream PASS; fork FAIL; pin NOT_RUN")
+        self.assertEqual(suite_verdict(binding), "KHÔNG ĐẠT (fork)")
+        self.assertEqual(suite_verdict({}), "CHƯA CHẠY")
+        self.assertEqual(suite_verdict({"upstream": "PASS"}), "CHƯA ĐỦ DỮ LIỆU")
 
 
 class RegistryTests(unittest.TestCase):

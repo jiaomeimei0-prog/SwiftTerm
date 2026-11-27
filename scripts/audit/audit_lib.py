@@ -48,11 +48,15 @@ def macos_ci_stats(facts: dict) -> dict | None:
     started = [job for job in macos if job.get("runner_name")]
     delays = [m for m in (minutes_between(job.get("created_at", ""), job.get("started_at", "")) for job in started) if m is not None]
     ubuntu_delays = [m for m in (minutes_between(job.get("created_at", ""), job.get("started_at", "")) for job in all_jobs if job.get("runner_name") and not _is_macos(job)) if m is not None]
-    completed = [job for job in macos if job.get("status") == "completed"]
+    # A job GitHub marks completed without ever assigning a runner (cancelled or skipped while queued)
+    # did not run. Counting it as finished made `in_progress` negative and hid a queue that never moved.
+    finished = [job for job in macos if job.get("status") == "completed" and job.get("runner_name")]
+    not_started = [job for job in macos if job.get("status") == "completed" and not job.get("runner_name")]
     return {
         "runs": len(runs), "jobs": len(macos), "queued": len(queued), "started": len(started),
-        "completed": len(completed), "in_progress": len(started) - len(completed),
-        "conclusions": dict(collections.Counter(job.get("conclusion") or "-" for job in completed)),
+        "completed": len(finished), "in_progress": sum(1 for job in macos if job.get("status") == "in_progress"),
+        "not_started": len(not_started),
+        "conclusions": dict(collections.Counter(job.get("conclusion") or "-" for job in finished)),
         "oldest_queued_min": minutes_between(min((job["created_at"] for job in queued if job.get("created_at")), default=""), facts.get("collected_at", "")),
         "start_delay_min": (min(delays), max(delays)) if delays else None,
         "ubuntu_max_delay_min": max(ubuntu_delays) if ubuntu_delays else None,
@@ -115,6 +119,7 @@ def summarise_swift_log(text: str) -> dict:
 
 
 HOSTHELPERS_COMPILE_RE = re.compile(r"^SwiftCompile normal \w+ \S*AppleTerminalView\+HostHelpers\.swift \(in target 'SwiftTerm'")
+PROJECT_RE = re.compile(r"(?:-project\s+|^\s*cd\s+)\S*?/([\w+-]+)\.xcodeproj\b")
 TEST_RESULT_RE = re.compile(r"Executed \d+ tests?, with \d+ failures|Test run with \d+ tests?")
 
 
@@ -122,17 +127,28 @@ def summarise_build_log(text: str) -> dict:
     """Facts from the log of the macOS `build` job: xcodebuild results, where HostHelpers was compiled, test totals."""
     lines = [ANSI_RE.sub("", re.sub(r"^\d{4}-\d\d-\d\dT[\d:.]+Z ", "", raw)).rstrip() for raw in text.splitlines()]
     facts: dict = {"xcodebuild_succeeded": 0, "xcodebuild_failed": 0, "swift_build_complete": 0, "hosthelpers_projects": [], "test_lines": []}
+    current_project = ""
     for index, line in enumerate(lines):
+        named = PROJECT_RE.search(line)
+        if named:
+            current_project = named.group(1)
         if line.startswith("** BUILD SUCCEEDED **"):
             facts["xcodebuild_succeeded"] += 1
         elif line.startswith("** BUILD FAILED **"):
             facts["xcodebuild_failed"] += 1
         elif line.startswith("Build complete!"):
             facts["swift_build_complete"] += 1
-        elif HOSTHELPERS_COMPILE_RE.match(line) and index + 1 < len(lines):
-            project = re.search(r"/([\w+-]+)\.xcodeproj\s*$", lines[index + 1])
-            if project and project.group(1) not in facts["hosthelpers_projects"]:
-                facts["hosthelpers_projects"].append(project.group(1))
+        elif HOSTHELPERS_COMPILE_RE.match(line):
+            # The compile line names the Swift package ('SwiftTerm'), not the app. The following `cd` usually
+            # names the .xcodeproj; when xcodebuild instead cds to the shared SRCROOT, the `xcodebuild -project`
+            # line that opened this section is what distinguishes MacTerminal from iOSTerminal.
+            project = ""
+            if index + 1 < len(lines):
+                following = PROJECT_RE.search(lines[index + 1])
+                project = following.group(1) if following else ""
+            project = project or current_project
+            if project and project not in facts["hosthelpers_projects"]:
+                facts["hosthelpers_projects"].append(project)
         elif TEST_RESULT_RE.search(line):
             facts["test_lines"].append(line.strip()[:140])
     facts["test_lines"] = facts["test_lines"][-4:]
@@ -199,6 +215,74 @@ def apple_evidence(states: dict[str, str]) -> dict[str, bool]:
         "ios_compiled": states["ios_build"] == "đạt",
         "mac_tested": states["swift_test"] == "đạt",
     }
+
+
+LINUX_XCTEST_RE = re.compile(r"Executed (\d+) tests?, with (\d+) failures?")
+LINUX_TESTING_RE = re.compile(r"Test run with (\d+) tests? in (\d+) suites? (passed|failed)")
+LOG_STAMP_RE = re.compile(r"^\d{4}-\d\d-\d\dT[\d:.]+Z ")
+
+
+def summarise_linux_log(text: str) -> dict:
+    """Totals printed by `swift test` in the log of the `linux-headless` job.
+
+    XCTest prints one summary per suite and the grand total last, so the last `Executed` line is the
+    total; Swift Testing prints a single `Test run with ...` line.
+    """
+    xctest = testing = None
+    evidence: list[str] = []
+    for raw in text.splitlines():
+        line = LOG_STAMP_RE.sub("", ANSI_RE.sub("", raw)).strip()
+        match = LINUX_XCTEST_RE.search(line)
+        if match:
+            xctest = {"executed": int(match.group(1)), "failures": int(match.group(2))}
+            evidence.append(line)
+        match = LINUX_TESTING_RE.search(line)
+        if match:
+            testing = {"tests": int(match.group(1)), "suites": int(match.group(2)), "result": match.group(3)}
+            evidence.append(line)
+    return {"xctest": xctest, "swift_testing": testing, "evidence_lines": evidence[-3:]}
+
+
+def linux_result(facts: dict) -> dict:
+    """What the `linux-headless` job of the audited run proves: the counts count only when the job itself succeeded."""
+    job = next((j for j in facts.get("swift_jobs", []) if j.get("name") == "linux-headless"), None)
+    log = facts.get("linux_headless_log") or {}
+    if "xctest" not in log and log.get("evidence_lines"):
+        log = summarise_linux_log("\n".join(log["evidence_lines"]))
+    xctest, testing = log.get("xctest"), log.get("swift_testing")
+    ok = bool(job and job.get("conclusion") == "success" and xctest and xctest["failures"] == 0 and testing and testing["result"] == "passed")
+    return {"ok": ok, "state": job_state(job), "job_id": str(job["id"]) if job else "?", "xctest": xctest, "swift_testing": testing}
+
+
+RESULT_RANK = {"PASS": 0, "NOT_RUN": 1, "FAIL": 2}
+
+
+def suite_results(test_runs: Iterable[dict], needle: str) -> dict[str, str]:
+    """Worst result per ref over the executed runs whose suite name contains `needle` (FAIL > NOT_RUN > PASS)."""
+    merged: dict[str, str] = {}
+    for run in test_runs:
+        if needle not in run.get("suite", ""):
+            continue
+        ref, result = run["ref"], run.get("result", "")
+        result = result if result in RESULT_RANK else "NOT_RUN"
+        if ref not in merged or RESULT_RANK[result] > RESULT_RANK[merged[ref]]:
+            merged[ref] = result
+    return merged
+
+
+def suite_summary(results: dict[str, str]) -> str:
+    """`upstream PASS; fork FAIL; pin FAIL` in a fixed order; empty when the suite was not run."""
+    return "; ".join(f"{ref} {results[ref]}" for ref in ("upstream", "fork", "pin", "swiftterm") if ref in results)
+
+
+def suite_verdict(results: dict[str, str], gate: tuple[str, ...] = ("fork", "pin")) -> str:
+    """ĐẠT only when every gate ref ran and passed; upstream is the control, not the subject."""
+    if not results:
+        return "CHƯA CHẠY"
+    failed = [ref for ref in gate if results.get(ref) == "FAIL"]
+    if failed:
+        return f"KHÔNG ĐẠT ({', '.join(failed)})"
+    return "ĐẠT" if all(results.get(ref) == "PASS" for ref in gate) else "CHƯA ĐỦ DỮ LIỆU"
 
 
 def defect_codes(defects: str) -> set[str]:

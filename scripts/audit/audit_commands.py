@@ -9,6 +9,7 @@ import os
 import plistlib
 import re
 from dataclasses import dataclass, field
+from xml.parsers.expat import ExpatError
 
 import openstep
 from audit_lib import GitRepo, TreeEntry, decode
@@ -68,6 +69,8 @@ class AshellSnapshot:
     absolute_refs: list[tuple[str, str]]
     entries: dict[str, TreeEntry]
     sources: dict[str, str]
+    malformed: dict[str, dict[str, str]] = field(default_factory=dict)
+    plist_errors: dict[str, str] = field(default_factory=dict)
 
 
 def _framework_name(framework: str) -> str:
@@ -87,12 +90,48 @@ def _pbx_embedded_name(path: str) -> str:
     return base
 
 
-def _load_tables(repo: GitRepo, ref: str) -> dict[str, dict[str, list[str]] | None]:
+def normalise_table(table: dict) -> tuple[dict[str, list[str]], dict[str, str]]:
+    """Coerce a catalogue to `name -> [framework, symbol, options, argtype]` so callers can index every row.
+
+    Rows that had to be coerced are returned separately with the reason (defect D08); they must not be
+    judged by the other checks because their fields are placeholders.
+    """
+    rows: dict[str, list[str]] = {}
+    malformed: dict[str, str] = {}
+    for name, row in table.items():
+        key = str(name)
+        sequence = isinstance(row, (list, tuple))
+        if sequence and len(row) == 4 and all(isinstance(item, str) for item in row):
+            rows[key] = list(row)
+            continue
+        items = [item if isinstance(item, str) else str(item) for item in (row if sequence else [])][:4]
+        rows[key] = items + [""] * (4 - len(items))
+        malformed[key] = f"expected 4 strings, got {f'{len(row)} item(s)' if sequence else type(row).__name__}"
+    return rows, malformed
+
+
+def _load_tables(repo: GitRepo, ref: str) -> tuple[dict[str, dict[str, list[str]] | None], dict[str, dict[str, str]], dict[str, str]]:
+    """(tables, malformed rows per catalogue, unreadable catalogues); a missing file maps to None."""
     tables: dict[str, dict[str, list[str]] | None] = {}
+    malformed: dict[str, dict[str, str]] = {}
+    errors: dict[str, str] = {}
     for key, path in PLIST_FILES.items():
         data = repo.show(ref, path)
-        tables[key] = plistlib.loads(data) if data is not None else None
-    return tables
+        if data is None:
+            tables[key] = None
+            continue
+        try:
+            parsed = plistlib.loads(data)
+        except (plistlib.InvalidFileException, ValueError, ExpatError) as exc:
+            tables[key], errors[key] = {}, f"{type(exc).__name__}: {exc}"[:200]
+            continue
+        if not isinstance(parsed, dict):
+            tables[key], errors[key] = {}, f"root is {type(parsed).__name__}, expected a dictionary"
+            continue
+        tables[key], bad = normalise_table(parsed)
+        if bad:
+            malformed[key] = bad
+    return tables, malformed, errors
 
 
 def _scan_builtins(path: str, text: str) -> tuple[list[Builtin], int]:
@@ -108,22 +147,59 @@ def _scan_builtins(path: str, text: str) -> tuple[list[Builtin], int]:
     return found, len(found)
 
 
+GROUP_KINDS = ("PBXGroup", "PBXVariantGroup", "XCVersionGroup")
+
+
+def pbx_paths(objects: dict) -> dict[str, str]:
+    """Project-relative path of every file reference, resolved through its parent groups.
+
+    Xcode keeps only the last path component on a reference that sits in a folder group, so
+    `path = commandDictionary.plist` under a group `path = Resources_mini` is the mini catalogue.
+    Only `sourceTree = "<group>"` inherits the parent's path; other roots keep their own.
+    """
+    parent = {child: oid for oid, obj in objects.items() if obj.get("isa") in GROUP_KINDS for child in obj.get("children", [])}
+    resolved: dict[str, str] = {}
+
+    def resolve(oid: str, trail: frozenset[str]) -> str:
+        if oid in resolved:
+            return resolved[oid]
+        obj = objects.get(oid, {})
+        own = obj.get("path", "")
+        if oid in trail or oid not in parent or obj.get("sourceTree", "<group>") != "<group>":
+            path = own
+        else:
+            base = resolve(parent[oid], trail | {oid})
+            path = f"{base}/{own}" if base and own else base or own
+        resolved[oid] = path
+        return path
+
+    return {oid: resolve(oid, frozenset()) for oid, obj in objects.items() if obj.get("isa") == "PBXFileReference"}
+
+
+def catalogue_key(path: str) -> str | None:
+    """`mini`/`full` for a bundled commandDictionary.plist path (group folders may precede it), else None."""
+    for key in ("mini", "full"):
+        if f"/{path}".endswith(f"/{PLIST_FILES[key]}"):
+            return key
+    return None
+
+
 def _load_pbx(repo: GitRepo, ref: str):
     data = repo.show(ref, "a-Shell.xcodeproj/project.pbxproj")
     if data is None:
         return {}, {}, []
     objects = openstep.loads(data)["objects"]
+    paths = pbx_paths(objects)
     targets: dict[str, TargetInfo] = {}
     for obj in objects.values():
         if obj.get("isa") != "PBXNativeTarget":
             continue
         info = TargetInfo(obj["name"], None)
         for phase_id in obj.get("buildPhases", []):
-            phase = objects[phase_id]
+            phase = objects.get(phase_id, {})
             kind = phase.get("isa")
             for build_id in phase.get("files", []):
-                ref_obj = objects.get(objects[build_id].get("fileRef", ""), {})
-                path = ref_obj.get("path", "")
+                path = paths.get(objects.get(build_id, {}).get("fileRef", ""), "")
                 if kind == "PBXResourcesBuildPhase":
                     info.resources.add(path)
                     if path.endswith("commandDictionary.plist"):
@@ -165,10 +241,11 @@ def snapshot(repo: GitRepo, ref: str, label: str) -> AshellSnapshot:
     bins = {os.path.basename(p): e.size for p, e in entries.items() if p.startswith("Resources/bin/") and e.is_blob}
     mans = {os.path.basename(p).rsplit(".", 1)[0] for p in entries if p.startswith("man/")}
     _, targets, absolute = _load_pbx(repo, ref)
+    tables, malformed, plist_errors = _load_tables(repo, ref)
     return AshellSnapshot(
-        label=label, ref=ref, sha=repo.rev(ref), tables=_load_tables(repo, ref), builtins=builtins, bins=bins,
+        label=label, ref=ref, sha=repo.rev(ref), tables=tables, builtins=builtins, bins=bins,
         mans=mans, xcfs_targets=_xcfs_targets(repo, ref), targets=targets, absolute_refs=absolute,
-        entries=entries, sources=sources,
+        entries=entries, sources=sources, malformed=malformed, plist_errors=plist_errors,
     )
 
 
@@ -221,11 +298,14 @@ def framework_provenance(snap: AshellSnapshot, framework: str, symbol: str, symb
 
 
 def target_catalogues(snap: AshellSnapshot) -> dict[str, str]:
-    """Map the app target -> catalogue key (`full` or `mini`) by its bundled commandDictionary.plist."""
+    """Map the app target -> catalogue key (`full` or `mini`) by its bundled commandDictionary.plist.
+
+    A target whose catalogue path is neither is left out instead of being assumed to be `full`.
+    """
     mapping: dict[str, str] = {}
     for name in APP_TARGETS:
         target = snap.targets.get(name)
-        if not target or not target.catalogue:
-            continue
-        mapping[name] = "mini" if target.catalogue.startswith("Resources_mini/") else "full"
+        key = catalogue_key(target.catalogue) if target and target.catalogue else None
+        if key:
+            mapping[name] = key
     return mapping
