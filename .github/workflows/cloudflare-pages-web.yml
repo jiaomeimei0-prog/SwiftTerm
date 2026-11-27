@@ -23,6 +23,7 @@ on:
       - 'scripts/build-wasm.sh'
       - 'scripts/prepare-cloudflare-web.sh'
       - 'scripts/cloudflare-resolve-account.sh'
+      - 'scripts/cloudflare-pages-attach-domains.sh'
       - 'scripts/wasm-toolchain.env'
       - '.github/workflows/cloudflare-pages-web.yml'
 
@@ -96,19 +97,10 @@ jobs:
             --commit-dirty=true
 
       - name: Attach custom domain (toolvip1.top)
-        working-directory: Web/cloudflare
         run: |
           set -euo pipefail
           # shellcheck source=/dev/null
-          source "$GITHUB_WORKSPACE/scripts/cloudflare-resolve-account.sh"
-          attach() {
-            local host="$1"
-            echo "--- pages domain add: $host ---"
-            ./node_modules/.bin/wrangler pages domain add "$host" --project-name="$PAGES_PROJECT" \
-              || echo "WARN: $host not attached (unregistered, wrong zone, or already present)."
-          }
-          attach "$CUSTOM_DOMAIN"
-          attach "www.${CUSTOM_DOMAIN}"
-          echo "After DNS settles: https://${CUSTOM_DOMAIN}/"
-          echo "If HTTPS returns Cloudflare Access login, disable Access for that hostname."
+          source scripts/cloudflare-resolve-account.sh
+          bash scripts/cloudflare-pages-attach-domains.sh \
+            "$CUSTOM_DOMAIN" "www.${CUSTOM_DOMAIN}"
           echo "Also open the pages.dev URL printed by wrangler deploy above."

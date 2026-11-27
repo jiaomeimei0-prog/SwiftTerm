@@ -40,15 +40,10 @@ echo "=== Deploy Pages project=$PROJECT ==="
   --project-name="$PROJECT" \
   --commit-dirty=true
 
-echo "=== Attach custom domains ==="
-for d in "${DOMAINS[@]}"; do
-  echo "--- domain add: $d ---"
-  if ./node_modules/.bin/wrangler pages domain add "$d" --project-name="$PROJECT"; then
-    echo "OK attached (or already attached): $d"
-  else
-    echo "WARN: could not attach $d — domain may be unregistered, wrong zone, or DNS not ready."
-  fi
-done
+echo "=== Attach custom domains (REST API) ==="
+# shellcheck source=/dev/null
+source "$ROOT/scripts/cloudflare-resolve-account.sh"
+bash "$ROOT/scripts/cloudflare-pages-attach-domains.sh" "${DOMAINS[@]}"
 
 echo "=== Probe Access lock (public GET) ==="
 for d in "${DOMAINS[@]}"; do
