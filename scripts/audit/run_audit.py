@@ -627,7 +627,8 @@ def build_findings(results: Results, snaps: dict[str, C.AshellSnapshot]) -> Find
     unused = [a["name"] for a in results.hostapi if a["status"] == "UNUSED"]
     untested = [a["name"] for a in results.hostapi if a["status"] == "USED_BY_ASHELL_UNTESTED_IN_SWIFTTERM"]
     if hs:
-        reg.add("LOW", "Kiểm thử", "swiftterm", "scripts/e2e_acceptance_host.sh:77", "Bằng chứng HostHelpers chỉ ở mức L0 (grep chuỗi) và nhãn '20 APIs' đã lỗi thời: "
+        level = "L3 (bước `Xcode iOS Build` đạt; log có dòng biên dịch `AppleTerminalView+HostHelpers.swift`, nhưng chưa có test hành vi)" if proven["ios_compiled"] else "L0 (grep chuỗi; bước `Xcode iOS Build` chưa đạt)"
+        reg.add("LOW", "Kiểm thử", "swiftterm", "scripts/e2e_acceptance_host.sh:77", f"Bằng chứng HostHelpers ở mức {level}. Nhãn '20 APIs' đã lỗi thời: "
                 f"file khai báo {hs['declared']} API (script liệt kê {hs['listed_in_e2e_script']}); {len(untested)} API được a-Shell gọi nhưng SwiftTerm không có test; {len(unused)} API không ai dùng",
                 f"Không có test trong SwiftTerm: {', '.join(untested)}; không ai dùng: {', '.join(unused)}. HostHelpers bị bao bởi `{hs['platform_guard']}` nên không bao giờ biên dịch trên Linux; chỉ bước `Xcode iOS Build` của workflow `Swift` (macOS) biên dịch nó — trạng thái: {states['ios_build']}.",
                 "Khi bước `Xcode iOS Build` đạt thì HostHelpers mới có bằng chứng biên dịch; thêm test cho các API chưa được phủ.", "audit_hostapi.analyse")

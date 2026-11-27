@@ -634,7 +634,7 @@ def tests_line(r) -> str:
         gate = f"`worker-binding.sh`: {suite_summary(binding)}. " if binding else "`worker-binding.sh` chưa chạy. "
     apple = ("Biên dịch Apple (workflow `Swift` gốc): macOS " + ("ĐÃ có bằng chứng" if proven["mac_compiled"] else "chưa có") + f" (`swiftpm-strict-concurrency` {states['strict_concurrency']}), iOS/HostHelpers "
              + ("ĐÃ có bằng chứng" if proven["ios_compiled"] else "chưa có") + f" (bước `Xcode iOS Build` {states['ios_build']}); hàng đợi macOS: "
-             + (f"{stats['completed']}/{stats['jobs']} job xong, {stats['in_progress']} đang chạy, {stats['queued']} queued" if stats else "không có dữ liệu"))
+             + (f"{stats['completed']}/{stats['jobs']} job xong, {stats['in_progress']} đang chạy, {stats['queued']} queued" + (f", {stats['not_started']} kết thúc khi chưa có runner" if stats["not_started"] else "") if stats else "không có dữ liệu"))
     windows = r.ci_facts.get("windows_log")
     windows_text = f"PowerShell 5.1 {windows['passed']} check đạt, {len(windows['failed'])} lỗi" if windows else "chưa có log"
     return f"3. **Kiểm thử:** {emulator}{gate}{apple}. Script Windows: {windows_text}. Chưa có chạy thật 158 lệnh."
