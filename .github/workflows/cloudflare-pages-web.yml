@@ -2,10 +2,11 @@
 # Hosting target: toolvip1.top (the project's Cloudflare zone; www.toolvip1.top is attached too).
 #
 # Required GitHub repository secrets (Settings → Secrets and variables → Actions):
-#   CLOUDFLARE_API_TOKEN   — required permissions on the target account/zone:
+#   CLOUDFLARE_API_TOKEN   — user-owned token; required permissions:
 #                              Account · Cloudflare Pages:Edit
 #                              Account · Account Settings:Read
-#                              Account · Workers Scripts:Edit   (to delete Worker "swiftterm")
+#                              Account · Workers Scripts:Edit   (delete Worker "swiftterm")
+#                              Account · Workers Builds Configuration:Edit (disconnect Git trigger)
 #                              Zone · Zone:Read + DNS:Edit on toolvip1.top
 #   CLOUDFLARE_ACCOUNT_ID  — Account ID from Overview (NOT Zone ID). Workflow auto-corrects
 #                            a wrong/Zone ID when the token can see exactly one account.
@@ -107,7 +108,9 @@ jobs:
           set -euo pipefail
           # shellcheck source=/dev/null
           source scripts/cloudflare-resolve-account.sh
-          # Remove Worker script/domains that served Hello World, then claim Pages DNS.
-          bash scripts/cloudflare-disable-worker-swiftterm.sh || echo "WARN: worker cleanup returned non-zero"
+          # Disconnect Workers Builds triggers, delete Worker script/domains, then claim Pages DNS.
+          if ! bash scripts/cloudflare-disable-worker-swiftterm.sh; then
+            echo "::warning::worker cleanup returned non-zero — Roll CLOUDFLARE_API_TOKEN with Workers Scripts:Edit + Workers Builds Configuration:Edit (user-owned), or Disconnect Builds in dashboard"
+          fi
           bash scripts/cloudflare-claim-pages-hostname.sh
           echo "Also open the pages.dev URL printed by wrangler deploy above."

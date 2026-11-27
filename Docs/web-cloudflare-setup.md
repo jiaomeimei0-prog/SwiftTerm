@@ -20,12 +20,14 @@ HTTPS: Cloudflare Pages/Tunnel terminate TLS giúp bạn (edge HTTPS).
 
 ### 1. Một lần trên Cloudflare Dashboard
 
-1. Tạo API Token (Edit token / Create Custom Token) với tối thiểu:
+1. Tạo **user-owned** API Token (My Profile → API Tokens; Edit / Roll) với tối thiểu:
    - **Account** → Cloudflare Pages → **Edit**
    - **Account** → Account Settings → **Read**
-   - **Account** → Workers Scripts → **Edit** (để xóa Worker `swiftterm` / Workers Builds Hello World)
+   - **Account** → Workers Scripts → **Edit** (xóa Worker `swiftterm`)
+   - **Account** → Workers Builds Configuration → **Edit** (ngắt Git trigger / dừng check `Workers Builds: swiftterm`)
    - **Zone** `toolvip1.top` → Zone → **Read**
    - **Zone** `toolvip1.top` → DNS → **Edit** ← bắt buộc để agent/CI tự tạo CNAME apex (thiếu quyền này → NXDOMAIN / 403 DNS API)
+   - Chi tiết: `Docs/cloudflare-token-dns-edit.md`
 2. Lấy **Account ID** (sidebar Overview) — **không** phải Zone ID.
 3. (Tuỳ chọn) tạo sẵn Pages project tên `swiftterm-web`.
 
@@ -69,7 +71,7 @@ bash scripts/cloudflare-connect-domain.sh toolvip1.top www.toolvip1.top
 bash scripts/cloudflare-disable-worker-swiftterm.sh   # dọn Worker/Workers Builds "swiftterm"
 ```
 
-**Workers Builds `swiftterm`:** nếu GitHub vẫn hiện check fail `Workers Builds: swiftterm`, xóa script Worker đó (script trên) hoặc Dashboard → Workers → `swiftterm` → Settings → xóa / ngắt GitHub Builds. Không để custom domain Worker đè Pages.
+**Workers Builds `swiftterm`:** sau merge cleanup, CI gọi `cloudflare-disable-worker-swiftterm.sh` (xóa Builds triggers + script). Nếu GitHub vẫn hiện check fail `Workers Builds: swiftterm`, Roll token (Builds Configuration:Edit) rồi chạy lại workflow; hoặc Dashboard → Workers → `swiftterm` → Settings → Builds → **Disconnect** rồi xóa Worker. Không để custom domain Worker đè Pages.
 
 **Access:** Zero Trust → Applications → tắt bảo vệ hostname demo (public WASM).
 
