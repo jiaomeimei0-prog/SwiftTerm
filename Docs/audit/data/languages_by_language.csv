@@ -1,0 +1,237 @@
+repo,sha,scope,language,files,lines,nonblank,bytes
+swiftterm,8025a28594,all tracked files,Swift,412,146483,131811,6255862
+swiftterm,8025a28594,all tracked files,Markdown,81,11888,9172,602259
+swiftterm,8025a28594,all tracked files,JavaScript,50,6521,6410,369341
+swiftterm,8025a28594,all tracked files,Python,22,5905,5143,331174
+swiftterm,8025a28594,all tracked files,TypeScript,39,2631,2614,135623
+swiftterm,8025a28594,all tracked files,JSON,22,2347,2343,88711
+swiftterm,8025a28594,all tracked files,Xcode project,3,1408,1366,58511
+swiftterm,8025a28594,all tracked files,Text,9,1370,1286,61779
+swiftterm,8025a28594,all tracked files,Other/no extension,9,1362,1303,379487
+swiftterm,8025a28594,all tracked files,PowerShell,9,864,761,37706
+swiftterm,8025a28594,all tracked files,Shell,9,810,756,29875
+swiftterm,8025a28594,all tracked files,YAML,6,595,518,20021
+swiftterm,8025a28594,all tracked files,Interface Builder,3,595,595,45177
+swiftterm,8025a28594,all tracked files,SwiftPM lock,5,570,570,17074
+swiftterm,8025a28594,all tracked files,CSV,2,318,318,52437
+swiftterm,8025a28594,all tracked files,Other (.infocmp),1,270,270,4517
+swiftterm,8025a28594,all tracked files,plist,8,211,210,6348
+swiftterm,8025a28594,all tracked files,Metal,1,134,119,4602
+swiftterm,8025a28594,all tracked files,Other (.xcscheme),1,106,106,3988
+swiftterm,8025a28594,all tracked files,Other (.svg),1,57,57,6627
+swiftterm,8025a28594,all tracked files,HTML,3,55,55,4628
+swiftterm,8025a28594,all tracked files,Config,6,50,46,1706
+swiftterm,8025a28594,all tracked files,Make,2,49,36,1835
+swiftterm,8025a28594,all tracked files,C,1,46,41,1524
+swiftterm,8025a28594,all tracked files,CSS,1,36,35,3016
+swiftterm,8025a28594,all tracked files,Batch,2,36,33,1156
+swiftterm,8025a28594,all tracked files,Other (.xcworkspacedata),3,21,21,405
+swiftterm,8025a28594,all tracked files,Other (.xctestplan),1,18,16,263
+swiftterm,8025a28594,all tracked files,C/C++/ObjC header,1,14,12,491
+swiftterm,8025a28594,all tracked files,TOML,1,12,11,521
+swiftterm,8025a28594,all tracked files,Other (.modulemap),1,1,1,42
+swiftterm,8025a28594,all tracked files,Binary asset,40,0,0,3174764
+swiftterm,8025a28594,first-party only,Swift,412,146483,131811,6255862
+swiftterm,8025a28594,first-party only,Markdown,81,11888,9172,602259
+swiftterm,8025a28594,first-party only,JavaScript,50,6521,6410,369341
+swiftterm,8025a28594,first-party only,Python,22,5905,5143,331174
+swiftterm,8025a28594,first-party only,TypeScript,39,2631,2614,135623
+swiftterm,8025a28594,first-party only,JSON,22,2347,2343,88711
+swiftterm,8025a28594,first-party only,Xcode project,3,1408,1366,58511
+swiftterm,8025a28594,first-party only,Text,9,1370,1286,61779
+swiftterm,8025a28594,first-party only,Other/no extension,9,1362,1303,379487
+swiftterm,8025a28594,first-party only,PowerShell,9,864,761,37706
+swiftterm,8025a28594,first-party only,Shell,9,810,756,29875
+swiftterm,8025a28594,first-party only,YAML,6,595,518,20021
+swiftterm,8025a28594,first-party only,Interface Builder,3,595,595,45177
+swiftterm,8025a28594,first-party only,SwiftPM lock,5,570,570,17074
+swiftterm,8025a28594,first-party only,CSV,2,318,318,52437
+swiftterm,8025a28594,first-party only,Other (.infocmp),1,270,270,4517
+swiftterm,8025a28594,first-party only,plist,8,211,210,6348
+swiftterm,8025a28594,first-party only,Metal,1,134,119,4602
+swiftterm,8025a28594,first-party only,Other (.xcscheme),1,106,106,3988
+swiftterm,8025a28594,first-party only,Other (.svg),1,57,57,6627
+swiftterm,8025a28594,first-party only,HTML,3,55,55,4628
+swiftterm,8025a28594,first-party only,Config,6,50,46,1706
+swiftterm,8025a28594,first-party only,Make,2,49,36,1835
+swiftterm,8025a28594,first-party only,C,1,46,41,1524
+swiftterm,8025a28594,first-party only,CSS,1,36,35,3016
+swiftterm,8025a28594,first-party only,Batch,2,36,33,1156
+swiftterm,8025a28594,first-party only,Other (.xcworkspacedata),3,21,21,405
+swiftterm,8025a28594,first-party only,Other (.xctestplan),1,18,16,263
+swiftterm,8025a28594,first-party only,C/C++/ObjC header,1,14,12,491
+swiftterm,8025a28594,first-party only,TOML,1,12,11,521
+swiftterm,8025a28594,first-party only,Other (.modulemap),1,1,1,42
+swiftterm,8025a28594,first-party only,Binary asset,40,0,0,3174764
+ashell,4f039cdb70,all tracked files,JavaScript,9581,1182297,1030770,49785542
+ashell,4f039cdb70,all tracked files,Perl,1318,817287,682904,29433884
+ashell,4f039cdb70,all tracked files,Text,906,496129,444926,23797880
+ashell,4f039cdb70,all tracked files,C/C++/ObjC header,565,336378,300768,19045640
+ashell,4f039cdb70,all tracked files,Other (.vim),1631,277021,246704,11771973
+ashell,4f039cdb70,all tracked files,man page,234,227979,225289,7360208
+ashell,4f039cdb70,all tracked files,Markdown,1239,172801,123024,6357842
+ashell,4f039cdb70,all tracked files,Other/no extension,898,165273,143497,5662985
+ashell,4f039cdb70,all tracked files,JSON,1125,155455,155197,5215258
+ashell,4f039cdb70,all tracked files,Other (.pod),43,45625,30845,1422938
+ashell,4f039cdb70,all tracked files,Patch,117,35125,34109,1013348
+ashell,4f039cdb70,all tracked files,TypeScript,341,31837,29978,1275575
+ashell,4f039cdb70,all tracked files,Other (.utf-8),32,30335,18167,1212873
+ashell,4f039cdb70,all tracked files,Swift,37,27544,26551,1555749
+ashell,4f039cdb70,all tracked files,HTML,30,24660,13024,516003
+ashell,4f039cdb70,all tracked files,Make,149,20407,17526,526551
+ashell,4f039cdb70,all tracked files,CSS,22,14594,14508,384212
+ashell,4f039cdb70,all tracked files,Other (.lock),7,13917,11697,479903
+ashell,4f039cdb70,all tracked files,Shell,76,13856,12805,490252
+ashell,4f039cdb70,all tracked files,Other (.log),3,11021,9341,411495
+ashell,4f039cdb70,all tracked files,Other (.xml),30,10139,9813,484919
+ashell,4f039cdb70,all tracked files,Other (.7),10,8970,8965,246112
+ashell,4f039cdb70,all tracked files,Other (.5),11,6709,6290,189421
+ashell,4f039cdb70,all tracked files,Xcode project,1,6561,6543,740138
+ashell,4f039cdb70,all tracked files,Other (.cp1250),6,5588,3315,187291
+ashell,4f039cdb70,all tracked files,Python,23,5283,4510,164960
+ashell,4f039cdb70,all tracked files,C++,12,4771,3960,163988
+ashell,4f039cdb70,all tracked files,Other (.aap),55,4544,3675,145044
+ashell,4f039cdb70,all tracked files,plist,22,4081,4081,102949
+ashell,4f039cdb70,all tracked files,YAML,174,3929,3758,102201
+ashell,4f039cdb70,all tracked files,Objective-C,21,3818,3640,174788
+ashell,4f039cdb70,all tracked files,Other (.rc),44,3686,3642,146425
+ashell,4f039cdb70,all tracked files,PEM key/cert,8,3139,3019,207353
+ashell,4f039cdb70,all tracked files,Other (.euc),3,2941,1719,97611
+ashell,4f039cdb70,all tracked files,Other (.8),5,2829,2829,82021
+ashell,4f039cdb70,all tracked files,Other (.flow),4,2270,2008,133020
+ashell,4f039cdb70,all tracked files,Rust,12,2111,2065,73954
+ashell,4f039cdb70,all tracked files,Other (.markdown),26,2048,1420,48090
+ashell,4f039cdb70,all tracked files,Other (.jst),25,1841,1598,49372
+ashell,4f039cdb70,all tracked files,Other (.intentdefinition),2,1580,1580,51512
+ashell,4f039cdb70,all tracked files,Other (.coffee),11,1542,1240,52284
+ashell,4f039cdb70,all tracked files,Other (.out),3,1529,1358,45823
+ashell,4f039cdb70,all tracked files,Other (.theme),14,1411,1212,42277
+ashell,4f039cdb70,all tracked files,C,10,1231,1130,30672
+ashell,4f039cdb70,all tracked files,Other (.ps),33,1224,1224,64070
+ashell,4f039cdb70,all tracked files,Other (.3),7,1202,1202,36754
+ashell,4f039cdb70,all tracked files,Other (.fr),1,1038,631,38502
+ashell,4f039cdb70,all tracked files,Other (.es),1,1023,632,37556
+ashell,4f039cdb70,all tracked files,Other (.sk),1,1008,585,33314
+ashell,4f039cdb70,all tracked files,Other (.ru),1,1007,629,36042
+ashell,4f039cdb70,all tracked files,Other (.cp1251),1,1007,629,36042
+ashell,4f039cdb70,all tracked files,Other (.pt),1,1004,615,36270
+ashell,4f039cdb70,all tracked files,Other (.eo),1,991,587,35150
+ashell,4f039cdb70,all tracked files,Other (.de),1,982,624,38835
+ashell,4f039cdb70,all tracked files,Other (.bar),1,981,638,40898
+ashell,4f039cdb70,all tracked files,Other (.iso9),1,981,591,33486
+ashell,4f039cdb70,all tracked files,Other (.sjis),1,977,577,33649
+ashell,4f039cdb70,all tracked files,Other (.nb),1,973,591,34626
+ashell,4f039cdb70,all tracked files,Other (.no),1,973,591,34626
+ashell,4f039cdb70,all tracked files,Other (.da),1,972,572,34681
+ashell,4f039cdb70,all tracked files,Other (.hr),1,972,593,33907
+ashell,4f039cdb70,all tracked files,Other (.ko),1,968,568,42310
+ashell,4f039cdb70,all tracked files,Other (.it),1,967,585,36327
+ashell,4f039cdb70,all tracked files,Other (.modulemap),3,957,894,19123
+ashell,4f039cdb70,all tracked files,Other (.nl),1,950,616,37321
+ashell,4f039cdb70,all tracked files,Other (.cnf),1,909,768,40075
+ashell,4f039cdb70,all tracked files,Other (.man),5,855,633,35976
+ashell,4f039cdb70,all tracked files,Other (.awk),3,852,817,19128
+ashell,4f039cdb70,all tracked files,Other (.big5),1,852,464,24362
+ashell,4f039cdb70,all tracked files,Other (.hu),1,830,482,27191
+ashell,4f039cdb70,all tracked files,Other (.sv),1,830,476,27795
+ashell,4f039cdb70,all tracked files,Other (.el),2,821,507,30394
+ashell,4f039cdb70,all tracked files,Other (.cp737),1,815,501,30216
+ashell,4f039cdb70,all tracked files,Other (.cs),1,812,458,25674
+ashell,4f039cdb70,all tracked files,Other (.ca),1,809,466,28420
+ashell,4f039cdb70,all tracked files,Other (.eps),1,803,803,12027
+ashell,4f039cdb70,all tracked files,Other (.less),2,748,617,16835
+ashell,4f039cdb70,all tracked files,Localization,20,707,353,39981
+ashell,4f039cdb70,all tracked files,Other (.lst),1,616,610,9694
+ashell,4f039cdb70,all tracked files,Config,13,601,585,17700
+ashell,4f039cdb70,all tracked files,Other (.in),8,544,467,6455
+ashell,4f039cdb70,all tracked files,Other (.ok),8,544,467,7544
+ashell,4f039cdb70,all tracked files,Other (.def),5,542,454,16972
+ashell,4f039cdb70,all tracked files,Other (.docs),1,319,293,19466
+ashell,4f039cdb70,all tracked files,Other (.targ),1,285,248,8390
+ashell,4f039cdb70,all tracked files,Other (.e2x),6,273,239,6485
+ashell,4f039cdb70,all tracked files,Other (.desktop),2,270,270,11227
+ashell,4f039cdb70,all tracked files,Other (.dict),1,262,262,3096
+ashell,4f039cdb70,all tracked files,Other (.bak),1,234,168,7138
+ashell,4f039cdb70,all tracked files,Other (.ttx),1,234,221,7561
+ashell,4f039cdb70,all tracked files,Other (.bsd),11,226,197,14183
+ashell,4f039cdb70,all tracked files,Other (.xpm),4,204,204,12484
+ashell,4f039cdb70,all tracked files,Other (.mf),1,182,170,7064
+ashell,4f039cdb70,all tracked files,Other (.perl),1,174,158,8010
+ashell,4f039cdb70,all tracked files,Go,3,171,161,4270
+ashell,4f039cdb70,all tracked files,Other (.dd),1,150,150,3227
+ashell,4f039cdb70,all tracked files,Other (.info),1,141,141,1765
+ashell,4f039cdb70,all tracked files,Other (.md~),1,140,103,4313
+ashell,4f039cdb70,all tracked files,Other (.conf),1,137,124,6982
+ashell,4f039cdb70,all tracked files,Other (.4),1,123,123,4824
+ashell,4f039cdb70,all tracked files,Other (.priv),7,118,117,6844
+ashell,4f039cdb70,all tracked files,Other (.aff),2,100,74,1578
+ashell,4f039cdb70,all tracked files,Other (.svg),1,90,90,7552
+ashell,4f039cdb70,all tracked files,Other (.xcscheme),1,88,88,3195
+ashell,4f039cdb70,all tracked files,Interface Builder,3,77,77,5271
+ashell,4f039cdb70,all tracked files,Other (.skip),1,75,63,1198
+ashell,4f039cdb70,all tracked files,Source map,65,74,74,9982334
+ashell,4f039cdb70,all tracked files,Other (.mdown),1,67,46,2059
+ashell,4f039cdb70,all tracked files,Other (.bnf),4,64,64,2476
+ashell,4f039cdb70,all tracked files,Other (.gyp),3,62,62,1341
+ashell,4f039cdb70,all tracked files,TOML,2,58,53,1081
+ashell,4f039cdb70,all tracked files,Other (.json5),1,55,55,1141
+ashell,4f039cdb70,all tracked files,Other (.imports),1,47,47,962
+ashell,4f039cdb70,all tracked files,Other (.iml),4,44,44,1738
+ashell,4f039cdb70,all tracked files,Other (.pub),6,38,38,1834
+ashell,4f039cdb70,all tracked files,Batch,4,35,34,1126
+ashell,4f039cdb70,all tracked files,Other (.pegjs),1,35,21,1347
+ashell,4f039cdb70,all tracked files,xcconfig,3,30,30,1453
+ashell,4f039cdb70,all tracked files,Other (.xcprivacy),1,26,26,706
+ashell,4f039cdb70,all tracked files,Other (.pc),2,26,24,728
+ashell,4f039cdb70,all tracked files,Other (.mit),1,24,20,1088
+ashell,4f039cdb70,all tracked files,Other (.dic),2,24,24,367
+ashell,4f039cdb70,all tracked files,Other (.me),2,23,14,485
+ashell,4f039cdb70,all tracked files,Other (.cfg),1,20,17,529
+ashell,4f039cdb70,all tracked files,Other (.nix),1,20,19,459
+ashell,4f039cdb70,all tracked files,Other (.opts),8,19,19,409
+ashell,4f039cdb70,all tracked files,Other (.78),1,16,11,626
+ashell,4f039cdb70,all tracked files,SwiftPM lock,1,16,16,315
+ashell,4f039cdb70,all tracked files,Other (.apache2),1,15,11,586
+ashell,4f039cdb70,all tracked files,Other (.workflow),1,14,12,258
+ashell,4f039cdb70,all tracked files,Other (.webidl),1,14,13,482
+ashell,4f039cdb70,all tracked files,Other (.disabled),1,12,10,280
+ashell,4f039cdb70,all tracked files,Other (.code-workspace),1,8,8,67
+ashell,4f039cdb70,all tracked files,Other (.vital),1,8,7,100
+ashell,4f039cdb70,all tracked files,Other (.xcworkspacedata),1,7,7,135
+ashell,4f039cdb70,all tracked files,Other (.tsv),1,7,7,1214
+ashell,4f039cdb70,all tracked files,Lua,1,6,5,187
+ashell,4f039cdb70,all tracked files,Other (.beep),1,3,3,129
+ashell,4f039cdb70,all tracked files,Binary asset,1329,0,0,19038894
+ashell,4f039cdb70,all tracked files,Other (.lld),2,0,0,0
+ashell,4f039cdb70,all tracked files,Other (.mgc),3,0,0,19774968
+ashell,4f039cdb70,first-party only,JavaScript,12,28329,25286,901511
+ashell,4f039cdb70,first-party only,Swift,37,27544,26551,1555749
+ashell,4f039cdb70,first-party only,Patch,56,15522,14637,520570
+ashell,4f039cdb70,first-party only,Xcode project,1,6561,6543,740138
+ashell,4f039cdb70,first-party only,Shell,47,4110,4016,185123
+ashell,4f039cdb70,first-party only,Objective-C,21,3818,3640,174788
+ashell,4f039cdb70,first-party only,PEM key/cert,3,3065,2946,203093
+ashell,4f039cdb70,first-party only,Rust,12,2111,2065,73954
+ashell,4f039cdb70,first-party only,Other (.intentdefinition),2,1580,1580,51512
+ashell,4f039cdb70,first-party only,plist,14,1220,1220,35690
+ashell,4f039cdb70,first-party only,Markdown,20,819,486,115186
+ashell,4f039cdb70,first-party only,Localization,15,707,353,25523
+ashell,4f039cdb70,first-party only,C++,3,578,556,24173
+ashell,4f039cdb70,first-party only,Python,2,421,389,16096
+ashell,4f039cdb70,first-party only,YAML,4,420,417,15522
+ashell,4f039cdb70,first-party only,Text,3,349,296,17731
+ashell,4f039cdb70,first-party only,JSON,4,232,232,5701
+ashell,4f039cdb70,first-party only,C/C++/ObjC header,6,230,198,11047
+ashell,4f039cdb70,first-party only,HTML,2,193,189,7587
+ashell,4f039cdb70,first-party only,Go,3,171,161,4270
+ashell,4f039cdb70,first-party only,Config,9,110,96,2345
+ashell,4f039cdb70,first-party only,Other (.xcscheme),1,88,88,3195
+ashell,4f039cdb70,first-party only,Interface Builder,3,77,77,5271
+ashell,4f039cdb70,first-party only,xcconfig,3,30,30,1453
+ashell,4f039cdb70,first-party only,Other (.xcprivacy),1,26,26,706
+ashell,4f039cdb70,first-party only,TOML,1,17,14,409
+ashell,4f039cdb70,first-party only,SwiftPM lock,1,16,16,315
+ashell,4f039cdb70,first-party only,C,1,9,8,290
+ashell,4f039cdb70,first-party only,Other (.xcworkspacedata),1,7,7,135
+ashell,4f039cdb70,first-party only,Other (.tsv),1,7,7,1214
+ashell,4f039cdb70,first-party only,Binary asset,19,0,0,128673

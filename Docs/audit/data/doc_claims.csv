@@ -1,0 +1,5 @@
+location,claim,metric,claimed,actual,verdict
+Docs/command-catalogue-full-2026-11-26.md:22,"| Host builtins (app) | ~10 | `help`, `config`, `pkg`, `relay`… — không nằm trong 158 |",Số host built-in (replaceCommand),10,80 tên / 93 lượt đăng ký,SAI/LỖI THỜI
+Docs/e2e-acceptance-results.md:17,## 2. HostHelpers bridge (20 APIs),Số API HostHelpers,20,21 thành viên public,SAI/LỖI THỜI
+Docs/functional-test-report-2026-11-26.md:10,| ST-02 | HostHelpers 20 API | static scan | PASS | ĐẠT host |,Số API HostHelpers,20,21 thành viên public,SAI/LỖI THỜI
+Docs/system-comparison-report-2026-11-26.md:89,| `AppleTerminalView+HostHelpers.swift` | **Thêm mới** | Port ~20 API HostHelpers từ holzschu v1 |,Số API HostHelpers,20,21 thành viên public,SAI/LỖI THỜI

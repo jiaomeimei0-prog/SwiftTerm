@@ -1,0 +1,131 @@
+repo,host,group,schemes,count,areas,first,sample
+swiftterm,apps.apple.com,Apple/Swift,https,4,documentation,README.md:8,https://apps.apple.com/us/app/secure-shellfish-ssh-files/id1336634154
+swiftterm,developer.apple.com,Apple/Swift,https,1,runtime-code,Sources/SwiftTerm/Mac/MacTerminalView.swift:583,https://developer.apple.com/forums/thread/663256?answerId=646653022#646653022
+swiftterm,docs.swift.org,Apple/Swift,https,1,ci-dev-tooling,scripts/audit/test_audit.py:478,https://docs.swift.org
+swiftterm,download.swift.org,Apple/Swift,https,5,ci-dev-tooling,.github/workflows/cloudflare-pages-web.yml:56,https://download.swift.org/swift-6.4.0-release/ubuntu2404/$SWIFTTERM_TOOLCHAIN_ID/$SWIFTTERM_TOOLCHAIN_ID-ubuntu24.04.ta
+swiftterm,www.swift.org,Apple/Swift,https,2,documentation,Docs/wasm.md:25,https://www.swift.org/install/macos/
+swiftterm,....trycloudflare.com,Cloudflare,https,3,ci-dev-tooling,scripts/serve-via-cloudflare-tunnel.cmd:24,https://....trycloudflare.com
+swiftterm,a.nel.cloudflare.com,Cloudflare,https,1,docs-evidence,Docs/evidence/domain-tooltop1-vip-probe.md:40,https://a.nel.cloudflare.com/report/v4?s=bem11kI9mQFy1r4Okgb%2FiDxhoibEOp6Q99T4Z7M8cJFk4E4BcmidW5PKjhrYM7L30%2FnBOf9LJ4y
+swiftterm,developers.cloudflare.com,Cloudflare,https,1,docs-evidence,Docs/evidence/domain-tooltop1-vip-probe.md:62,https://developers.cloudflare.com/cloudflare-one/tutorials/cli/
+swiftterm,folks-assumed-met-engine.trycloudflare.com,Cloudflare,https,9,"docs-evidence,documentation",Docs/evidence/cloud-agent-web-evidence.md:55,https://folks-assumed-met-engine.trycloudflare.com
+swiftterm,api.github.com,GitHub,https,1,ci-dev-tooling,.github/workflows/docc.yml:37,https://api.github.com/repos/${{
+swiftterm,gist.github.com,GitHub,https,3,"documentation,runtime-code",Sources/SwiftTerm/Mac/MacTerminalView.swift:582,https://gist.github.com/lukaskubanek/9a61ac71dc0db8bb04db2028f2635779
+swiftterm,github.com,GitHub,"https,ssh",169,"ci-dev-tooling,documentation,runtime-code,sample-apps,tests,web-runtime",Sources/SwiftTerm/Apple/AppleTerminalView.swift:2306,https://github.com/migueldeicaza/SwiftTerm/issues/286
+swiftterm,raw.githubusercontent.com,GitHub,https,5,"ci-dev-tooling,documentation",Docs/final-monorepo-audit-2026-11-26.md:116,https://raw.githubusercontent.com/holzschu/a-Shell-commands/master/
+swiftterm,user-images.githubusercontent.com,GitHub,https,6,documentation,README.md:392,https://user-images.githubusercontent.com/36863/79060395-82181400-7c52-11ea-8f48-cd02323a8284.png
+swiftterm,1.2.3.4,IP literal,ssh,1,tests,Tests/SwiftTermTests/GhosttyImplicitLinkDetectionTests.swift:185,ssh://1.2.3.4
+swiftterm,registry.npmjs.org,JS registries,https,103,web-runtime,Web/cloudflare/package-lock.json:14,https://registry.npmjs.org/@cloudflare/kv-asset-handler/-/kv-asset-handler-0.4.0.tgz
+swiftterm,a.b,Other,"http,https",2,tests,Tests/SwiftTermTests/LinkLookupTests.swift:333,http://a.b
+swiftterm,a.test,Other,https,2,tests,Tests/SwiftTermTests/SmartWordSelectionTests.swift:44,https://a.test/?next=www.example.com.
+swiftterm,asciinema.org,Other,https,2,documentation,README.md:257,https://asciinema.org/
+swiftterm,bugs.debian.org,Other,https,1,runtime-code,Sources/SwiftTerm/Terminal.swift:1851,https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=510030
+swiftterm,cursor.com,Other,https,2,"ci-dev-tooling,documentation",Docs/run-agent-on-your-windows-pc.md:25,https://cursor.com/install?win32=true
+swiftterm,discord.gg,Other,https,1,documentation,README.md:27,https://discord.gg/rgN3yzHg8G
+swiftterm,duckduckgo.com,Other,https,1,tests,Tests/SwiftTermTests/GhosttyImplicitLinkDetectionTests.swift:184,https://duckduckgo.com
+swiftterm,en.wikipedia.org,Other,https,5,"documentation,runtime-code,tests",Sources/SwiftTerm/Documentation.docc/GraphicsSupport.md:13,https://en.wikipedia.org/wiki/Sixel
+swiftterm,ex.io,Other,https,3,tests,Tests/SwiftTermTests/GhosttyImplicitLinkDetectionTests.swift:56,https://ex.io/
+swiftterm,example.co,Other,https,1,tests,Tests/SwiftTermTests/LinkLookupTests.swift:475,https://example.co
+swiftterm,example.test,Other,https,9,tests,Tests/SwiftTermTests/LinkColorTests.swift:25,https://example.test
+swiftterm,foreign.invalid,Other,http,1,sample-apps,TerminalApp/WebTerminal/BrowserTests/server-smoke.mjs:155,http://foreign.invalid
+swiftterm,geoffg.net,Other,https,1,documentation,README.md:420,https://geoffg.net/Downloads/Terminal/VT100_User_Guide.pdf
+swiftterm,ghostty.org,Other,https,1,documentation,Tools/SwiftTermBenchmarks/README.md:327,https://ghostty.org
+swiftterm,gitlab.freedesktop.org,Other,https,1,documentation,README.md:434,https://gitlab.freedesktop.org/terminal-wg/esctest
+swiftterm,google.com,Other,https,2,tests,Tests/SwiftTermTests/GhosttyImplicitLinkDetectionTests.swift:184,https://google.com
+swiftterm,iterm2.com,Other,https,3,"documentation,runtime-code",Sources/SwiftTerm/Documentation.docc/GraphicsSupport.md:38,https://iterm2.com/documentation-images.html
+swiftterm,krzyzanowskim.com,Other,https,1,documentation,README.md:440,https://krzyzanowskim.com
+swiftterm,man7.org,Other,http,1,documentation,README.md:429,http://man7.org/linux/man-pages/man4/console_codes.4.html
+swiftterm,marc.info,Other,https,2,runtime-code,Sources/SwiftTerm/Terminal.swift:5703,https://marc.info/?l=bugtraq&m=104612710031920&w=2
+swiftterm,migueldeicaza.github.io,Other,https,7,documentation,README.md:11,https://migueldeicaza.github.io/SwiftTerm/documentation/swiftterm/
+swiftterm,mitchellh.com,Other,https,1,documentation,Tools/SwiftTermBenchmarks/README.md:328,https://mitchellh.com
+swiftterm,opencollective.com,Other,https,21,web-runtime,Web/cloudflare/package-lock.json:592,https://opencollective.com/libvips
+swiftterm,purple-frost-65fb.cloudflareaccess.com,Other,https,3,docs-evidence,Docs/evidence/domain-tooltop1-vip-probe.md:33,https://purple-frost-65fb.cloudflareaccess.com/cdn-cgi/access/login/toolvip1.top?kid=ef42951ccde0df96f503cbfb92e062fddd6
+swiftterm,rdap.nic.vip,Other,https,2,"docs-evidence,documentation",Docs/evidence/domain-tooltop1-vip-probe.md:19,https://rdap.nic.vip/domain/tooltop1.vip
+swiftterm,sw.kovidgoyal.net,Other,https,2,documentation,Sources/SwiftTerm/Documentation.docc/GraphicsSupport.md:65,https://sw.kovidgoyal.net/kitty/graphics-protocol/
+swiftterm,target.test,Other,https,1,tests,Tests/SwiftTermTests/Osc8LinkRenderingTests.swift:115,https://target.test
+swiftterm,team.cloudflareaccess.com,Other,https,1,ci-dev-tooling,scripts/tests/windows-tunnel-common.tests.ps1:88,https://team.cloudflareaccess.com/
+swiftterm,terminal-wg.pages.freedesktop.org,Other,https,5,"documentation,tests",README.md:72,https://terminal-wg.pages.freedesktop.org/bidi/
+swiftterm,terminalguide.namepad.de,Other,https,1,documentation,README.md:421,https://terminalguide.namepad.de
+swiftterm,tirania.org,Other,https,1,documentation,README.md:444,https://tirania.org/
+swiftterm,wikimedia.org,Other,https,3,runtime-code,Sources/SwiftTerm/SixelDcsHandler.swift:413,https://wikimedia.org/api/rest_v1/media/math/render/svg/17e876f7e3260ea7fed73f69e19c71eb715dd09d
+swiftterm,www.apache.org,Other,http,1,ci-dev-tooling,Tools/SwiftTermBenchmarks/Licenses/LICENSE-APACHE:3,http://www.apache.org/licenses/
+swiftterm,www.contributor-covenant.org,Other,https,3,documentation,CODE_OF_CONDUCT.md:71,https://www.contributor-covenant.org/version/1/4/code-of-conduct.html
+swiftterm,www.example.com,Other,https,2,tests,Tests/SwiftTermTests/LinkLookupTests.swift:735,https://www.example.com
+swiftterm,www.google.com,Other,http,1,tests,Tests/SwiftTermTests/GhosttyImplicitLinkDetectionTests.swift:199,http://www.google.com
+swiftterm,www.sourcelair.com,Other,https,2,"runtime-code,web-runtime",Web/cloudflare/site/pkg/LICENSE:3,https://www.sourcelair.com
+swiftterm,www.superlogical.com,Other,https,3,documentation,Docs/osc7501-delta.md:152,https://www.superlogical.com/rex/docs/build/program-status
+swiftterm,x.y,Other,https,1,tests,Tests/SwiftTermTests/MetalPlainTextTests.swift:468,https://x.y
+swiftterm,xtermjs.org,Other,https,2,documentation,README.md:58,https://xtermjs.org
+swiftterm,yahoo.com,Other,https,2,tests,Tests/SwiftTermTests/GhosttyImplicitLinkDetectionTests.swift:185,https://yahoo.com
+swiftterm,tooltop1.vip,Project domain,https,35,"ci-dev-tooling,docs-evidence,documentation",Docs/domain-tooltop1-vip-blocker.md:3,
+swiftterm,toolvip1.top,Project domain,https,105,"ci-dev-tooling,docs-evidence,documentation,web-runtime",Web/cloudflare/wrangler.toml:2,https://toolvip1.top
+swiftterm,www.tooltop1.vip,Project domain,,3,documentation,Docs/domain-tooltop1-vip-blocker.md:32,
+swiftterm,www.toolvip1.top,Project domain,https,21,"ci-dev-tooling,docs-evidence,documentation,web-runtime",.github/workflows/cloudflare-pages-web.yml:2,
+swiftterm,invisible-island.net,Standards/reference,"http,https",4,"documentation,runtime-code",Sources/SwiftTerm/Terminal.swift:1209,http://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-The-Alternate-Screen-Buffer
+swiftterm,vt100.net,Standards/reference,"http,https",27,"documentation,runtime-code",Sources/SwiftTerm/CharSets.swift:25,http://vt100.net/docs/vt102-ug/table5-13.html
+swiftterm,www.unicode.org,Standards/reference,https,9,"ci-dev-tooling,runtime-code",Sources/SwiftTerm/Apple/ArabicShapingData.swift:6,https://www.unicode.org/Public/17.0.0/ucd/
+ashell,developer.apple.com,Apple/Swift,https,4,runtime-code,defaultToolbar.txt:4,https://developer.apple.com/sf-symbols/
+ashell,codeload.github.com,GitHub,https,12,ci-dev-tooling,ci/native-frameworks.sh:34,https://codeload.github.com/holzschu/ios_system/tar.gz/$revision
+ashell,gist.github.com,GitHub,https,2,runtime-code,hterm_all.js:20891,https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda
+ashell,github.com,GitHub,https,132,"ci-dev-tooling,documentation,runtime-code",xcfs/Package.swift:346,https://github.com/fprimex/jq/releases/download/ios/jq.xcframework.zip
+ashell,raw.githubusercontent.com,GitHub,https,6,"ci-dev-tooling,documentation,runtime-code",cacert.pem:11,https://raw.githubusercontent.com/mozilla-firefox/firefox/refs/heads/release/security/nss/lib/ckfw/builtins/certdata.txt
+ashell,www.github.com,GitHub,http,2,runtime-code,a-Shell/KBWebViewBase.m:28,http://www.github.com/blinksh/blink
+ashell,nodejs.org,JS registries,https,1,ci-dev-tooling,node/build.sh:133,https://nodejs.org/dist/$rev/node-$rev.tar.gz
+ashell,npmjs.org,JS registries,https,1,runtime-code,hterm_all.js:4602,https://npmjs.org/package/wcwidth.js
+ashell,registry.npmjs.org,JS registries,https,6,runtime-code,node/fetch-lock.json:96,https://registry.npmjs.org/web-streams-polyfill/-/web-streams-polyfill-3.3.3.tgz
+ashell,alpineapp.email,Other,https,1,ci-dev-tooling,scripts/build-pico.sh:13,https://alpineapp.email/alpine/release/src/alpine-2.26.tar.xz
+ashell,andrewsweeney.net,Other,http,2,runtime-code,wasm_worker_wasm.js:14,http://andrewsweeney.net/post/llvm-to-wasm/
+ashell,bianshen00009.gitbook.io,Other,https,3,"documentation,runtime-code",a-Shell/ExtraCommands.swift:200,https://bianshen00009.gitbook.io/a-guide-to-a-shell/
+ashell,bugs.webkit.org,Other,https,1,runtime-code,a-Shell/KBWebViewBase.m:68,https://bugs.webkit.org/show_bug.cgi?id=230360
+ashell,bugzilla.mozilla.org,Other,https,1,runtime-code,hterm_all.js:5352,https://bugzilla.mozilla.org/show_bug.cgi?id=1178676
+ashell,chromium.googlesource.com,Other,https,1,runtime-code,node/ios-platform.patch:324,https://chromium.googlesource.com/chromium/src/+/HEAD/LICENSE
+ashell,crbug.com,Other,https,9,runtime-code,script.js:2193,https://crbug.com/919222
+ashell,cs.chromium.org,Other,https,1,runtime-code,hterm_all.js:2142,https://cs.chromium.org/chromium/src/ui/base/l10n/l10n_util.cc?type=cs&q=CheckAndResolveLocale
+ashell,curl.se,Other,https,1,runtime-code,cacert.pem:6,https://curl.se/docs/caextract.html
+ashell,developer.chrome.com,Other,https,1,runtime-code,hterm_all.js:2260,https://developer.chrome.com/extensions/i18n-messages
+ashell,developer.mozilla.org,Other,https,6,runtime-code,hterm_all.js:8355,https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
+ashell,discord.com,Other,https,2,runtime-code,a-Shell/SceneDelegate.swift:4194,https://discord.com/channels/935519150305050644/1452153688284987443/1534518700500320329
+ashell,discord.gg,Other,https,3,"documentation,runtime-code",a-Shell/ExtraCommands.swift:201,https://discord.gg/cvYnZm69Gy
+ashell,docs.fastlane.tools,Other,https,1,runtime-code,.gitignore:72,https://docs.fastlane.tools/best-practices/source-control/#source-control
+ashell,fletcherpenney.net,Other,https,1,runtime-code,a-Shell/ExtraCommands.swift:250,https://fletcherpenney.net/multimarkdown/
+ashell,gondor.apana.org.au,Other,http,1,runtime-code,a-Shell/ExtraCommands.swift:241,http://gondor.apana.org.au/~herbert/dash/
+ashell,goo.gl,Other,https,3,runtime-code,hterm_all.js:12058,https://goo.gl/sXelnq
+ashell,guides.cocoapods.org,Other,https,1,runtime-code,.gitignore:56,https://guides.cocoapods.org/using/using-cocoapods.html#should-i-check-the-pods-directory-into-source-control
+ashell,helix-editor.com,Other,https,1,runtime-code,helix/helix.patch:27,https://helix-editor.com
+ashell,holzschu.github.io,Other,https,2,documentation,README.md:23,https://holzschu.github.io/a-Shell_iOS/
+ashell,imagemagick.org,Other,https,1,runtime-code,a-Shell/ExtraCommands.swift:244,https://imagemagick.org
+ashell,img.shields.io,Other,https,6,documentation,README.md:4,https://img.shields.io/badge/Platform-iOS%2014.0+-lightgrey.svg
+ashell,libarchive.org,Other,https,1,runtime-code,a-Shell/ExtraCommands.swift:256,https://libarchive.org
+ashell,libgit2.org,Other,https,1,runtime-code,a-Shell/ExtraCommands.swift:245,https://libgit2.org
+ashell,mama.indstate.edu,Other,http,1,runtime-code,a-Shell/ExtraCommands.swift:257,http://mama.indstate.edu/users/ice/tree/
+ashell,nethackwiki.com,Other,https,1,runtime-code,hterm_all.js:22257,https://nethackwiki.com/wiki/Vt_tiledata
+ashell,opencollective.com,Other,https,1,runtime-code,node/fetch-lock.json:91,https://opencollective.com/node-fetch
+ashell,paypal.me,Other,https,2,runtime-code,node/fetch-lock.json:68,https://paypal.me/jimmywarting
+ashell,peterodding.com,Other,http,1,runtime-code,a-Shell/ExtraCommands.swift:260,http://peterodding.com/code/vim/session
+ashell,pixelsvsbytes.com,Other,https,2,runtime-code,require_jscore.js:4,https://pixelsvsbytes.com
+ashell,robopress.robotsandpencils.com,Other,https,1,runtime-code,WkWebViewExtension.swift:6,https://robopress.robotsandpencils.com/swift-swizzling-wkwebview-168d7e657106
+ashell,robotsandpencils.com,Other,https,1,runtime-code,WkWebViewExtension.swift:5,https://robotsandpencils.com/blog/swift-swizzling-adding-a-custom-toolbar-to-wkwebview/
+ashell,rosettacode.org,Other,http,2,runtime-code,helix/crossterm.patch:57,http://rosettacode.org/wiki/Terminal_control/Dimensions#Library:_BSD_libc
+ashell,stackoverflow.com,Other,https,6,runtime-code,a-Shell/SceneDelegate.swift:6084,https://stackoverflow.com/questions/64055966/ios-14-play-audio-from-video-in-background/64753248#64753248
+ashell,tug.org,Other,https,1,runtime-code,a-Shell/ExtraCommands.swift:258,https://tug.org.
+ashell,twitter.com,Other,https,2,documentation,README.md:5,https://twitter.com/a_Shell_iOS
+ashell,unixpapa.com,Other,http,1,runtime-code,hterm_all.js:8356,http://unixpapa.com/js/key.html
+ashell,url.spec.whatwg.org,Other,https,1,runtime-code,url-polyfill.js:37,https://url.spec.whatwg.org/#urlencoded-serializing
+ashell,www.apache.org,Other,http,2,runtime-code,Herdr/LICENSE:195,http://www.apache.org/licenses/LICENSE-2.0
+ashell,www.cl.cam.ac.uk,Other,https,1,runtime-code,hterm_all.js:4667,https://www.cl.cam.ac.uk/~mgk25/ucs/wcwidth.c
+ashell,www.crufty.net,Other,http,1,runtime-code,a-Shell/ExtraCommands.swift:249,http://www.crufty.net/help/sjg/bmake.html
+ashell,www.cyberciti.biz,Other,https,1,runtime-code,a-Shell/SceneDelegate.swift:2862,https://www.cyberciti.biz/tips/howto-linux-unix-bash-shell-setup-prompt.html
+ashell,www.iosapptemplates.com,Other,https,1,runtime-code,Util/UIColor+hexString.swift:5,https://www.iosapptemplates.com/blog/swift-programming/convert-hex-colors-to-uicolor-swift-4.
+ashell,www.lua.org,Other,https,1,runtime-code,a-Shell/ExtraCommands.swift:246,https://www.lua.org/
+ashell,www.luatex.org,Other,http,1,runtime-code,a-Shell/ExtraCommands.swift:247,http://www.luatex.org
+ashell,www.opengroup.org,Other,https,2,runtime-code,hterm_all.js:4614,https://www.opengroup.org/onlinepubs/007904975/functions/wcswidth.html
+ashell,www.openssh.com,Other,https,1,runtime-code,a-Shell/ExtraCommands.swift:255,https://www.openssh.com
+ashell,www.perl.org,Other,http,1,runtime-code,a-Shell/ExtraCommands.swift:253,http://www.perl.org/
+ashell,www.vim.org,Other,https,1,runtime-code,a-Shell/ExtraCommands.swift:259,https://www.vim.org
+ashell,peps.python.org,Package ecosystems,https,1,ci-dev-tooling,updatePythonFiles.sh:91,https://peps.python.org/pep-0425/
+ashell,static.crates.io,Package ecosystems,https,1,ci-dev-tooling,helix/build.sh:69,https://static.crates.io/crates/crossterm/crossterm-0.28.1.crate
+ashell,www.python.org,Package ecosystems,https,1,runtime-code,a-Shell/ExtraCommands.swift:254,https://www.python.org/about/
+ashell,invisible-island.net,Standards/reference,https,1,runtime-code,hterm_all.js:8390,https://invisible-island.net/xterm/ctlseqs/ctlseqs.html#h2-PC-Style-Function-Keys
+ashell,vt100.net,Standards/reference,"http,https",14,runtime-code,hterm_all.js:22746,http://vt100.net/docs/vt220-rm/table2-15.html
+ashell,www.gnu.org,Standards/reference,"http,https",4,runtime-code,require_jscore.js:15,https://www.gnu.org/licenses/
+ashell,www.unicode.org,Standards/reference,https,2,runtime-code,hterm_all.js:4659,https://www.unicode.org/unicode/reports/tr11/
+ashell,www.vt100.net,Standards/reference,http,2,runtime-code,hterm_all.js:15519,http://www.vt100.net/docs/vt510-rm/DECSTR#T5-9

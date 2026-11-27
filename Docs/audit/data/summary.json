@@ -1,0 +1,121 @@
+{
+  "generated_at": "2026-11-27T09:25:33Z",
+  "distinct_command_names": 251,
+  "catalogue_sizes_fork": {
+    "full": 158,
+    "mini": 136,
+    "extra": 8,
+    "llvm": 10,
+    "tex": 31,
+    "luatex": 7,
+    "sshStock": 4
+  },
+  "host_builtin_registrations": 93,
+  "host_builtin_distinct_names": 80,
+  "commands_with_static_defects": 50,
+  "defects_upstream_original": 50,
+  "defects_fork_introduced": 0,
+  "defect_groups": {
+    "config": [
+      "basename",
+      "blink",
+      "curl-impersonate",
+      "dirname",
+      "multimarkdown",
+      "openrsync",
+      "pico",
+      "python",
+      "python3",
+      "python3.13",
+      "rsync",
+      "wasmkit"
+    ],
+    "provenance": [
+      "blink",
+      "cbc",
+      "curl-impersonate",
+      "multimarkdown",
+      "python",
+      "python3",
+      "python3.13",
+      "wasmkit"
+    ],
+    "unverified_symbol": [
+      "amstex",
+      "bibtex",
+      "cslatex",
+      "csplain",
+      "dvilualatex",
+      "dviluatex",
+      "dvipdfmx",
+      "eplain",
+      "etex",
+      "euptex",
+      "jadetex",
+      "latex",
+      "lualatex",
+      "luatex",
+      "makeindex",
+      "mex",
+      "mllatex",
+      "mltex",
+      "pdfcslatex",
+      "pdfcsplain",
+      "pdfetex",
+      "pdfjadetex",
+      "pdflatex",
+      "pdfmex",
+      "pdftex",
+      "pdfxmltex",
+      "tex",
+      "texlua",
+      "texluac",
+      "texsis",
+      "uplatex",
+      "uptex",
+      "utf8mex",
+      "xdvipdfmx",
+      "xelatex",
+      "xetex",
+      "xmltex"
+    ]
+  },
+  "sinks_by_status": {
+    "BY_DESIGN": 17,
+    "TEST_ONLY": 8,
+    "DEV_TOOL": 1,
+    "NOT_REVIEWED": 34,
+    "FINDING": 3,
+    "THIRD_PARTY": 9
+  },
+  "unit_tests": {
+    "suite": "scripts/audit/test_audit.py (bộ phát hiện, đối chứng dương/âm)",
+    "ran": 56,
+    "exit": 0,
+    "result": "PASS"
+  },
+  "drift_fork_vs_upstream": {
+    "same": 251
+  },
+  "wrong_calls_total": 50,
+  "wrong_calls_by_kind": {
+    "broken-doc-path": 4,
+    "broken-doc-link": 6,
+    "workflow-unpinned-actions": 7,
+    "shebang-not-executable": 33
+  },
+  "findings_by_severity": {
+    "HIGH": 1,
+    "MEDIUM": 7,
+    "LOW": 9,
+    "INFO": 5
+  },
+  "test_runs": {
+    "upstream:PASS": 4,
+    "fork:PASS": 3,
+    "fork:FAIL": 1,
+    "pin:PASS": 3,
+    "pin:FAIL": 1,
+    "swiftterm:PASS": 1
+  }
+}

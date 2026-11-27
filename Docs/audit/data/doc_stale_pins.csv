@@ -1,0 +1,12 @@
+location,sha,subject,relation
+Docs/command-catalogue-full-2026-11-26.md:3,f47f284c,Stop calling internal TerminalView.updateDisplay (#5),cũ hơn pin hiện tại (đã bị thay thế)
+Docs/command-parity-vs-ashell-2026-11-26.md:17,17b01a4d,Merge pull request #1126 from demrom/feature/openssh-client-registrati,nhánh khác / không liên quan pin
+Docs/command-parity-vs-ashell-2026-11-26.md:17,f47f284c,Stop calling internal TerminalView.updateDisplay (#5),cũ hơn pin hiện tại (đã bị thay thế)
+Docs/e2e-acceptance-results.md:11,ef3ee3711539dbf067e93dbb68fe7f94b6b2e271,Unify nested SwiftTerm pin to fork SoT main tip,nhánh khác / không liên quan pin
+Docs/feature-status-report-2026-11-26.md:8,f47f284c,Stop calling internal TerminalView.updateDisplay (#5),cũ hơn pin hiện tại (đã bị thay thế)
+Docs/feature-status-report-2026-11-26.md:9,f47f284c,Stop calling internal TerminalView.updateDisplay (#5),cũ hơn pin hiện tại (đã bị thay thế)
+Docs/feature-status-report-2026-11-26.md:30,f47f284c,Stop calling internal TerminalView.updateDisplay (#5),cũ hơn pin hiện tại (đã bị thay thế)
+Docs/final-monorepo-audit-2026-11-26.md:3,b4488692,Bump SwiftTerm submodule to fork main tip,nhánh khác / không liên quan pin
+Docs/host-capabilities-gap-2026-11-26.md:4,0c9b11b6,Port Stock SSH tip wiring for command parity with holzschu (#6),cũ hơn pin hiện tại (đã bị thay thế)
+Docs/system-comparison-report-2026-11-26.md:17,17b01a4d,Merge pull request #1126 from demrom/feature/openssh-client-registrati,nhánh khác / không liên quan pin
+Docs/system-comparison-report-2026-11-26.md:22,f47f284c,Stop calling internal TerminalView.updateDisplay (#5),cũ hơn pin hiện tại (đã bị thay thế)

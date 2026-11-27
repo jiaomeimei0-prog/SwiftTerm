@@ -1,0 +1,10 @@
+repo,workflow,triggers,runners,permissions,unpinned_actions,pinned_actions,secrets
+swiftterm,.github/workflows/cloudflare-pages-web.yml,"push,workflow_dispatch",ubuntu-24.04,per-job,2,0,"CLOUDFLARE_ACCOUNT_ID,CLOUDFLARE_API_TOKEN"
+swiftterm,.github/workflows/docc.yml,"push,workflow_dispatch","macos-latest,ubuntu-latest",top-level,4,0,
+swiftterm,.github/workflows/web-wasm.yml,"pull_request,push,workflow_dispatch","ubuntu-24.04,ubuntu-latest",top-level,4,0,
+swiftterm,.github/workflows/windows-scripts.yml,"pull_request,push,workflow_dispatch",windows-latest,top-level,0,1,
+swiftterm,.github/workflows/xcode.yml,"pull_request,push","ubuntu-latest,xcode-27",top-level,8,0,
+ashell,.github/workflows/app-build.yml,"pull_request,workflow_dispatch",macos-15,top-level,0,2,
+ashell,.github/workflows/native-frameworks.yml,"pull_request,push,workflow_dispatch","macos-26,ubuntu-latest",top-level,13,0,GITHUB_TOKEN
+ashell,.github/workflows/openrsync.yml,"pull_request,push,workflow_dispatch","macos-26,ubuntu-latest",top-level,5,0,GITHUB_TOKEN
+ashell,.github/workflows/pico-framework.yml,"pull_request,push,workflow_dispatch","macos-26,ubuntu-latest",top-level,4,0,GITHUB_TOKEN

@@ -1,0 +1,131 @@
+repo,language,rule,severity,location,area,snippet,note,status,verdict
+swiftterm,Swift,unsafe-url-open,LOW,Sources/SwiftTerm/Mac/MacTerminalView.swift:4812,runtime-code,NSWorkspace.shared.open($0),,,
+swiftterm,Swift,unsafe-url-open,LOW,Sources/SwiftTerm/Mac/TerminalLinkOpening.swift:139,runtime-code,open: @escaping @MainActor (URL) -> Void = { NSWorkspace.shared.open($0) },,,
+swiftterm,Swift,unsafe-url-open,LOW,Sources/SwiftTerm/Mac/TerminalLinkOpening.swift:226,runtime-code,"}, open: { NSWorkspace.shared.open($0) })",,,
+swiftterm,Swift,process-spawn,MEDIUM,Sources/SwiftTerm/Pty.swift:113,runtime-code,"let pid = forkpty(&master, nil, nil, &desiredWindowSize)",,BY_DESIGN,LocalProcess: forkpty/execve chạy shell do app nhúng chỉ định
+swiftterm,Swift,process-spawn,MEDIUM,Sources/SwiftTerm/Pty.swift:138,runtime-code,"_ = execve(cExecutable, cArgs.base, cEnv.base)",,BY_DESIGN,LocalProcess: forkpty/execve chạy shell do app nhúng chỉ định
+swiftterm,Swift,process-spawn,MEDIUM,Sources/SwiftTermBuildInfoGenerator/BuildInfoGenerator.swift:265,runtime-code,let process = Process(),,BY_DESIGN,công cụ build: chạy git với tham số cố định (-C <repo>)
+swiftterm,Swift,network-listener,INFO,TerminalApp/WebTerminal/Sources/WebTerminalServer/HTTPServer.swift:98,sample-apps,"address: .hostname(""127.0.0.1"", port: configuration.port)",listener chỉ loopback hoặc Unix domain socket,,
+swiftterm,JavaScript,http-listener,INFO,Tests/WebWasmTests/browser.mjs:24,tests,"server.listen(0, '127.0.0.1', () => { server.off('error', rejectReady); resolveReady(); });",listener chỉ loopback,,
+swiftterm,JavaScript,child-process,MEDIUM,Tests/WebWasmTests/corpus.test.mjs:4,tests,import { spawnSync } from 'node:child_process';,,TEST_ONLY,mã kiểm thử
+swiftterm,JavaScript,child-process,MEDIUM,Tests/WebWasmTests/corpus.test.mjs:26,tests,"const result=spawnSync(process.env.SWIFTTERM_NATIVE_SNAPSHOT,['--snapshot'],{input,maxBuffer:256*1024*1024,timeout:10000});",,TEST_ONLY,mã kiểm thử
+swiftterm,Swift,js-eval-in-webview,MEDIUM,Tools/BidiHarness/BidiHarness/HarnessViewController.swift:662,ci-dev-tooling,"webView.loadHTMLString(html, baseURL: nil)",,DEV_TOOL,"harness phát triển, không phát hành"
+swiftterm,Swift,network-listener,INFO,Tools/BidiHarness/BidiHarness/SocketControlServer.swift:58,ci-dev-tooling,"guard Darwin.listen(descriptor, 8) == 0 else {",listener chỉ loopback hoặc Unix domain socket,,
+swiftterm,Python,subprocess,LOW,Tools/BidiHarness/Scripts/capture-helper.py:23,ci-dev-tooling,result = subprocess.run(,,,
+swiftterm,Python,subprocess,LOW,Tools/SwiftTermBenchmarks/layout-report.py:57,ci-dev-tooling,"nm = subprocess.run([""nm"", ""-n"", binary], capture_output=True, text=True)",,,
+swiftterm,Python,subprocess,LOW,Tools/SwiftTermBenchmarks/layout-report.py:67,ci-dev-tooling,demangled = subprocess.run(,,,
+swiftterm,Python,subprocess,LOW,Tools/generate_kitty_parity_matrix.py:48,ci-dev-tooling,result = subprocess.run(,,,
+swiftterm,Python,subprocess,LOW,Tools/run-pty-benchmark.py:81,ci-dev-tooling,process = subprocess.Popen(,,,
+swiftterm,Python,subprocess,LOW,Tools/run-pty-benchmark.py:163,ci-dev-tooling,process = subprocess.Popen(,,,
+swiftterm,Python,subprocess,LOW,scripts/audit/audit_lib.py:327,ci-dev-tooling,"proc = subprocess.run([""git"", ""-C"", self.path, *args], capture_output=True)",,,
+swiftterm,Python,subprocess,LOW,scripts/audit/audit_lib.py:333,ci-dev-tooling,"return subprocess.run([""git"", ""-C"", self.path, *args], capture_output=True).returncode == 0",,,
+swiftterm,Python,subprocess,LOW,scripts/audit/audit_lib.py:345,ci-dev-tooling,raw = subprocess.run(,,,
+swiftterm,Python,subprocess,LOW,scripts/audit/audit_lib.py:360,ci-dev-tooling,"proc = subprocess.run([""git"", ""-C"", self.path, ""show"", f""{ref}:{path}""], capture_output=True)",,,
+swiftterm,Python,subprocess,LOW,scripts/audit/audit_lib.py:371,ci-dev-tooling,self._proc = subprocess.Popen(,,,
+swiftterm,Python,tls-verify-off,HIGH,scripts/audit/audit_security.py:100,ci-dev-tooling,"_r(""Python"", ""tls-verify-off"", ""HIGH"", r""verify\s*=\s*False|_create_unverified_context""),",,NOT_REVIEWED,
+swiftterm,Python,subprocess,LOW,scripts/audit/run_audit.py:80,ci-dev-tooling,"proc = subprocess.run(cmd, cwd=cwd, env=env, capture_output=True, text=True, timeout=timeout)",,,
+swiftterm,Python,subprocess,LOW,scripts/audit/run_audit.py:356,ci-dev-tooling,"archive = subprocess.run([""git"", ""-C"", str(ash.path), ""archive"", sha], capture_output=True, check=True).stdout",,,
+swiftterm,Python,subprocess,LOW,scripts/audit/run_audit.py:357,ci-dev-tooling,"subprocess.run([""tar"", ""-x"", ""-C"", str(tree)], input=archive, check=True)",,,
+swiftterm,Python,shell-true,HIGH,scripts/audit/test_audit.py:227,ci-dev-tooling,"""s.py"": ""import subprocess\nsubprocess.run(cmd, shell=True)\n"",",,NOT_REVIEWED,
+swiftterm,Python,archive-extractall,INFO,scripts/audit/test_audit.py:257,ci-dev-tooling,"guarded = ""for m in z.infolist():\n    t = (root / m.filename).resolve()\n    if not t.is_relative_to(root): raise ValueError()\nz.extractal",từng member được kiểm đường dẫn trước khi giải nén,,
+swiftterm,Python,archive-extractall,INFO,scripts/audit/test_audit.py:259,ci-dev-tooling,"self.assertEqual([(h.rule, h.severity) for h in self.scan(""b.py"", ""Python"", ""z.extractall(root)\n"")], [(""archive-extractall"", ""MEDIUM"")])",từng member được kiểm đường dẫn trước khi giải nén,,
+swiftterm,Python,subprocess,LOW,scripts/audit/test_audit.py:519,ci-dev-tooling,"return subprocess.run([""git"", ""-C"", tmp, ""-c"", ""user.name=t"", ""-c"", ""user.email=t@t"", *args], check=True, capture_output=True, text=True).st",,,
+swiftterm,Shell,rm-rf-variable,LOW,scripts/e2e_acceptance_host.sh:260,ci-dev-tooling,"rm -rf ""$FAKE""",,,
+ashell,Shell,rm-rf-variable,LOW,ShellWorkers/generate-targets.sh:21,ci-dev-tooling,"trap 'rm -rf ""$tmp""' EXIT",,,
+ashell,Swift,js-eval-in-webview,MEDIUM,WkWebViewExtension.swift:127,runtime-code,"self.evaluateJavaScript(command) { result, error in",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,WkWebViewExtension.swift:143,runtime-code,"self.evaluateJavaScript(command) { result, error in",,NOT_REVIEWED,
+ashell,Swift,process-spawn,MEDIUM,a-Shell-Intents/ExecuteCommandIntentHandler.swift:193,runtime-code,returnVal = ios_system(command),,BY_DESIGN,"đường thực thi lệnh cốt lõi của a-Shell (ios_system, Shortcuts intent)"
+ashell,Swift,process-spawn,MEDIUM,a-Shell-LongCommands/ExecuteLongCommandIntent.swift:228,runtime-code,returnVal = ios_system(command),,BY_DESIGN,"đường thực thi lệnh cốt lõi của a-Shell (ios_system, Shortcuts intent)"
+ashell,Swift,dynamic-symbol,MEDIUM,a-Shell/AppDelegate.swift:225,runtime-code,"dlsym(defaultSymbolScope, ""ios_posix_spawn"") != nil,",,BY_DESIGN,"dò khả năng: dlsym(..., ""ios_posix_spawn"") != nil"
+ashell,Swift,unsafe-url-open,LOW,a-Shell/ExtraCommands.swift:2135,runtime-code,"UIApplication.shared.open(url, options: [.universalLinksOnly: false], completionHandler: nil)",,,
+ashell,Swift,unsafe-url-open,LOW,a-Shell/ExtraCommands.swift:2157,runtime-code,"UIApplication.shared.open(url, options: [.universalLinksOnly: false], completionHandler: nil)",,,
+ashell,Swift,unsafe-url-open,LOW,a-Shell/ExtraCommands.swift:2173,runtime-code,"UIApplication.shared.open(url, options: [.universalLinksOnly: false], completionHandler: nil)",,,
+ashell,Swift,process-spawn,MEDIUM,a-Shell/ExtraCommands.swift:2569,runtime-code,_ = ios_system(command.decomposedStringWithCanonicalMapping),,BY_DESIGN,"đường thực thi lệnh cốt lõi của a-Shell (ios_system, Shortcuts intent)"
+ashell,Swift,network-listener,MEDIUM,a-Shell/Relay.swift:294,runtime-code,let listener = try NWListener(using: parameters),,BY_DESIGN,"Relay: opt-in, mặc định 127.0.0.1, TLS bắt buộc, token 32-256 ký tự, mTLS tuỳ chọn"
+ashell,Swift,process-spawn,MEDIUM,a-Shell/Relay.swift:892,runtime-code,ios_system(command.decomposedStringWithCanonicalMapping),,BY_DESIGN,Relay thực thi lệnh nhận qua TLS + token
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate+TerminalView.swift:697,runtime-code,"webView?.evaluateJavaScript(""inputString += '\(commandBeforeCursor + string)'; commandIsRunning;"") { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate+TerminalView.swift:1403,runtime-code,"webView?.evaluateJavaScript(""inputString += '\(stdinString.replacingOccurrences(of: ""\\"", with: ""\\\\"").replacingOccurrences(of: ""\"""", with:",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate+TerminalView.swift:1632,runtime-code,"webView?.evaluateJavaScript(""inputString += '\(string.replacingOccurrences(of: ""\\"", with: ""\\\\"").replacingOccurrences(of: ""\"""", with: ""\\\",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate+TerminalView.swift:1646,runtime-code,"webView?.evaluateJavaScript(""commandIsRunning;"") { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate.swift:890,runtime-code,"class SceneDelegate: UIViewController, UIWindowSceneDelegate, WKNavigationDelegate, WKScriptMessageHandler, UIDocumentPickerDelegate, UIPopo",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate.swift:1119,runtime-code,"webView?.evaluateJavaScript(""var event = new KeyboardEvent('keydown', {which:27, keyCode:27, key:'Esc', code:'Esc', bubbles:true});document.",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate.swift:1124,runtime-code,"webView?.evaluateJavaScript(""var event = new KeyboardEvent('keydown', {which:8, keyCode:8, key:'Delete', code:'Delete', bubbles:true});docum",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate.swift:1134,runtime-code,"self.webView?.evaluateJavaScript(""document.execCommand(\""insertText\"", false, \"""" + title.replacingOccurrences(of: ""\\"", with: ""\\\\"").repla",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate.swift:1139,runtime-code,"self.webView?.evaluateJavaScript(""document.execCommand(\""insertText\"", false, \"""" + ""\\r"" + ""\"");"") { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,process-spawn,MEDIUM,a-Shell/SceneDelegate.swift:1307,runtime-code,ios_system(command.decomposedStringWithCanonicalMapping),,BY_DESIGN,"đường thực thi lệnh cốt lõi của a-Shell (ios_system, Shortcuts intent)"
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate.swift:1487,runtime-code,"webView?.evaluateJavaScript(""window.controlOn = false;"")",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate.swift:1621,runtime-code,"webView?.evaluateJavaScript(commandString!) { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate.swift:3253,runtime-code,"self.webView?.evaluateJavaScript(""commandIsRunning;"") { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate.swift:3282,runtime-code,self.webView?.evaluateJavaScript(command!.jsCommand),,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate.swift:3482,runtime-code,"jscWebView?.evaluateJavaScript(javascript) { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,process-spawn,MEDIUM,a-Shell/SceneDelegate.swift:4041,runtime-code,_ = ios_system(command.decomposedStringWithCanonicalMapping),,BY_DESIGN,"đường thực thi lệnh cốt lõi của a-Shell (ios_system, Shortcuts intent)"
+ashell,Swift,process-spawn,MEDIUM,a-Shell/SceneDelegate.swift:4411,runtime-code,ios_system(self.currentCommand.decomposedStringWithCanonicalMapping),,BY_DESIGN,"đường thực thi lệnh cốt lõi của a-Shell (ios_system, Shortcuts intent)"
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate.swift:4629,runtime-code,"webView?.evaluateJavaScript(""window.homedir = '\(homeurl)';"")",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate.swift:6198,runtime-code,"self.webView?.evaluateJavaScript(""document.execCommand(\""insertText\"", false, \"""" + parsedString + ""\"");"") { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,tls-trust-bypass,HIGH,a-Shell/SceneDelegate.swift:6338,runtime-code,"func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeD",,FINDING,xem phát hiện về handler chấp nhận mọi server-trust
+ashell,Swift,tls-trust-bypass,HIGH,a-Shell/SceneDelegate.swift:6341,runtime-code,let cred = URLCredential(trust: challenge.protectionSpace.serverTrust!),,FINDING,xem phát hiện về handler chấp nhận mọi server-trust
+ashell,Swift,tls-trust-bypass,HIGH,a-Shell/SceneDelegate.swift:6342,runtime-code,"completionHandler(.useCredential, cred)",,FINDING,xem phát hiện về handler chấp nhận mọi server-trust
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/SceneDelegate.swift:6893,runtime-code,"webView.evaluateJavaScript(""inputString += 'q';"") { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,process-spawn,MEDIUM,a-Shell/SceneDelegate.swift:6901,runtime-code,var result = ios_system(arguments[2].decomposedStringWithCanonicalMapping),,BY_DESIGN,"đường thực thi lệnh cốt lõi của a-Shell (ios_system, Shortcuts intent)"
+ashell,Swift,process-spawn,MEDIUM,a-Shell/SceneDelegate.swift:7161,runtime-code,var result = ios_system(arguments[2].decomposedStringWithCanonicalMapping),,BY_DESIGN,"đường thực thi lệnh cốt lõi của a-Shell (ios_system, Shortcuts intent)"
+ashell,Swift,process-spawn,MEDIUM,a-Shell/Util/jsc.swift:294,runtime-code,var result = ios_system(command.decomposedStringWithCanonicalMapping),,BY_DESIGN,"đường thực thi lệnh cốt lõi của a-Shell (ios_system, Shortcuts intent)"
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/WKWebView+InputAssistant.swift:59,runtime-code,"evaluateJavaScript(""Jupyter.notebook.command_mode();"") { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/WKWebView+InputAssistant.swift:213,runtime-code,"evaluateJavaScript(""var event = new KeyboardEvent('keydown', {which:13, keyCode:13, bubbles:true});  Jupyter.notebook.get_selected_cell().co",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/WKWebView+InputAssistant.swift:229,runtime-code,"evaluateJavaScript(""var event = new KeyboardEvent('keydown', {which:9, keyCode:9, bubbles:true}); if (!Jupyter.notebook.get_selected_cell().",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/WKWebView+InputAssistant.swift:241,runtime-code,"evaluateJavaScript(""document.execCommand('cut');"") { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/WKWebView+InputAssistant.swift:259,runtime-code,"evaluateJavaScript(""document.execCommand('copy');"") { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/WKWebView+InputAssistant.swift:283,runtime-code,"evaluateJavaScript(""Jupyter.notebook.paste_cell_below();"") { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/WKWebView+InputAssistant.swift:292,runtime-code,"evaluateJavaScript(""Jupyter.notebook.select_prev(true); Jupyter.notebook.focus_cell(); Jupyter.notebook.edit_mode();"") { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/WKWebView+InputAssistant.swift:303,runtime-code,"evaluateJavaScript(""Jupyter.notebook.select_next(true); Jupyter.notebook.focus_cell(); Jupyter.notebook.edit_mode();"") { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/WKWebView+InputAssistant.swift:315,runtime-code,"evaluateJavaScript(""Jupyter.notebook.get_selected_cell().code_mirror.execCommand('undo');"") { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/WKWebView+InputAssistant.swift:327,runtime-code,"evaluateJavaScript(""Jupyter.notebook.get_selected_cell().code_mirror.execCommand('redo');"") { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/WKWebView+InputAssistant.swift:359,runtime-code,"evaluateJavaScript(""iOS_multiCharLanguage = true;"") { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/WKWebView+InputAssistant.swift:369,runtime-code,"evaluateJavaScript(""iOS_multiCharLanguage = false;"") { (result, error) in",,NOT_REVIEWED,
+ashell,Swift,js-eval-in-webview,MEDIUM,a-Shell/WKWebView+KeyCommands.swift:112,runtime-code,"evaluateJavaScript(commandString) { (result, error) in",,NOT_REVIEWED,
+ashell,Python,subprocess,LOW,ci/audit-artifact.py:37,ci-dev-tooling,"result = subprocess.run(args, text=True, capture_output=True, check=False, cwd=cwd)",,,
+ashell,Python,archive-extractall,INFO,ci/audit-artifact.py:245,ci-dev-tooling,archive.extractall(temporary),từng member được kiểm đường dẫn trước khi giải nén,,
+ashell,Shell,rm-rf-variable,LOW,ci/native-frameworks.sh:63,ci-dev-tooling,"[[ ! -d $work/ios_system.xcframework ]] || rm -rf ""$work/ios_system.xcframework""",,,
+ashell,Shell,rm-rf-variable,LOW,ci/native-frameworks.sh:143,ci-dev-tooling,"[[ ! -d $work/$product.xcframework ]] || rm -rf ""$work/$product.xcframework""",,,
+ashell,Shell,rm-rf-variable,LOW,codex/build.sh:51,ci-dev-tooling,"rm -r ""$stage""",,,
+ashell,Shell,rm-rf-variable,LOW,codex/build.sh:141,ci-dev-tooling,"[[ ! -d $here/codex.xcframework ]] || rm -rf ""$here/codex.xcframework""",,,
+ashell,Shell,rm-rf-variable,LOW,codex/tests/terminal.sh:6,ci-dev-tooling,"trap 'rm -rf ""$out""' EXIT HUP INT TERM",,,
+ashell,Shell,rm-rf-variable,LOW,fd/build.sh:110,ci-dev-tooling,"rm -rf ""$here/fd.xcframework""",,,
+ashell,Shell,rm-rf-variable,LOW,fzf/build.sh:141,ci-dev-tooling,"rm -rf ""$here/fzf.xcframework""",,,
+ashell,Shell,rm-rf-variable,LOW,gitoxide/build.sh:100,ci-dev-tooling,"rm -rf ""$here/gitoxide.xcframework""",,,
+ashell,Shell,rm-rf-variable,LOW,helix/build.sh:211,ci-dev-tooling,"[[ ! -d $here/helix.xcframework ]] || rm -rf ""$here/helix.xcframework""",,,
+ashell,Objective-C/C,unsafe-string,INFO,helix/command.m:92,runtime-code,"strcpy(slash, ""/runtime"");",độ dài đã được kiểm ngay trước đó,,
+ashell,JavaScript,dom-injection,MEDIUM,hterm_all.js:6089,runtime-code,menuitem.innerHTML = '<hr>';,,THIRD_PARTY,thư viện hterm đóng gói sẵn
+ashell,JavaScript,dom-injection,MEDIUM,hterm_all.js:6376,runtime-code,this.findBar_.innerHTML = lib.resource.getData('hterm/html/find_bar');,,THIRD_PARTY,thư viện hterm đóng gói sẵn
+ashell,JavaScript,dom-injection,MEDIUM,hterm_all.js:6385,runtime-code,this.upArrowButton_.innerHTML = lib.resource,,THIRD_PARTY,thư viện hterm đóng gói sẵn
+ashell,JavaScript,dom-injection,MEDIUM,hterm_all.js:6387,runtime-code,this.downArrowButton_.innerHTML = lib.resource,,THIRD_PARTY,thư viện hterm đóng gói sẵn
+ashell,JavaScript,dom-injection,MEDIUM,hterm_all.js:6389,runtime-code,this.closeButton_.innerHTML = lib.resource.getData('hterm/images/close');,,THIRD_PARTY,thư viện hterm đóng gói sẵn
+ashell,JavaScript,dom-injection,MEDIUM,hterm_all.js:6412,runtime-code,this.resultScreen_.innerHTML = lib.resource.getData('hterm/html/find_screen');,,THIRD_PARTY,thư viện hterm đóng gói sẵn
+ashell,JavaScript,dom-injection,MEDIUM,hterm_all.js:11143,runtime-code,this.cursorRowNode_.innerHTML = '';,,THIRD_PARTY,thư viện hterm đóng gói sẵn
+ashell,JavaScript,dom-injection,MEDIUM,hterm_all.js:12917,runtime-code,this.rulerSpan_.innerHTML =,,THIRD_PARTY,thư viện hterm đóng gói sẵn
+ashell,JavaScript,dom-injection,MEDIUM,hterm_all.js:17408,runtime-code,this.clipboardNotice_.innerHTML =,,THIRD_PARTY,thư viện hterm đóng gói sẵn
+ashell,Shell,rm-rf-variable,LOW,navi/build.sh:21,ci-dev-tooling,"rm -rf ""$source"" ""$cache/source.patch-sha256""",,,
+ashell,Shell,rm-rf-variable,INFO,navi/build.sh:93,ci-dev-tooling,"rm -rf ""${2:?XCFramework output path required}""",biến có bảo vệ ${var:?},,
+ashell,Shell,rm-rf-variable,LOW,node/build.sh:104,ci-dev-tooling,"rm -rf ""$sdk_source""",,,
+ashell,Shell,rm-rf-variable,LOW,node/build.sh:125,ci-dev-tooling,"if [[ -d $cache/ios-system.xcframework ]]; then rm -rf ""$cache/ios-system.xcframework""; fi",,,
+ashell,Shell,rm-rf-variable,LOW,node/build.sh:148,ci-dev-tooling,"rm -rf ""$source""",,,
+ashell,Shell,rm-rf-variable,LOW,node/build.sh:301,ci-dev-tooling,"rm -rf ""$node_framework""",,,
+ashell,JavaScript,child-process,MEDIUM,node/child-process-test.cjs:3,runtime-code,const cp = require('node:child_process');,,TEST_ONLY,mã kiểm thử
+ashell,JavaScript,child-process,MEDIUM,node/child-process-test.cjs:12,runtime-code,"assert.equal(cp.execSync('echo hi', { encoding: 'utf8' }), 'hi\n');",,TEST_ONLY,mã kiểm thử
+ashell,JavaScript,child-process,MEDIUM,node/child-process-test.cjs:51,runtime-code,"const sync = cp.spawnSync('grep', ['x'], { input: 'no\nx\n', encoding: 'utf8' });",,TEST_ONLY,mã kiểm thử
+ashell,JavaScript,child-process,MEDIUM,node/child-process-test.cjs:56,runtime-code,"assert.throws(() => cp.execSync('exit 7'), error => error.status === 7);",,TEST_ONLY,mã kiểm thử
+ashell,JavaScript,child-process,MEDIUM,node/child-process-test.cjs:59,runtime-code,"assert.throws(() => cp.execFileSync('node47-no-such-command'), error => error.code === 'ENOENT');",,TEST_ONLY,mã kiểm thử
+ashell,JavaScript,child-process,MEDIUM,node/child-process-test.cjs:61,runtime-code,"assert.throws(() => cp.execFileSync(path.join(process.env.APPDIR, 'a-Shell')), error => error.code === 'ENOSYS');",,TEST_ONLY,mã kiểm thử
+ashell,JavaScript,eval,HIGH,require.js:161,runtime-code,(new Function(,,BY_DESIGN,bộ nạp module CommonJS: new Function bọc mã module trong bộ nhớ đệm của app
+ashell,JavaScript,eval,HIGH,require_jscore.js:85,runtime-code,(new Function(,,BY_DESIGN,bộ nạp module CommonJS: new Function bọc mã module trong bộ nhớ đệm của app
+ashell,Shell,rm-rf-variable,LOW,rg/build.sh:101,ci-dev-tooling,"rm -rf ""$here/rg.xcframework""",,,
+ashell,Shell,rm-rf-variable,LOW,ruff/build.sh:108,ci-dev-tooling,"rm -rf ""$here/Ruff.xcframework""",,,
+ashell,Shell,rm-rf-variable,INFO,scripts/build-openrsync.sh:87,ci-dev-tooling,"if [[ -d $universal ]]; then rm -rf ""${universal:?}""; fi",biến có bảo vệ ${var:?},,
+ashell,Shell,rm-rf-variable,INFO,scripts/build-openrsync.sh:92,ci-dev-tooling,"if [[ -d $build/dist/$name.xcframework ]]; then rm -rf ""${build:?}/dist/$name.xcframework""; fi",biến có bảo vệ ${var:?},,
+ashell,Shell,rm-rf-variable,INFO,scripts/build-pico.sh:106,ci-dev-tooling,"if [[ -d $universal ]]; then rm -rf ""${universal:?}""; fi",biến có bảo vệ ${var:?},,
+ashell,Shell,rm-rf-variable,INFO,scripts/build-pico.sh:111,ci-dev-tooling,"if [[ -d $build/dist/pico.xcframework ]]; then rm -rf ""${build:?}/dist/pico.xcframework""; fi",biến có bảo vệ ${var:?},,
+ashell,Shell,rm-rf-variable,LOW,scripts/verify_ashell_integrity.sh:15,ci-dev-tooling,"trap 'rm -rf ""$OUT""' EXIT HUP INT TERM",,,
+ashell,Shell,insecure-tls,INFO,scripts/verify_ashell_integrity.sh:150,ci-dev-tooling,"code=$(curl -k -s -o /dev/null -w '%{http_code}' --connect-timeout 2 ""https://127.0.0.1:${port}/"" 2>/dev/null || true)",chỉ gọi loopback (chứng chỉ tự ký),,
+ashell,Shell,rm-rf-variable,LOW,tests/cloud-download-wait.sh:6,ci-dev-tooling,"trap 'rm -rf ""$work""' EXIT",,,
+ashell,Shell,rm-rf-variable,LOW,tests/photos-host.sh:7,ci-dev-tooling,"trap 'chmod -R u+w ""$scratch""; rm -rf ""$scratch""' EXIT HUP INT TERM",,,
+ashell,Shell,rm-rf-variable,LOW,tests/relay.sh:10,ci-dev-tooling,"trap 'rm -rf ""$work""' EXIT HUP INT TERM",,,
+ashell,Shell,rm-rf-variable,LOW,tests/ssh-stock-registration.sh:9,ci-dev-tooling,"trap 'rm -r ""$work""' EXIT",,,

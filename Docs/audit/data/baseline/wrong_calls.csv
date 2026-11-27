@@ -1,0 +1,85 @@
+kind,repo,location,call,problem,evidence,severity
+broken-doc-path,swiftterm,Apps/README.md:17,Apps/a-Shell/SwiftTerm,path named in docs does not exist at this ref,`Apps/a-Shell/SwiftTerm` for Xcode `relativePath = SwiftTerm`. That is a,LOW
+broken-doc-link,swiftterm,Docs/osc7501-delta.md:5,spec-diffs.md,markdown link target does not exist,SwiftTerm validates a report before it changes stored records. It gives invalid record addresses and report limits priority over recovery of individual pairs. G,LOW
+broken-doc-link,swiftterm,Docs/osc7501-delta.md:122,spec-diffs.md,markdown link target does not exist,SwiftTerm can allocate a group for `N` or an initial `P` without clearing active status. Its tests explicitly preserve records on `N`. The spec's named `A` path,LOW
+broken-doc-link,swiftterm,Docs/osc7501-delta.md:148,spec-diffs.md,markdown link target does not exist,This document adds no code changes. It uses the source comparison and the existing regression tests described in [spec-diffs.md](spec-diffs.md). Ghostty outcome,LOW
+broken-doc-path,swiftterm,Docs/security-audit-egress-2026-11-26.md:180,Sources/CSwiftTerm,path named in docs does not exist at this ref,| `Sources/CSwiftTerm` | **Không tồn tại** |,LOW
+broken-doc-path,swiftterm,Docs/system-comparison-report-2026-11-26.md:239,Apps/a-Shell/SwiftTerm,path named in docs does not exist at this ref,4. Khi cần binary mới: bump nested `Apps/a-Shell/SwiftTerm` lên tip SoT có HostHelpers (không chỉ docs).,LOW
+broken-doc-link,swiftterm,PERFORMANCE.md:156,Docs/performance-osc7501-storage-fix.patch,markdown link target does not exist,The accepted [storage patch](Docs/performance-osc7501-storage-fix.patch),LOW
+broken-doc-link,swiftterm,PERFORMANCE.md:203,Docs/performance-osc7501-fix-2026-10-08.json,markdown link target does not exist,measurements. The [measurement record](Docs/performance-osc7501-fix-2026-10-08.json),LOW
+broken-doc-link,swiftterm,PERFORMANCE.md:206,Docs/performance-osc7501-fix-2026-10-08-baselines.json.gz,markdown link target does not exist,[compressed baselines](Docs/performance-osc7501-fix-2026-10-08-baselines.json.gz),LOW
+broken-doc-path,swiftterm,Sources/SwiftTerm/Documentation.docc/Embedding.md:34,Docs/io-baselines.md,path named in docs does not exist at this ref,`Docs/io-baselines.md` with the method.,LOW
+workflow-unpinned-actions,swiftterm,.github/workflows/cloudflare-pages-web.yml,"actions/checkout@v4, actions/setup-node@v4",third-party actions referenced by mutable tag instead of commit SHA,2 reference(s),LOW
+workflow-unpinned-actions,swiftterm,.github/workflows/docc.yml,"actions/checkout@v4, actions/configure-pages@v5, actions/deploy-pages@v4, actions/upload-pages-artifact@v3",third-party actions referenced by mutable tag instead of commit SHA,4 reference(s),LOW
+workflow-permissions,swiftterm,.github/workflows/web-wasm.yml,permissions:,no top-level `permissions:` block (GITHUB_TOKEN gets the repository default),secrets used: none,LOW
+workflow-unpinned-actions,swiftterm,.github/workflows/web-wasm.yml,"actions/checkout@v4, actions/setup-node@v4, actions/upload-artifact@v4",third-party actions referenced by mutable tag instead of commit SHA,4 reference(s),LOW
+workflow-permissions,swiftterm,.github/workflows/xcode.yml,permissions:,no top-level `permissions:` block (GITHUB_TOKEN gets the repository default),secrets used: none,LOW
+workflow-unpinned-actions,swiftterm,.github/workflows/xcode.yml,"actions/checkout@v4, actions/upload-artifact@v4",third-party actions referenced by mutable tag instead of commit SHA,8 reference(s),LOW
+shebang-not-executable,swiftterm,Tools/generate_kitty_parity_matrix.py,#!/usr/bin/env python3,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,swiftterm,Tools/import-ghostty-fuzz-corpus.swift,#!/usr/bin/env swift,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,swiftterm,scripts/esctest-known-good.py,#!/usr/bin/env python3,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,swiftterm,scripts/ios_input_ssh_server.py,#!/usr/bin/env python3,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,swiftterm,scripts/regen_unicode_width_data.py,#!/usr/bin/env python3,has a shebang but git mode is 100644,,LOW
+ps1-hardcoded-root,swiftterm,scripts/serve-named-tunnel-domain.ps1:9,#   cd $env:USERPROFILE\Documents\SwiftTerm,repo root hard-coded to %USERPROFILE%\Documents\SwiftTerm; breaks when the clone lives elsewhere (e.g. C:\Users\<user>\SwiftTerm),#   cd $env:USERPROFILE\Documents\SwiftTerm,MEDIUM
+ps1-hardcoded-root,swiftterm,scripts/serve-named-tunnel-domain.ps1:22,"$Root = Join-Path $env:USERPROFILE ""Documents\SwiftTerm""",repo root hard-coded to %USERPROFILE%\Documents\SwiftTerm; breaks when the clone lives elsewhere (e.g. C:\Users\<user>\SwiftTerm),"$Root = Join-Path $env:USERPROFILE ""Documents\SwiftTerm""",MEDIUM
+ps1-no-bom,swiftterm,scripts/serve-via-cloudflare-tunnel.ps1,(file header),no UTF-8 BOM: Windows PowerShell 5.1 reads it as ANSI,first bytes: 23205365,LOW
+ps1-hardcoded-root,swiftterm,scripts/serve-via-cloudflare-tunnel.ps1:5,#   cd $env:USERPROFILE\Documents\SwiftTerm,repo root hard-coded to %USERPROFILE%\Documents\SwiftTerm; breaks when the clone lives elsewhere (e.g. C:\Users\<user>\SwiftTerm),#   cd $env:USERPROFILE\Documents\SwiftTerm,MEDIUM
+ps1-hardcoded-root,swiftterm,scripts/serve-via-cloudflare-tunnel.ps1:10,"$Site = Join-Path $env:USERPROFILE ""Documents\SwiftTerm\Web\cloudflare\site""",repo root hard-coded to %USERPROFILE%\Documents\SwiftTerm; breaks when the clone lives elsewhere (e.g. C:\Users\<user>\SwiftTerm),"$Site = Join-Path $env:USERPROFILE ""Documents\SwiftTerm\Web\cloudflare\site""",MEDIUM
+ps1-hardcoded-root,swiftterm,scripts/windows-bringup-toolvip1.ps1:5,#   cd $env:USERPROFILE\Documents\SwiftTerm,repo root hard-coded to %USERPROFILE%\Documents\SwiftTerm; breaks when the clone lives elsewhere (e.g. C:\Users\<user>\SwiftTerm),#   cd $env:USERPROFILE\Documents\SwiftTerm,MEDIUM
+ps1-hardcoded-root,swiftterm,scripts/windows-bringup-toolvip1.ps1:20,"$Root = Join-Path $env:USERPROFILE ""Documents\SwiftTerm""",repo root hard-coded to %USERPROFILE%\Documents\SwiftTerm; breaks when the clone lives elsewhere (e.g. C:\Users\<user>\SwiftTerm),"$Root = Join-Path $env:USERPROFILE ""Documents\SwiftTerm""",MEDIUM
+ps1-hardcoded-root,swiftterm,scripts/windows-install-persistent-tunnel.ps1:27,"$Root = Join-Path $env:USERPROFILE ""Documents\SwiftTerm""",repo root hard-coded to %USERPROFILE%\Documents\SwiftTerm; breaks when the clone lives elsewhere (e.g. C:\Users\<user>\SwiftTerm),"$Root = Join-Path $env:USERPROFILE ""Documents\SwiftTerm""",MEDIUM
+ps1-hardcoded-root,swiftterm,scripts/windows-persistent-e2e.ps1:6,#   cd $env:USERPROFILE\Documents\SwiftTerm,repo root hard-coded to %USERPROFILE%\Documents\SwiftTerm; breaks when the clone lives elsewhere (e.g. C:\Users\<user>\SwiftTerm),#   cd $env:USERPROFILE\Documents\SwiftTerm,MEDIUM
+ps1-hardcoded-root,swiftterm,scripts/windows-persistent-e2e.ps1:10,#   $env:USERPROFILE\Documents\SwiftTerm\Docs\evidence\windows-persistent-e2e-log.txt,repo root hard-coded to %USERPROFILE%\Documents\SwiftTerm; breaks when the clone lives elsewhere (e.g. C:\Users\<user>\SwiftTerm),#   $env:USERPROFILE\Documents\SwiftTerm\Docs\evidence\windows-persistent-e2e-log.txt,MEDIUM
+ps1-hardcoded-root,swiftterm,scripts/windows-persistent-e2e.ps1:15,"$Root = Join-Path $env:USERPROFILE ""Documents\SwiftTerm""",repo root hard-coded to %USERPROFILE%\Documents\SwiftTerm; breaks when the clone lives elsewhere (e.g. C:\Users\<user>\SwiftTerm),"$Root = Join-Path $env:USERPROFILE ""Documents\SwiftTerm""",MEDIUM
+ps1-hardcoded-root,swiftterm,scripts/windows-persistent-e2e.ps1:23,"throw ""Missing $Index - clone https://github.com/jiaomeimei0-prog/SwiftTerm.git into Documents\SwiftTerm first.""",repo root hard-coded to %USERPROFILE%\Documents\SwiftTerm; breaks when the clone lives elsewhere (e.g. C:\Users\<user>\SwiftTerm),"throw ""Missing $Index - clone https://github.com/jiaomeimei0-prog/SwiftTerm.git into Documents\SwiftTerm first.""",MEDIUM
+ps1-hardcoded-root,swiftterm,scripts/windows-start-my-machine-and-tunnel.ps1:17,"$Root = Join-Path $env:USERPROFILE ""Documents\SwiftTerm""",repo root hard-coded to %USERPROFILE%\Documents\SwiftTerm; breaks when the clone lives elsewhere (e.g. C:\Users\<user>\SwiftTerm),"$Root = Join-Path $env:USERPROFILE ""Documents\SwiftTerm""",MEDIUM
+wrong-domain-reference,swiftterm,.github/workflows/cloudflare-pages-web.yml:2,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,# Hosting targets: tooltop1.vip (requested) + toolvip1.top (existing CF zone).,MEDIUM
+wrong-domain-reference,swiftterm,.github/workflows/cloudflare-pages-web.yml:3,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,# tooltop1.vip must be registered + DNS on Cloudflare before attach succeeds.,MEDIUM
+wrong-domain-reference,swiftterm,.github/workflows/cloudflare-pages-web.yml:35,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,CUSTOM_DOMAIN: tooltop1.vip,MEDIUM
+wrong-domain-reference,swiftterm,.github/workflows/cloudflare-pages-web.yml:95,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,- name: Attach custom domains (tooltop1.vip + toolvip1.top),MEDIUM
+wrong-domain-reference,swiftterm,Docs/tooltop1-domain-check-and-guide.md:24,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,| `tooltop1.vip` | tên bạn yêu cầu | **không tồn tại** |,LOW
+wrong-domain-reference,swiftterm,Docs/tooltop1-domain-check-and-guide.md:34,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,### Đường A — Bạn muốn đúng tên `tooltop1.vip`,LOW
+wrong-domain-reference,swiftterm,Docs/tooltop1-domain-check-and-guide.md:38,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,"1. **Mua/đăng ký** `tooltop1.vip` tại registrar (GoDaddy, Namecheap, Cloudflare Registrar, …).",LOW
+wrong-domain-reference,swiftterm,Docs/tooltop1-domain-check-and-guide.md:39,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,- Kiểm tra trước khi trả tiền: mở https://rdap.nic.vip/domain/tooltop1.vip — phải **không còn 404**.,LOW
+wrong-domain-reference,swiftterm,Docs/tooltop1-domain-check-and-guide.md:40,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,2. Trong Cloudflare Dashboard → **Add a site** → nhập `tooltop1.vip` → lấy 2 nameserver Cloudflare.,LOW
+wrong-domain-reference,swiftterm,Docs/tooltop1-domain-check-and-guide.md:54,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,bash scripts/cloudflare-connect-domain.sh tooltop1.vip www.tooltop1.vip,LOW
+wrong-domain-reference,swiftterm,Docs/tooltop1-domain-check-and-guide.md:60,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,"curl -sS -D- -o /tmp/idx.html -w ""http=%{http_code}\n"" https://tooltop1.vip/",LOW
+wrong-domain-reference,swiftterm,Docs/tooltop1-domain-check-and-guide.md:65,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,Mở trình duyệt: `https://tooltop1.vip/` — phải thấy terminal canvas SwiftTerm.,LOW
+wrong-domain-reference,swiftterm,Docs/tooltop1-domain-check-and-guide.md:129,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,- [ ] Đã chọn đúng tên: `tooltop1.vip` **hoặc** `toolvip1.top`,LOW
+wrong-domain-reference,swiftterm,Docs/web-cloudflare-setup.md:52,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,### Custom domain: `tooltop1.vip` (yêu cầu) + `toolvip1.top` (zone sẵn),LOW
+wrong-domain-reference,swiftterm,Docs/web-cloudflare-setup.md:67,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,bash scripts/cloudflare-connect-domain.sh tooltop1.vip toolvip1.top www.toolvip1.top,LOW
+wrong-domain-reference,swiftterm,Web/cloudflare/wrangler.toml:2,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,# Requested host: https://tooltop1.vip  (must be registered + on Cloudflare DNS),MEDIUM
+wrong-domain-reference,swiftterm,Web/cloudflare/wrangler.toml:5,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,#   bash scripts/cloudflare-connect-domain.sh tooltop1.vip toolvip1.top,MEDIUM
+wrong-domain-reference,swiftterm,scripts/cloudflare-connect-domain.sh:11,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,# Default domains: tooltop1.vip toolvip1.top www.toolvip1.top,MEDIUM
+wrong-domain-reference,swiftterm,scripts/cloudflare-connect-domain.sh:26,tooltop1.vip,mistyped domain; the real project domain is toolvip1.top,DOMAINS=(tooltop1.vip toolvip1.top www.toolvip1.top),MEDIUM
+workflow-unpinned-actions,ashell,.github/workflows/native-frameworks.yml,"actions/checkout@v7, actions/download-artifact@v8, actions/setup-go@v6, actions/upload-artifact@v7, astral-sh/setup-uv@v7",third-party actions referenced by mutable tag instead of commit SHA,13 reference(s),LOW
+workflow-unpinned-actions,ashell,.github/workflows/openrsync.yml,"actions/checkout@v7, actions/download-artifact@v8, actions/upload-artifact@v7, astral-sh/setup-uv@v7",third-party actions referenced by mutable tag instead of commit SHA,5 reference(s),LOW
+workflow-unpinned-actions,ashell,.github/workflows/pico-framework.yml,"actions/checkout@v7, actions/download-artifact@v8, actions/upload-artifact@v7, astral-sh/setup-uv@v7",third-party actions referenced by mutable tag instead of commit SHA,4 reference(s),LOW
+shebang-not-executable,ashell,ODR/forbidden_2023.sh,#! /bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,ShellWorkers/resources.sh,#!/bin/bash,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,ci/audit-artifact.py,#!/usr/bin/env -S uv run --script,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,fd/build.sh,#!/usr/bin/env bash,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,fd/tests/acceptance.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,fd/tests/verify.sh,#!/usr/bin/env bash,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,fzf/tests/cold-shell.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,fzf/tests/reentry.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,gitoxide/acceptance.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,navi/build.sh,#!/usr/bin/env bash,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,navi/tests/shell-route.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,node/acceptance.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,node/interactive.sh,#!/usr/bin/env sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,node/tests/acceptance.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,ruff/build.sh,#!/bin/bash,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,ruff/tests/acceptance.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,scripts/build-openrsync.sh,#!/bin/bash,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/cloud-download-wait.sh,#!/bin/bash,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/cloud-files.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/fonts.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/openrsync/run.sh,#!/bin/bash,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/photos-host.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/photos-link.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/photos-membership.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/photos.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/relay.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/url-logging/check.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,updatePythonFiles.sh,#! /bin/sh,has a shebang but git mode is 100644,,LOW

@@ -1,0 +1,3400 @@
+{
+  "collected_at": "2026-11-27T09:25:43Z",
+  "fork_vs_upstream": {
+    "ahead_by": 7,
+    "behind_by": 31,
+    "html_url": "https://github.com/jiaomeimei0-prog/a-shell/compare/holzschu:master...master",
+    "merge_base": "34e0ae014114d6df35bdd038caee231897d1ec01",
+    "status": "diverged"
+  },
+  "swift_run": {
+    "conclusion": "success",
+    "created_at": "2026-11-26T17:17:48Z",
+    "event": "pull_request",
+    "head_sha": "140ef9380929b9c61cbdfdf608b80b6ba5dfbd08",
+    "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45866514883",
+    "id": 45866514883,
+    "status": "completed"
+  },
+  "swift_jobs": [
+    {
+      "completed_at": "2026-11-26T17:22:12Z",
+      "conclusion": "success",
+      "created_at": "2026-11-26T17:17:48Z",
+      "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45866514883/job/140070606717",
+      "id": 140070606717,
+      "labels": [
+        "ubuntu-latest"
+      ],
+      "name": "linux-headless",
+      "runner_name": "GitHub Actions 1000000881",
+      "started_at": "2026-11-26T17:17:51Z",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Initialize containers",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Build SwiftTerm",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Build SwiftTerm with complete concurrency checking",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run headless tests",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Stop containers",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Complete job",
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-11-26T17:59:06Z",
+      "conclusion": "success",
+      "created_at": "2026-11-26T17:17:48Z",
+      "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45866514883/job/140070606760",
+      "id": 140070606760,
+      "labels": [
+        "xcode-27"
+      ],
+      "name": "esctest",
+      "runner_name": "GitHub Actions 1000000910",
+      "started_at": "2026-11-26T17:51:16Z",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Fetch esctest",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Known-good esctest tests",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Full esctest run",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "esctest summary",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Upload esctest log",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Complete job",
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-11-26T17:54:10Z",
+      "conclusion": "success",
+      "created_at": "2026-11-26T17:17:48Z",
+      "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45866514883/job/140070606770",
+      "id": 140070606770,
+      "labels": [
+        "xcode-27"
+      ],
+      "name": "thread-sanitizer",
+      "runner_name": "GitHub Actions 1000000908",
+      "started_at": "2026-11-26T17:50:03Z",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Stage A Thread Sanitizer Tests",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Complete job",
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-11-26T18:20:26Z",
+      "conclusion": "success",
+      "created_at": "2026-11-26T17:17:48Z",
+      "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45866514883/job/140070606772",
+      "id": 140070606772,
+      "labels": [
+        "xcode-27"
+      ],
+      "name": "build",
+      "runner_name": "GitHub Actions 1000000913",
+      "started_at": "2026-11-26T17:56:59Z",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Show toolchain versions",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "List all files, because this is driving me insane, this does not repro anywhere but github",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Xcode Mac Build",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Xcode iOS Build",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Swift Package Build",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Check fixed field layout",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Check generated Unicode widths",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run tests",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Coverage",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Complete job",
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-11-26T17:57:20Z",
+      "conclusion": "success",
+      "created_at": "2026-11-26T17:17:48Z",
+      "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45866514883/job/140070606796",
+      "id": 140070606796,
+      "labels": [
+        "xcode-27"
+      ],
+      "name": "swiftpm-strict-concurrency",
+      "runner_name": "GitHub Actions 1000000912",
+      "started_at": "2026-11-26T17:54:55Z",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Build SwiftTerm with complete concurrency checking",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Complete job",
+          "status": "completed"
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-11-26T17:58:55Z",
+      "conclusion": "success",
+      "created_at": "2026-11-26T17:17:48Z",
+      "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45866514883/job/140070606938",
+      "id": 140070606938,
+      "labels": [
+        "xcode-27"
+      ],
+      "name": "swift6-tools",
+      "runner_name": "GitHub Actions 1000000911",
+      "started_at": "2026-11-26T17:51:19Z",
+      "status": "completed",
+      "steps": [
+        {
+          "conclusion": "success",
+          "name": "Set up job",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Build SwiftTerm benchmarks",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Build RenderBench",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Build and test BidiHarness",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "status": "completed"
+        },
+        {
+          "conclusion": "success",
+          "name": "Complete job",
+          "status": "completed"
+        }
+      ]
+    }
+  ],
+  "swift_tree": {
+    "swift_sha": "140ef9380929b9c61cbdfdf608b80b6ba5dfbd08",
+    "st_ref": "HEAD",
+    "same": {
+      "Package.swift": true,
+      "Sources": true,
+      "Tests": true,
+      "TerminalApp": true
+    }
+  },
+  "swift_recent": [
+    {
+      "conclusion": "success",
+      "created_at": "2026-11-26T17:17:48Z",
+      "head_branch": "cursor/audit-command-inventory-45fd",
+      "head_sha": "140ef9380929b9c61cbdfdf608b80b6ba5dfbd08",
+      "id": 45866514883,
+      "status": "completed",
+      "jobs": [
+        {
+          "completed_at": "2026-11-26T17:22:12Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T17:17:48Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45866514883/job/140070606717",
+          "id": 140070606717,
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "name": "linux-headless",
+          "runner_name": "GitHub Actions 1000000881",
+          "started_at": "2026-11-26T17:17:51Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Initialize containers",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm with complete concurrency checking",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run headless tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stop containers",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T17:59:06Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T17:17:48Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45866514883/job/140070606760",
+          "id": 140070606760,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "esctest",
+          "runner_name": "GitHub Actions 1000000910",
+          "started_at": "2026-11-26T17:51:16Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Fetch esctest",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Known-good esctest tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Full esctest run",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "esctest summary",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Upload esctest log",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T17:54:10Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T17:17:48Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45866514883/job/140070606770",
+          "id": 140070606770,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "thread-sanitizer",
+          "runner_name": "GitHub Actions 1000000908",
+          "started_at": "2026-11-26T17:50:03Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stage A Thread Sanitizer Tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T18:20:26Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T17:17:48Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45866514883/job/140070606772",
+          "id": 140070606772,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "build",
+          "runner_name": "GitHub Actions 1000000913",
+          "started_at": "2026-11-26T17:56:59Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Show toolchain versions",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "List all files, because this is driving me insane, this does not repro anywhere but github",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Xcode Mac Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Xcode iOS Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Swift Package Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Check fixed field layout",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Check generated Unicode widths",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Coverage",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T17:57:20Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T17:17:48Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45866514883/job/140070606796",
+          "id": 140070606796,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "swiftpm-strict-concurrency",
+          "runner_name": "GitHub Actions 1000000912",
+          "started_at": "2026-11-26T17:54:55Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm with complete concurrency checking",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T17:58:55Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T17:17:48Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45866514883/job/140070606938",
+          "id": 140070606938,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "swift6-tools",
+          "runner_name": "GitHub Actions 1000000911",
+          "started_at": "2026-11-26T17:51:19Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm benchmarks",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build RenderBench",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build and test BidiHarness",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "conclusion": "failure",
+      "created_at": "2026-11-26T16:50:54Z",
+      "head_branch": "cursor/audit-command-inventory-45fd",
+      "head_sha": "c302922885e59244e03d00d3c87165237ec89062",
+      "id": 45862505182,
+      "status": "completed",
+      "jobs": [
+        {
+          "completed_at": "2026-11-26T17:29:59Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T16:50:54Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45862505182/job/140056860970",
+          "id": 140056860970,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "build",
+          "runner_name": "GitHub Actions 1000000871",
+          "started_at": "2026-11-26T17:07:52Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Show toolchain versions",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "List all files, because this is driving me insane, this does not repro anywhere but github",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Xcode Mac Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Xcode iOS Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Swift Package Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Check fixed field layout",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Check generated Unicode widths",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Coverage",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T16:54:53Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T16:50:54Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45862505182/job/140056861284",
+          "id": 140056861284,
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "name": "linux-headless",
+          "runner_name": "GitHub Actions 1000000847",
+          "started_at": "2026-11-26T16:50:57Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Initialize containers",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm with complete concurrency checking",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run headless tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stop containers",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T17:20:01Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T16:50:54Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45862505182/job/140056861299",
+          "id": 140056861299,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "esctest",
+          "runner_name": "GitHub Actions 1000000875",
+          "started_at": "2026-11-26T17:12:37Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Fetch esctest",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Known-good esctest tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Full esctest run",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "esctest summary",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Upload esctest log",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T17:05:15Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T16:50:54Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45862505182/job/140056861321",
+          "id": 140056861321,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "thread-sanitizer",
+          "runner_name": "GitHub Actions 1000000860",
+          "started_at": "2026-11-26T16:59:53Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stage A Thread Sanitizer Tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T16:58:22Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T16:50:54Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45862505182/job/140056861362",
+          "id": 140056861362,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "swiftpm-strict-concurrency",
+          "runner_name": "GitHub Actions 1000000855",
+          "started_at": "2026-11-26T16:56:18Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm with complete concurrency checking",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T17:25:02Z",
+          "conclusion": "cancelled",
+          "created_at": "2026-11-26T16:50:54Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45862505182/job/140056861413",
+          "id": 140056861413,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "swift6-tools",
+          "runner_name": "",
+          "started_at": "2026-11-26T16:50:54Z",
+          "status": "completed",
+          "steps": []
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "created_at": "2026-11-26T15:47:27Z",
+      "head_branch": "cursor/fix-named-tunnel-ps1-45fd",
+      "head_sha": "1f7528c0683162a9a44e6d4cb1ff8a7701651a09",
+      "id": 45852558315,
+      "status": "completed",
+      "jobs": [
+        {
+          "completed_at": "2026-11-26T18:04:22Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:47:28Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45852558315/job/140022428511",
+          "id": 140022428511,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "esctest",
+          "runner_name": "GitHub Actions 1000000914",
+          "started_at": "2026-11-26T17:57:24Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Fetch esctest",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Known-good esctest tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Full esctest run",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "esctest summary",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Upload esctest log",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T17:51:11Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:47:28Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45852558315/job/140022428615",
+          "id": 140022428615,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "swiftpm-strict-concurrency",
+          "runner_name": "GitHub Actions 1000000909",
+          "started_at": "2026-11-26T17:48:45Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm with complete concurrency checking",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T18:06:38Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:47:28Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45852558315/job/140022428886",
+          "id": 140022428886,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "swift6-tools",
+          "runner_name": "GitHub Actions 1000000915",
+          "started_at": "2026-11-26T17:57:37Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm benchmarks",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build RenderBench",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build and test BidiHarness",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T18:24:06Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:47:28Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45852558315/job/140022428919",
+          "id": 140022428919,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "build",
+          "runner_name": "GitHub Actions 1000000917",
+          "started_at": "2026-11-26T18:01:55Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Show toolchain versions",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "List all files, because this is driving me insane, this does not repro anywhere but github",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Xcode Mac Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Xcode iOS Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Swift Package Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Check fixed field layout",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Check generated Unicode widths",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Coverage",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T18:07:41Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:47:28Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45852558315/job/140022429006",
+          "id": 140022429006,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "thread-sanitizer",
+          "runner_name": "GitHub Actions 1000000916",
+          "started_at": "2026-11-26T18:01:56Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stage A Thread Sanitizer Tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T15:51:18Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:47:28Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45852558315/job/140022429206",
+          "id": 140022429206,
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "name": "linux-headless",
+          "runner_name": "GitHub Actions 1000000810",
+          "started_at": "2026-11-26T15:47:31Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Initialize containers",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm with complete concurrency checking",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run headless tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stop containers",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "created_at": "2026-11-26T15:42:37Z",
+      "head_branch": "cursor/fix-named-tunnel-ps1-45fd",
+      "head_sha": "e993aeccc2787d6045619465416581c70e50e851",
+      "id": 45851779352,
+      "status": "completed",
+      "jobs": [
+        {
+          "completed_at": "2026-11-26T19:03:50Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:42:37Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45851779352/job/140019717220",
+          "id": 140019717220,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "thread-sanitizer",
+          "runner_name": "GitHub Actions 1000000951",
+          "started_at": "2026-11-26T18:56:33Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stage A Thread Sanitizer Tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T17:51:13Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:42:37Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45851779352/job/140019717634",
+          "id": 140019717634,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "swift6-tools",
+          "runner_name": "GitHub Actions 1000000906",
+          "started_at": "2026-11-26T17:43:59Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm benchmarks",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build RenderBench",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build and test BidiHarness",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T19:01:07Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:42:37Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45851779352/job/140019717656",
+          "id": 140019717656,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "build",
+          "runner_name": "GitHub Actions 1000000942",
+          "started_at": "2026-11-26T18:40:56Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Show toolchain versions",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "List all files, because this is driving me insane, this does not repro anywhere but github",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Xcode Mac Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Xcode iOS Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Swift Package Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Check fixed field layout",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Check generated Unicode widths",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Coverage",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T15:46:33Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:42:37Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45851779352/job/140019717667",
+          "id": 140019717667,
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "name": "linux-headless",
+          "runner_name": "GitHub Actions 1000000805",
+          "started_at": "2026-11-26T15:42:41Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Initialize containers",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm with complete concurrency checking",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run headless tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stop containers",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T19:04:30Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:42:37Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45851779352/job/140019717833",
+          "id": 140019717833,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "swiftpm-strict-concurrency",
+          "runner_name": "GitHub Actions 1000000952",
+          "started_at": "2026-11-26T19:01:43Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm with complete concurrency checking",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T17:57:31Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:42:37Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45851779352/job/140019717919",
+          "id": 140019717919,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "esctest",
+          "runner_name": "GitHub Actions 1000000907",
+          "started_at": "2026-11-26T17:50:50Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Fetch esctest",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Known-good esctest tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Full esctest run",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "esctest summary",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Upload esctest log",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "conclusion": "failure",
+      "created_at": "2026-11-26T15:40:09Z",
+      "head_branch": "cursor/fix-named-tunnel-ps1-45fd",
+      "head_sha": "62263b055137465826eb46eca0b8866fecc582e9",
+      "id": 45851375353,
+      "status": "completed",
+      "jobs": [
+        {
+          "completed_at": "2026-11-26T17:37:33Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:40:10Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45851375353/job/140018319344",
+          "id": 140018319344,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "swiftpm-strict-concurrency",
+          "runner_name": "GitHub Actions 1000000897",
+          "started_at": "2026-11-26T17:35:14Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm with complete concurrency checking",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T17:56:56Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:40:10Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45851375353/job/140018319658",
+          "id": 140018319658,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "build",
+          "runner_name": "GitHub Actions 1000000898",
+          "started_at": "2026-11-26T17:35:12Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Show toolchain versions",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "List all files, because this is driving me insane, this does not repro anywhere but github",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Xcode Mac Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Xcode iOS Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Swift Package Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Check fixed field layout",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Check generated Unicode widths",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Coverage",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T18:59:49Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:40:10Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45851375353/job/140018319761",
+          "id": 140018319761,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "esctest",
+          "runner_name": "GitHub Actions 1000000950",
+          "started_at": "2026-11-26T18:52:41Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Fetch esctest",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Known-good esctest tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Full esctest run",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "esctest summary",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Upload esctest log",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T18:53:28Z",
+          "conclusion": "cancelled",
+          "created_at": "2026-11-26T15:40:10Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45851375353/job/140018319931",
+          "id": 140018319931,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "swift6-tools",
+          "runner_name": "",
+          "started_at": "2026-11-26T15:40:10Z",
+          "status": "completed",
+          "steps": []
+        },
+        {
+          "completed_at": "2026-11-26T18:59:31Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:40:10Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45851375353/job/140018319966",
+          "id": 140018319966,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "thread-sanitizer",
+          "runner_name": "GitHub Actions 1000000949",
+          "started_at": "2026-11-26T18:52:42Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stage A Thread Sanitizer Tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T15:44:04Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:40:10Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45851375353/job/140018320040",
+          "id": 140018320040,
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "name": "linux-headless",
+          "runner_name": "GitHub Actions 1000000800",
+          "started_at": "2026-11-26T15:40:13Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Initialize containers",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm with complete concurrency checking",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run headless tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stop containers",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "created_at": "2026-11-26T15:27:44Z",
+      "head_branch": "cursor/fix-named-tunnel-ps1-45fd",
+      "head_sha": "20f5188a0a2720b503f1f8e3b7b835f0c2146c40",
+      "id": 45849323924,
+      "status": "completed",
+      "jobs": [
+        {
+          "completed_at": "2026-11-26T18:48:27Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:27:45Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45849323924/job/140011212595",
+          "id": 140011212595,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "thread-sanitizer",
+          "runner_name": "GitHub Actions 1000000944",
+          "started_at": "2026-11-26T18:42:26Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stage A Thread Sanitizer Tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T19:07:04Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:27:45Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45849323924/job/140011213069",
+          "id": 140011213069,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "build",
+          "runner_name": "GitHub Actions 1000000945",
+          "started_at": "2026-11-26T18:43:19Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Show toolchain versions",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "List all files, because this is driving me insane, this does not repro anywhere but github",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Xcode Mac Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Xcode iOS Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Swift Package Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Check fixed field layout",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Check generated Unicode widths",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Coverage",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T17:21:39Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:27:45Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45849323924/job/140011213082",
+          "id": 140011213082,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "swiftpm-strict-concurrency",
+          "runner_name": "GitHub Actions 1000000884",
+          "started_at": "2026-11-26T17:20:21Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm with complete concurrency checking",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T18:51:07Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:27:45Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45849323924/job/140011213119",
+          "id": 140011213119,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "esctest",
+          "runner_name": "GitHub Actions 1000000946",
+          "started_at": "2026-11-26T18:44:31Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Fetch esctest",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Known-good esctest tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Full esctest run",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "esctest summary",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Upload esctest log",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T15:31:16Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:27:45Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45849323924/job/140011213179",
+          "id": 140011213179,
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "name": "linux-headless",
+          "runner_name": "GitHub Actions 1000000791",
+          "started_at": "2026-11-26T15:27:48Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Initialize containers",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm with complete concurrency checking",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run headless tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stop containers",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T18:52:37Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:27:45Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45849323924/job/140011213242",
+          "id": 140011213242,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "swift6-tools",
+          "runner_name": "GitHub Actions 1000000947",
+          "started_at": "2026-11-26T18:46:18Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm benchmarks",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build RenderBench",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build and test BidiHarness",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "conclusion": "failure",
+      "created_at": "2026-11-26T15:21:21Z",
+      "head_branch": "cursor/fix-named-tunnel-ps1-45fd",
+      "head_sha": "b306b63a60357e3db7324efdd8662602dc33facb",
+      "id": 45848250948,
+      "status": "completed",
+      "jobs": [
+        {
+          "completed_at": "2026-11-26T15:24:59Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:21:21Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45848250948/job/140007455532",
+          "id": 140007455532,
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "name": "linux-headless",
+          "runner_name": "GitHub Actions 1000000783",
+          "started_at": "2026-11-26T15:21:25Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Initialize containers",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm with complete concurrency checking",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run headless tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stop containers",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T18:32:13Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:21:21Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45848250948/job/140007455916",
+          "id": 140007455916,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "swift6-tools",
+          "runner_name": "GitHub Actions 1000000930",
+          "started_at": "2026-11-26T18:24:08Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm benchmarks",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build RenderBench",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build and test BidiHarness",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T17:19:59Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:21:21Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45848250948/job/140007455950",
+          "id": 140007455950,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "esctest",
+          "runner_name": "GitHub Actions 1000000874",
+          "started_at": "2026-11-26T17:12:40Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Fetch esctest",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Known-good esctest tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Full esctest run",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "esctest summary",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Upload esctest log",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T18:25:46Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:21:21Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45848250948/job/140007455961",
+          "id": 140007455961,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "swiftpm-strict-concurrency",
+          "runner_name": "GitHub Actions 1000000929",
+          "started_at": "2026-11-26T18:23:25Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm with complete concurrency checking",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T17:23:18Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:21:21Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45848250948/job/140007456040",
+          "id": 140007456040,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "thread-sanitizer",
+          "runner_name": "GitHub Actions 1000000877",
+          "started_at": "2026-11-26T17:16:50Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stage A Thread Sanitizer Tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T18:46:14Z",
+          "conclusion": "cancelled",
+          "created_at": "2026-11-26T15:21:21Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45848250948/job/140007456180",
+          "id": 140007456180,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "build",
+          "runner_name": "",
+          "started_at": "2026-11-26T15:21:21Z",
+          "status": "completed",
+          "steps": []
+        }
+      ]
+    },
+    {
+      "conclusion": "success",
+      "created_at": "2026-11-26T15:09:03Z",
+      "head_branch": "cursor/fix-named-tunnel-ps1-45fd",
+      "head_sha": "8cd55641506502c397c16570793aa9aa062ec588",
+      "id": 45846153972,
+      "status": "completed",
+      "jobs": [
+        {
+          "completed_at": "2026-11-26T18:13:05Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:09:03Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45846153972/job/140000245777",
+          "id": 140000245777,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "esctest",
+          "runner_name": "GitHub Actions 1000000921",
+          "started_at": "2026-11-26T18:09:07Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Fetch esctest",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Known-good esctest tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Full esctest run",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "esctest summary",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Upload esctest log",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T18:16:38Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:09:03Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45846153972/job/140000246222",
+          "id": 140000246222,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "swift6-tools",
+          "runner_name": "GitHub Actions 1000000922",
+          "started_at": "2026-11-26T18:10:37Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm benchmarks",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build RenderBench",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build and test BidiHarness",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T16:51:53Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:09:03Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45846153972/job/140000246239",
+          "id": 140000246239,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "thread-sanitizer",
+          "runner_name": "GitHub Actions 1000000842",
+          "started_at": "2026-11-26T16:45:39Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stage A Thread Sanitizer Tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T18:34:24Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:09:03Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45846153972/job/140000246261",
+          "id": 140000246261,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "build",
+          "runner_name": "GitHub Actions 1000000923",
+          "started_at": "2026-11-26T18:13:06Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Show toolchain versions",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "List all files, because this is driving me insane, this does not repro anywhere but github",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Xcode Mac Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Xcode iOS Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Swift Package Build",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Check fixed field layout",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Check generated Unicode widths",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Coverage",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T18:15:16Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:09:03Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45846153972/job/140000246398",
+          "id": 140000246398,
+          "labels": [
+            "xcode-27"
+          ],
+          "name": "swiftpm-strict-concurrency",
+          "runner_name": "GitHub Actions 1000000924",
+          "started_at": "2026-11-26T18:13:08Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm with complete concurrency checking",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        },
+        {
+          "completed_at": "2026-11-26T15:12:08Z",
+          "conclusion": "success",
+          "created_at": "2026-11-26T15:09:03Z",
+          "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45846153972/job/140000246402",
+          "id": 140000246402,
+          "labels": [
+            "ubuntu-latest"
+          ],
+          "name": "linux-headless",
+          "runner_name": "GitHub Actions 1000000769",
+          "started_at": "2026-11-26T15:09:07Z",
+          "status": "completed",
+          "steps": [
+            {
+              "conclusion": "success",
+              "name": "Set up job",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Initialize containers",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Build SwiftTerm with complete concurrency checking",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Run headless tests",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Post Run actions/checkout@v4",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Stop containers",
+              "status": "completed"
+            },
+            {
+              "conclusion": "success",
+              "name": "Complete job",
+              "status": "completed"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "queued_runs": [],
+  "pin_vs_master": {
+    "ahead_by": 2,
+    "behind_by": 0,
+    "merge_base": "4f039cdb70e84a87b437e5fb54d021ce64650b1a",
+    "status": "ahead"
+  },
+  "pin_pulls": [
+    {
+      "base": "master",
+      "head": "cursor/accept-catalogue-158-45fd",
+      "html_url": "https://github.com/jiaomeimei0-prog/a-shell/pull/8",
+      "merged_at": null,
+      "number": 8,
+      "state": "open",
+      "title": "Add on-device acceptance script for 158-command catalogue"
+    }
+  ],
+  "fork_only_files": [
+    {
+      "additions": 4,
+      "deletions": 2,
+      "filename": ".github/workflows/app-build.yml",
+      "status": "modified"
+    },
+    {
+      "additions": 2,
+      "deletions": 1,
+      "filename": ".gitmodules",
+      "status": "modified"
+    },
+    {
+      "additions": 28,
+      "deletions": 3,
+      "filename": "README.md",
+      "status": "modified"
+    },
+    {
+      "additions": 34,
+      "deletions": 0,
+      "filename": "Resources_mini/sshStockCommands.plist",
+      "status": "added"
+    },
+    {
+      "additions": 1,
+      "deletions": 1,
+      "filename": "ShellWorkers/PaneWire.h",
+      "status": "modified"
+    },
+    {
+      "additions": 3,
+      "deletions": 1,
+      "filename": "ShellWorkers/RemotePane.m",
+      "status": "modified"
+    },
+    {
+      "additions": 5,
+      "deletions": 1,
+      "filename": "ShellWorkers/Worker.m",
+      "status": "modified"
+    },
+    {
+      "additions": 1,
+      "deletions": 1,
+      "filename": "ShellWorkers/Worker.swift",
+      "status": "modified"
+    },
+    {
+      "additions": 1,
+      "deletions": 0,
+      "filename": "ShellWorkers/Worker.xcconfig",
+      "status": "modified"
+    },
+    {
+      "additions": 1,
+      "deletions": 1,
+      "filename": "ShellWorkers/resources.sh",
+      "status": "modified"
+    },
+    {
+      "additions": 1,
+      "deletions": 1,
+      "filename": "SwiftTerm",
+      "status": "modified"
+    },
+    {
+      "additions": 70,
+      "deletions": 0,
+      "filename": "a-Shell.xcodeproj/project.pbxproj",
+      "status": "modified"
+    },
+    {
+      "additions": 25,
+      "deletions": 0,
+      "filename": "a-Shell/AppDelegate.swift",
+      "status": "modified"
+    },
+    {
+      "additions": 0,
+      "deletions": 11,
+      "filename": "a-Shell/SceneDelegate+TerminalView.swift",
+      "status": "modified"
+    },
+    {
+      "additions": 188,
+      "deletions": 0,
+      "filename": "scripts/verify_ashell_integrity.sh",
+      "status": "added"
+    },
+    {
+      "additions": 93,
+      "deletions": 0,
+      "filename": "tests/ssh-stock-registration.sh",
+      "status": "added"
+    }
+  ],
+  "fork_only_commits": [
+    {
+      "message": "Pin SwiftTerm submodule to fork v2 (keep five host capabilities) (#1)",
+      "sha": "18595d50b1"
+    },
+    {
+      "message": "Bump SwiftTerm submodule to fork main tip (#2)",
+      "sha": "b426f498dc"
+    },
+    {
+      "message": "Add on-device integrity smoke script (#3)",
+      "sha": "9b4c754891"
+    },
+    {
+      "message": "Harden integrity script TLS port probe parsing (#4)",
+      "sha": "69f290306b"
+    },
+    {
+      "message": "Stop calling internal TerminalView.updateDisplay (#5)",
+      "sha": "f47f284cc9"
+    },
+    {
+      "message": "Port Stock SSH tip wiring for command parity with holzschu (#6)",
+      "sha": "0c9b11b6a1"
+    },
+    {
+      "message": "Unify nested SwiftTerm pin to fork SoT main tip (#7)",
+      "sha": "4f039cdb70"
+    }
+  ],
+  "upstream_only_commits": [
+    {
+      "date": "2026-10-23",
+      "message": "Register stock OpenSSH clients with isolated workers",
+      "sha": "f497d97662"
+    },
+    {
+      "date": "2026-10-23",
+      "message": "Limit stock client registration to the worker-enabled mini target",
+      "sha": "783cc8a833"
+    },
+    {
+      "date": "2026-10-23",
+      "message": "Document stock client home-path migration",
+      "sha": "a2fceba103"
+    },
+    {
+      "date": "2026-10-23",
+      "message": "Match migration instructions to the client home adapter",
+      "sha": "5dacf19091"
+    },
+    {
+      "date": "2026-11-06",
+      "message": "Merge current worker base into OpenSSH clients",
+      "sha": "43f1d3343c"
+    },
+    {
+      "date": "2026-11-08",
+      "message": "Merge branch 'master' into feature/openssh-client-registration",
+      "sha": "4c94ab3397"
+    },
+    {
+      "date": "2026-11-09",
+      "message": "Merge branch 'master' into feature/openssh-client-registration",
+      "sha": "ef2efe466b"
+    },
+    {
+      "date": "2026-11-10",
+      "message": "Merge #1168 (libpng path fix) to unbreak the noPython CI builds",
+      "sha": "1ff9685dca"
+    },
+    {
+      "date": "2026-11-15",
+      "message": "Merge master into feature/openssh-client-registration",
+      "sha": "2676b2bb7a"
+    },
+    {
+      "date": "2026-11-23",
+      "message": "Merge origin/master into the OpenSSH client candidate",
+      "sha": "1e5642f5c7"
+    },
+    {
+      "date": "2026-11-23",
+      "message": "Scope stock OpenSSH to worker-enabled a-Shell mini",
+      "sha": "21976c4df6"
+    },
+    {
+      "date": "2026-11-24",
+      "message": "Reconcile Stock OpenSSH project with current upstream workers",
+      "sha": "476092480b"
+    },
+    {
+      "date": "2026-11-24",
+      "message": "Generate worker resources for the configured app host",
+      "sha": "b735f72187"
+    },
+    {
+      "date": "2026-11-24",
+      "message": "Send Stock SSH activation explicitly to shell workers",
+      "sha": "2dfd3d6558"
+    },
+    {
+      "date": "2026-11-24",
+      "message": "Pin the Stock SSH producer recipe and distinguish runtime checks",
+      "sha": "7201a40096"
+    },
+    {
+      "date": "2026-11-24",
+      "message": "Restore generated Swift bindings for shell workers",
+      "sha": "5b5da7c22b"
+    },
+    {
+      "date": "2026-11-24",
+      "message": "Package Stock SSH frameworks into the a-Shell checkout",
+      "sha": "d767515e15"
+    },
+    {
+      "date": "2026-11-24",
+      "message": "Restore generated Swift bindings for shell workers",
+      "sha": "68d2c604d4"
+    },
+    {
+      "date": "2026-11-24",
+      "message": "Check all ten generated worker source references",
+      "sha": "b22981efff"
+    },
+    {
+      "date": "2026-11-24",
+      "message": "Check all ten generated worker source references",
+      "sha": "d93c9c5292"
+    },
+    {
+      "date": "2026-11-25",
+      "message": "Merge pull request #1194 from demrom/fix/generated-shell-worker-swift",
+      "sha": "428300cdb9"
+    },
+    {
+      "date": "2026-11-25",
+      "message": "Update to build 615",
+      "sha": "4a27abf0bb"
+    },
+    {
+      "date": "2026-11-25",
+      "message": "Merge branch 'master' of github.com:holzschu/a-shell",
+      "sha": "80479f02f0"
+    },
+    {
+      "date": "2026-11-25",
+      "message": "Merge pull request #1126 from demrom/feature/openssh-client-registration",
+      "sha": "17b01a4d36"
+    },
+    {
+      "date": "2026-11-25",
+      "message": "Build number 616",
+      "sha": "c70f4b4232"
+    },
+    {
+      "date": "2026-11-25",
+      "message": "Merge branch 'master' of github.com:holzschu/a-shell",
+      "sha": "1770a58b3f"
+    },
+    {
+      "date": "2026-11-26",
+      "message": "Localize a-Shell Shortcuts actions in French",
+      "sha": "e9671c34aa"
+    },
+    {
+      "date": "2026-11-26",
+      "message": "Adding codex to a-Shell mini to check if herdr sees it",
+      "sha": "2cfaafdf71"
+    },
+    {
+      "date": "2026-11-26",
+      "message": "Require Kilo Code config before offering its Herdr plugin on iOS",
+      "sha": "a68e97fcf7"
+    },
+    {
+      "date": "2026-11-26",
+      "message": "Merge pull request #1200 from demrom/fix/herdr-kilo-config",
+      "sha": "994081b236"
+    },
+    {
+      "date": "2026-11-26",
+      "message": "Merge pull request #1197 from jeanphilippe-mh/l10n/french-shortcuts-actions",
+      "sha": "8f1527610f"
+    }
+  ],
+  "runs_for_sha": [
+    {
+      "conclusion": "success",
+      "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45866514916",
+      "id": 45866514916,
+      "name": "WebAssembly browser API",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45866514883",
+      "id": 45866514883,
+      "name": "Swift",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "html_url": "https://github.com/jiaomeimei0-prog/SwiftTerm/actions/runs/45866514950",
+      "id": 45866514950,
+      "name": "Windows scripts",
+      "status": "completed"
+    }
+  ],
+  "windows_log": {
+    "passed": 52,
+    "failed": [],
+    "summary": "ALL PASSED",
+    "ps_version": "5.1.26100.33822",
+    "os": "Microsoft Windows Server 2025",
+    "error": ""
+  },
+  "windows_mutation_log": {
+    "passed": 29,
+    "failed": [
+      "no Documents-based repo root in serve-named-tunnel-domain.ps1",
+      "bom serve-via-cloudflare-tunnel.ps1",
+      "no Documents-based repo root in serve-via-cloudflare-tunnel.ps1",
+      "no Documents-based repo root in windows-bringup-toolvip1.ps1",
+      "no Documents-based repo root in windows-install-persistent-tunnel.ps1",
+      "no Documents-based repo root in windows-persistent-e2e.ps1",
+      "no Documents-based repo root in windows-start-my-machine-and-tunnel.ps1"
+    ],
+    "summary": "",
+    "ps_version": "5.1.26100.33822",
+    "os": "Microsoft Windows Server 2025",
+    "error": "Get-SwiftTermRoot : The term 'Get-SwiftTermRoot' is not recognized as the name of a cmdlet, function, script file, or"
+  },
+  "swift_log": {
+    "image": "xcode-27-arm64",
+    "macos": "27.0.1 (build 26A434)",
+    "xcode": "Xcode 27.1",
+    "result": "Build complete! (75.52 sec)",
+    "warnings": [
+      {
+        "location": "Sources/SwiftTerm/Mac/MacTerminalView.swift:1388:16",
+        "message": "immutable value 'terminal' was never used; consider replacing with '_' or removing it"
+      },
+      {
+        "location": "Sources/SwiftTerm/Mac/MacTerminalView.swift:1400:16",
+        "message": "immutable value 'terminal' was never used; consider replacing with '_' or removing it"
+      },
+      {
+        "location": "Sources/SwiftTerm/Mac/MacTerminalView.swift:4915:45",
+        "message": "'init(cString:)' is deprecated: Use String(decoding: array, as: UTF8.self) instead, after truncating the null termination."
+      }
+    ]
+  },
+  "build_log": {
+    "xcodebuild_succeeded": 2,
+    "xcodebuild_failed": 0,
+    "swift_build_complete": 4,
+    "hosthelpers_projects": [
+      "MacTerminal",
+      "iOSTerminal"
+    ],
+    "test_lines": [
+      "Executed 15 tests, with 0 failures (0 unexpected) in 0.018 (0.021) seconds",
+      "Executed 159 tests, with 0 failures (0 unexpected) in 2.265 (2.296) seconds",
+      "Executed 159 tests, with 0 failures (0 unexpected) in 2.265 (2.298) seconds",
+      "✔ Test run with 2270 tests in 203 suites passed after 132.819 seconds."
+    ]
+  },
+  "linux_headless_log": {
+    "xctest": {
+      "executed": 78,
+      "failures": 0
+    },
+    "swift_testing": {
+      "tests": 1190,
+      "suites": 94,
+      "result": "passed"
+    },
+    "evidence_lines": [
+      "Executed 78 tests, with 0 failures (0 unexpected) in 1.351 (1.351) seconds",
+      "Executed 78 tests, with 0 failures (0 unexpected) in 1.351 (1.351) seconds",
+      "✔ Test run with 1190 tests in 94 suites passed after 68.377 seconds."
+    ]
+  }
+}

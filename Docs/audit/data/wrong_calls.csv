@@ -1,0 +1,51 @@
+kind,repo,location,call,problem,evidence,severity
+broken-doc-path,swiftterm,Apps/README.md:17,Apps/a-Shell/SwiftTerm,path named in docs does not exist at this ref,`Apps/a-Shell/SwiftTerm` for Xcode `relativePath = SwiftTerm`. That is a,LOW
+broken-doc-link,swiftterm,Docs/osc7501-delta.md:5,spec-diffs.md,markdown link target does not exist,SwiftTerm validates a report before it changes stored records. It gives invalid record addresses and report limits priority over recovery of individual pairs. G,LOW
+broken-doc-link,swiftterm,Docs/osc7501-delta.md:122,spec-diffs.md,markdown link target does not exist,SwiftTerm can allocate a group for `N` or an initial `P` without clearing active status. Its tests explicitly preserve records on `N`. The spec's named `A` path,LOW
+broken-doc-link,swiftterm,Docs/osc7501-delta.md:148,spec-diffs.md,markdown link target does not exist,This document adds no code changes. It uses the source comparison and the existing regression tests described in [spec-diffs.md](spec-diffs.md). Ghostty outcome,LOW
+broken-doc-path,swiftterm,Docs/security-audit-egress-2026-11-26.md:180,Sources/CSwiftTerm,path named in docs does not exist at this ref,| `Sources/CSwiftTerm` | **Không tồn tại** |,LOW
+broken-doc-path,swiftterm,Docs/system-comparison-report-2026-11-26.md:239,Apps/a-Shell/SwiftTerm,path named in docs does not exist at this ref,4. Khi cần binary mới: bump nested `Apps/a-Shell/SwiftTerm` lên tip SoT có HostHelpers (không chỉ docs).,LOW
+broken-doc-link,swiftterm,PERFORMANCE.md:156,Docs/performance-osc7501-storage-fix.patch,markdown link target does not exist,The accepted [storage patch](Docs/performance-osc7501-storage-fix.patch),LOW
+broken-doc-link,swiftterm,PERFORMANCE.md:203,Docs/performance-osc7501-fix-2026-10-08.json,markdown link target does not exist,measurements. The [measurement record](Docs/performance-osc7501-fix-2026-10-08.json),LOW
+broken-doc-link,swiftterm,PERFORMANCE.md:206,Docs/performance-osc7501-fix-2026-10-08-baselines.json.gz,markdown link target does not exist,[compressed baselines](Docs/performance-osc7501-fix-2026-10-08-baselines.json.gz),LOW
+broken-doc-path,swiftterm,Sources/SwiftTerm/Documentation.docc/Embedding.md:34,Docs/io-baselines.md,path named in docs does not exist at this ref,`Docs/io-baselines.md` with the method.,LOW
+workflow-unpinned-actions,swiftterm,.github/workflows/cloudflare-pages-web.yml,"actions/checkout@v4, actions/setup-node@v4",third-party actions referenced by mutable tag instead of commit SHA,2 reference(s),LOW
+workflow-unpinned-actions,swiftterm,.github/workflows/docc.yml,"actions/checkout@v4, actions/configure-pages@v5, actions/deploy-pages@v4, actions/upload-pages-artifact@v3",third-party actions referenced by mutable tag instead of commit SHA,4 reference(s),LOW
+workflow-unpinned-actions,swiftterm,.github/workflows/web-wasm.yml,"actions/checkout@v4, actions/setup-node@v4, actions/upload-artifact@v4",third-party actions referenced by mutable tag instead of commit SHA,4 reference(s),LOW
+workflow-unpinned-actions,swiftterm,.github/workflows/xcode.yml,"actions/checkout@v4, actions/upload-artifact@v4",third-party actions referenced by mutable tag instead of commit SHA,8 reference(s),LOW
+shebang-not-executable,swiftterm,Tools/generate_kitty_parity_matrix.py,#!/usr/bin/env python3,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,swiftterm,Tools/import-ghostty-fuzz-corpus.swift,#!/usr/bin/env swift,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,swiftterm,scripts/esctest-known-good.py,#!/usr/bin/env python3,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,swiftterm,scripts/ios_input_ssh_server.py,#!/usr/bin/env python3,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,swiftterm,scripts/regen_unicode_width_data.py,#!/usr/bin/env python3,has a shebang but git mode is 100644,,LOW
+workflow-unpinned-actions,ashell,.github/workflows/native-frameworks.yml,"actions/checkout@v7, actions/download-artifact@v8, actions/setup-go@v6, actions/upload-artifact@v7, astral-sh/setup-uv@v7",third-party actions referenced by mutable tag instead of commit SHA,13 reference(s),LOW
+workflow-unpinned-actions,ashell,.github/workflows/openrsync.yml,"actions/checkout@v7, actions/download-artifact@v8, actions/upload-artifact@v7, astral-sh/setup-uv@v7",third-party actions referenced by mutable tag instead of commit SHA,5 reference(s),LOW
+workflow-unpinned-actions,ashell,.github/workflows/pico-framework.yml,"actions/checkout@v7, actions/download-artifact@v8, actions/upload-artifact@v7, astral-sh/setup-uv@v7",third-party actions referenced by mutable tag instead of commit SHA,4 reference(s),LOW
+shebang-not-executable,ashell,ODR/forbidden_2023.sh,#! /bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,ShellWorkers/resources.sh,#!/bin/bash,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,ci/audit-artifact.py,#!/usr/bin/env -S uv run --script,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,fd/build.sh,#!/usr/bin/env bash,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,fd/tests/acceptance.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,fd/tests/verify.sh,#!/usr/bin/env bash,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,fzf/tests/cold-shell.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,fzf/tests/reentry.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,gitoxide/acceptance.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,navi/build.sh,#!/usr/bin/env bash,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,navi/tests/shell-route.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,node/acceptance.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,node/interactive.sh,#!/usr/bin/env sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,node/tests/acceptance.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,ruff/build.sh,#!/bin/bash,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,ruff/tests/acceptance.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,scripts/build-openrsync.sh,#!/bin/bash,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/cloud-download-wait.sh,#!/bin/bash,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/cloud-files.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/fonts.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/openrsync/run.sh,#!/bin/bash,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/photos-host.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/photos-link.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/photos-membership.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/photos.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/relay.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,tests/url-logging/check.sh,#!/bin/sh,has a shebang but git mode is 100644,,LOW
+shebang-not-executable,ashell,updatePythonFiles.sh,#! /bin/sh,has a shebang but git mode is 100644,,LOW

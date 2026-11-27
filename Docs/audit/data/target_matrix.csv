@@ -1,0 +1,4 @@
+target,catalogue,catalogue_entries,embedded_frameworks,frameworks_referenced_but_not_embedded,missing_count
+a-Shell,full,158,529,,0
+a-Shell-mini,mini,136,237,,0
+a-Shell-noPython,mini,136,38,Python;WasmKitCommand;blink;curl-impersonate;multimarkdown;openrsync;pico,7
