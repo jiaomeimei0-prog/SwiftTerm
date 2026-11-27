@@ -147,6 +147,87 @@ PY
   else
     echo "No workers.dev DNS records to delete for claimed hosts"
   fi
+
+  echo "=== Ensure Pages DNS (CNAME → ${PROJECT}.pages.dev, proxied) ==="
+  # Apex missing A/AAAA causes Chrome DNS_PROBE_FINISHED_NXDOMAIN even though
+  # the zone exists (NOERROR / ANSWER:0). Pages expects a proxied CNAME; CF
+  # flattens apex CNAMEs.
+  TARGET="${PROJECT}.pages.dev"
+  python3 - "$DNS_JSON" "$ZONE_ID" "$TOKEN" "$APEX" "www.${APEX}" "$TARGET" <<'PY'
+import json, os, sys, urllib.request
+
+dns_json, zone_id, token, apex, www, target = sys.argv[1:7]
+data = json.loads(dns_json)
+records = data.get("result") or []
+if not data.get("success"):
+    print("WARN: prior DNS list unsuccessful:", data.get("errors"))
+
+wanted = {
+    apex: ("CNAME", target),
+    www: ("CNAME", target),
+}
+
+def req(method, url, body=None):
+    data_bytes = None if body is None else json.dumps(body).encode()
+    r = urllib.request.Request(
+        url,
+        data=data_bytes,
+        method=method,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+        },
+    )
+    with urllib.request.urlopen(r, timeout=45) as resp:
+        return json.load(resp)
+
+# Index existing by name
+by_name = {}
+for row in records:
+    name = (row.get("name") or "").rstrip(".")
+    by_name.setdefault(name, []).append(row)
+
+for host, (typ, content) in wanted.items():
+    existing = by_name.get(host, [])
+    good = [
+        r for r in existing
+        if (r.get("type") == typ and (r.get("content") or "").rstrip(".") == content and r.get("proxied") is True)
+    ]
+    if good:
+        print(f"OK DNS already: {typ} {host} -> {content} proxied")
+        continue
+    # Remove conflicting A/AAAA/CNAME on this name so Pages CNAME can be created.
+    for r in existing:
+        rid = r.get("id")
+        if not rid:
+            continue
+        if r.get("type") in {"A", "AAAA", "CNAME"}:
+            print(f"DELETE conflicting {r.get('type')} {host} -> {r.get('content')}")
+            try:
+                out = req("DELETE", f"https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records/{rid}")
+                print(f"  success={out.get('success')} errors={out.get('errors')}")
+            except Exception as exc:
+                print(f"  WARN delete failed: {exc}")
+    body = {
+        "type": typ,
+        "name": host,
+        "content": content,
+        "proxied": True,
+        "ttl": 1,
+    }
+    print(f"CREATE {typ} {host} -> {content} proxied")
+    try:
+        out = req("POST", f"https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records", body)
+        print(f"  success={out.get('success')} errors={out.get('errors')} id={(out.get('result') or {}).get('id','')[:8]}")
+    except Exception as exc:
+        print(f"  WARN create failed: {exc}")
+
+# Refresh listing
+final = req("GET", f"https://api.cloudflare.com/client/v4/zones/{zone_id}/dns_records?per_page=100")
+print("=== DNS after ensure ===")
+for row in final.get("result") or []:
+    print(f"  {(row.get('type') or ''):6} {(row.get('name') or ''):40} -> {row.get('content')}  proxied={row.get('proxied')}")
+PY
 fi
 
 echo "=== Re-assert Pages custom domains for project=${PROJECT} ==="
