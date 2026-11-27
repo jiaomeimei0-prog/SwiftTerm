@@ -2,8 +2,9 @@
 # Hosting target: toolvip1.top (the project's Cloudflare zone; www.toolvip1.top is attached too).
 #
 # Required GitHub repository secrets (Settings → Secrets and variables → Actions):
-#   CLOUDFLARE_API_TOKEN   — Pages:Edit + Account:Read (custom domains need Zones:Edit)
-#   CLOUDFLARE_ACCOUNT_ID  — from Cloudflare dashboard URL / Account ID
+#   CLOUDFLARE_API_TOKEN   — Pages:Edit + Account:Read (custom domains need Zone DNS:Edit)
+#   CLOUDFLARE_ACCOUNT_ID  — Account ID from Overview (NOT Zone ID). Workflow auto-corrects
+#                            a wrong/Zone ID when the token can see exactly one account.
 #
 # Security notes (Sonar githubactions):
 # - Prefer npm ci + lockfile + local binary over bare npx / unpinned installs (S6505 / S8543)
@@ -21,6 +22,7 @@ on:
       - 'Web/**'
       - 'scripts/build-wasm.sh'
       - 'scripts/prepare-cloudflare-web.sh'
+      - 'scripts/cloudflare-resolve-account.sh'
       - 'scripts/wasm-toolchain.env'
       - '.github/workflows/cloudflare-pages-web.yml'
 
@@ -81,11 +83,14 @@ jobs:
         working-directory: Web/cloudflare
         run: |
           set -euo pipefail
-          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
-            echo '::error::Set GitHub Actions secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID (repo Settings → Secrets). Deploy was previously skipped while the job still reported success.'
-            exit 1
-          fi
+          # Resolve from repo root helper (trim + replace Zone-ID mistakes).
+          # shellcheck source=/dev/null
+          source "$GITHUB_WORKSPACE/scripts/cloudflare-resolve-account.sh"
+          # Persist corrected Account ID for the domain-attach step.
+          echo "CLOUDFLARE_ACCOUNT_ID=${CLOUDFLARE_ACCOUNT_ID}" >> "$GITHUB_ENV"
           ./node_modules/.bin/wrangler --version
+          ./node_modules/.bin/wrangler pages project create "$PAGES_PROJECT" --production-branch=main \
+            || echo "pages project create skipped (exists or not required)"
           ./node_modules/.bin/wrangler pages deploy site \
             --project-name="$PAGES_PROJECT" \
             --commit-dirty=true
@@ -94,10 +99,8 @@ jobs:
         working-directory: Web/cloudflare
         run: |
           set -euo pipefail
-          if [ -z "${CLOUDFLARE_API_TOKEN:-}" ] || [ -z "${CLOUDFLARE_ACCOUNT_ID:-}" ]; then
-            echo '::error::Cloudflare secrets missing — cannot attach custom domains'
-            exit 1
-          fi
+          # shellcheck source=/dev/null
+          source "$GITHUB_WORKSPACE/scripts/cloudflare-resolve-account.sh"
           attach() {
             local host="$1"
             echo "--- pages domain add: $host ---"
