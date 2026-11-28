@@ -32,9 +32,11 @@ Nhắc: Apple ID free ~7 ngày; theo dõi `notAfter` của cert.
 sh verify_command_catalogue_158.sh
 # Kỳ vọng: ACCEPT: all 158 catalogue names present in help -l
 
-# Điền Docs/command-158-device-matrix-PENDING.csv
-#   runtime_status: PASS_DEVICE | FAIL_DEVICE
-#   user_observed_output / user_pass_fail
+# Điền Docs/command-158-device-matrix-PENDING.csv (schema C):
+#   runtime_status          ← cột chính (PASS_DEVICE | FAIL_DEVICE)
+#   user_observed_output    ← evidence (bắt buộc khi đóng L4)
+#   user_pass_fail          ← evidence phụ (PASS|FAIL)
+# validate_catalogue.sh cross-check command ↔ plist keys + PENDING trên runtime_status.
 # KHÔNG để AI tự điền.
 
 # Sau khi điền:

@@ -24,3 +24,11 @@
 ## Kết luận A2a
 
 **PASS review** — không viết lại; tiếp tục dùng cho B3 trên device.
+
+## CSV schema (chốt cho A2b)
+
+| Cột | Bắt buộc pre-device |
+|-----|---------------------|
+| `runtime_status` | Có — toàn `PENDING_USER_DEVICE` |
+| `user_observed_output` / `user_pass_fail` | Có trong CSV; **trống** đến device |
+| `command` | Phải **trùng set** với key `commandDictionary.plist` (không chỉ đếm 158) |
