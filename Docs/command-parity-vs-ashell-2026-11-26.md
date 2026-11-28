@@ -5,6 +5,7 @@
 | Hạng mục | Trạng thái fork vs `holzschu/a-shell` tip |
 |----------|-------------------------------------------|
 | **158 lệnh** `Resources/commandDictionary.plist` | **ĐÃ ĐỦ — byte-identical** (SHA khớp, 0 lệnh thiếu/thừa) |
+| SHA256 `commandDictionary.plist` @ pin `e95741b8` | `6b73f4c2f2b5bb6e3708647f4c19a6642709c907adbea5bfc4f90bd15dc7a6cc` |
 | mini 136 | **ĐÃ ĐỦ — byte-identical** |
 | extra / llvm / tex / luatex dictionaries | **ĐÃ ĐỦ — byte-identical** |
 | Host builtins (`help`, `config`, `pkg`…) | Có (cùng mã nguồn host) |
