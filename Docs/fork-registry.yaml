@@ -1,0 +1,35 @@
+schema_version: 1
+updated: "2026-11-28T08:56:00+07:00"
+assert:
+  git_submodule_count: 2
+  git_submodules:
+    - path: SwiftTerm
+      url: https://github.com/jiaomeimei0-prog/SwiftTerm.git
+      pin: 633a592ee9dd9585a0536314d26e906154ac43db
+      tip_sot_main: 5345160eab8a4b787bc7f8ff1278f84c8f19bd83
+      action: fork
+      bump_status: stopped_gt_30_commits
+    - path: cpython
+      url: https://github.com/holzschu/cpython.git
+      branch: "3.13"
+      action: keep
+  binary_target_count: 65
+  binary_targets_source: Apps/a-Shell/xcfs/Package.swift
+  podfile: false
+monorepo:
+  apps_a_shell_gitlink: e95741b8e59bef75cec490528f8f36a498555bcf
+rebase_schedule:
+  - trigger: ios_major
+    actions: [merge_upstream_ashell, ci_noPython, device_smoke]
+  - trigger: xcode_major
+    actions: [rebuild_noPython, fix_deployment_target]
+decisions:
+  - id: ios_system_ecosystem
+    action: keep
+    reason: checksum-pinned holzschu binaries; fork breaks rebase
+  - id: swiftterm_sot
+    action: fork
+    reason: emulator + HostHelpers owned by jiaomeimei0-prog/SwiftTerm
+  - id: ashell_host
+    action: fork
+    reason: commands/Shortcuts/file UX live in a-shell host
